@@ -1,597 +1,477 @@
-#' TIme Series Graphs
+#' TIme series in Dygraph form
 #'
 #' @name fgts_dygraph
 #'
-#' @param indt Input data
+#' @param indt Input data in long or wide format.  THere must be at least one date column, one
+#' character column and one numeric column.  Ideal format is `date,variable,value`
+#' @param title Title to put on top of graph
+#' @param ylab Label for y axis
+#' @param roller Initial moving average value to smooth graphs.  (See [dygraphs::dyRoller()])  Options are
+#'  * `default` (Default) chose a smoothing parameter consistent with the length of the input series
+#'  * `finest` No smoothing
+#'  * integer >= 0 : User specified moving average length.
+#' @param pointers  Pointer options to use with mouse movement. (See [dygraphs::dyCrosshair()])
+#' @param splitcols,stepcols,hidecols  String or list of data series to show on a second y axis, to be shown as step plots, or to be hidden.
+#' @param hilightcols String or list of data series to plot in different style than other series.
+#' @param hilightwidth (Default: 2) relative width of series specified in `hilightcols`
+#' @param hilightstyle (Default: solid).  Line style of series specified in `hilightcols`.
+#' Options are (`solid`,`dashed`,`dotted`,`dotdash`)
+#' @param events String with possible events to add to graph.  Options can be added together
+#' with `;` and include
+#' * `doi,eventsetname`  : Events in internal event list `eventsetname` from list maintained by [fg_update_dates_of_interest()].
+#' * `seasonal,type` : Regularly spaced intervals of `type`.  For options, see details.
+#' * `minmax` : Locations of highest and lowest observations per series.
+#' * `dt,text,d1,<d2>` : Text events starting at `d1` and possibly ending at `<d2>`,both
+#'      of the form `yyyy-mm-dd`.
+#' * `break,labelform` : Breakouts as determined by [fg_addbreakouts()] with `labelform` in ("singleasdate","singleavalue","breakno")
+#' * `tp,n` : Turning points as determined by [fg_findTurningPoints()]
+#' @param event_ds `data.frame` of events to be added to graph.  See details and
+#' examples for specification.
+#' @param annotations string with annotations on individual series or along `y` axes.  Options can be added
+#' together with `;`  and can include
+#' * `lastvalue`  : Value of latest observation for each series, placed at the end of the series
+#' * `lastlabel`  : Name of each series, placed at the end of the series.
+#' * `hline,y : Horizontal line at `y`
+#' * `range,ybeg,yend` : Band placed between `ybeg` and `yend`
+#' @param annotation_ds `data.frame` of annotations added to graph. See details for specification.
+#' @param forecast_ds `data.frame` of forecasts to be displayed after the end of those in `indt`. Those typically are in wide format, with at minimum
+#' a (first) date column and series names of the form `series.f``, `series.flo`` and/or `series.fhi``, where `series` is one of the
+#' plotted series in `indt`
+#' @param ylimits  Two number vector of lower and upper limits of data to be displayed. Alternatively,
+#' a string of the form `<seriesnm>,<q>` will limit displayed data to the (q,1-q) quantiles of `seriesnm`
+#' @param dtstartfrac Fraction in (0,1] of dates in `indt` to start the range selector.
+#' See [dygraphs::dyRangeSelector()]
+#' @param dtwindow String to specify date ranges applied [dygraphs::dyRangeSelector()] of the
+#' form `begin::end` where either end can take the form "yyyy-mm-dd" or a relative date to the other end of the
+#' series, e.g `-3m` or `-2w`.  Example: `"-3m::-1m"` defines a 2 month period 1 month back from the end of the series.
+#' @param exportevents String of name of `data.frame` to create in  `.GlobalEnv` with event dates displayed on graph.
+#' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
+#' @param dylegend (Default: TRUE) include legend in graph
+#' @param groupnm  (Default: `common`)  Group name used in `shiny` or `RMarkdown` to synchonize graphs
+#' @param fillGraph (Default: FALSE) Shade area underneath each series.
+#' @param verbose (Default: FALSE) Print extra details about what will be graphed.
+#' @param extraoptions Additional options passed to [dygraphs::dyOptions()]
 #'
-#' @returns Dygraph
+#' @import data.table
+#' @importFrom data.table .SD,.I,.GRP
 #'
-#' @details See Rd
+#`
+#' @returns Dygraph of data
+#'
+#' @details
+#'  Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
+#' ('date','variable','value') format.  This package infers date columns names from column types and seeks to be as agnostic
+#' as possible as to column names.
+#' Colors can be managed using [fg_update_colors()] and will persist across R sessions,
+#' Series are grouped together into bands around a series `series` if their names end as in 'series.lo' or 'series.hi'.  See examples and vignette for details.
+#'
+#' **Events** are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
+#' using [fg_update_dates_of_interest()] which will persist across R sessions.  See examples and vignette for further details.
+#' Events can also be added using a `data.frame` passed via `event_ds` with the following columns:
+#'
+#' \preformatted{  xx zz 111}
+#'
+#'
+#' | column | required | type | description |
+#' |:---|:---:|:---:|:---|
+#' | `date` | yes | Date | Start date |
+#' | `date_end` |  | Date |End date to specify range of a colored band |
+#' | `text` | yes | character | Text to display |
+#' | `color` | |  | character | Color for line and text |
+#' | `eventonly` | | logical | Only draw line for for start of event, no band |
+#' | `strokePattern` | | character | `dashed` (default), one of ('solid','dashed','dotted','dotdash') |
+#' | `loc` | | character | 'bottom' (default), one of ('top','bottom') |
+#' | `series` | | character | Name of series to apply event to, if needed |
+#'
+#' Many times, events depend on outside data or statistical analysis on the original data.  The `event_ds` to be passed
+#' in can come from event helpers in [overlay_eventset()], [fg_addbreakouts()], [fg_findTurningPoints()], or  [fg_ratingsEvents()].
+#'
+#' **Annotiations** include any notes or highlights added to the graph on the 'y' axis or on an individual series.  In addition to those passed
+#' via the `annotations` parameter, annotations can be added using a `data.frame` with the following columns:
+#' | column | required | type | description |
+#' |:---|:---:|:---:|:---|
+#' | `date` | yes | Date | Start date |
+#' | `date_end` |  | Date |End date to specify range of a colored band |
+#' | `text` | yes | character | Text to display |
+#' | `color` | |  | character | Color for line and text |
+#' | `eventonly` | | logical | Only draw line for for start of event, no band |
 #'
 #' @examples
-#' library(tidyquant)
-#' dta = tq_get(c("IBM","ORCL","NVDA")) |> select(DT_ENTRY=date, variable=symbol,value=adjusted)
-#' fgts_dygraph(dta, title="Tech Stock Prices", ylab="Adjusted Close Price", roller="default",dtstartpct=0.8)
+#' fgts_dygraph(eqtypx[,.(date,TLT)], title="Stock Prices", events="doi,regm;doi,fedmoves")
 #'
 #' @export
-fgts_dygraph<-function(indt,annovar="",titlevar="",splitfirst=FALSE,title="",meltvar="variable",ylab="",roller="default",
-                        events="",eventdataset=NULL,pointers="hair,horizontal",ylimits=NULL,miscannotation="",
-                        dtstartpct=0,dtwindow="",exportevents=FALSE,hlinedsn=NULL,hideseries=NULL,
-                        lownm="",hinm="",colors=hicPaletteDygraph, stroke=NULL, strokewidth=1,forecast="",forecast_periods=10,
-                        dylegend="always",groupnm="common",pvalue=NULL,addextraspace=0.1,stepPlot=NULL,fillGraph=FALSE,
-                        extraoptions=list(),...) {
+fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,both",
+                        splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
+                        hilightcols=FALSE,hilightwidth=2,hilightstyle="solid",
+                        events="",event_ds=NULL,
+                        annotations="",annotation_ds=NULL,
+                        forecast_ds=NULL,
+                        ylimits=NULL,dtstartfrac=0,dtwindow="",exportevents=NULL,
+                        meltvar="variable",dylegend="always",groupnm="common",
+                        fillGraph=FALSE,verbose=FALSE,
+                        extraoptions=list()) {
 
- # Preprocessing: get into data.table format
-    if(is.xts(indt)) { indt <- xts2df(indt) }
-    if(dplyr::is.tbl(indt)) { indt <-ungroup(indt) }
-    if(!data.table::is.data.table(indt)) { indt <- data.table::data.table(indt) }
-    annolistnames <- c("todo","a1","a2","a3","a4","a5")
-    tevents <-data.frame()
-    if(is.data.frame(events))  {
-        elist = events }
-    else {
-        elist = suppressWarnings(tibble::tibble(todo=s(events)) |>
-                      tidyr::separate_wider_delim(todo,",",names=annolistnames,too_many="drop",too_few="align_start"))
-        }
-    flist = suppressWarnings(tibble::tibble(todo=s(forecast)) |>
-                      tidyr::separate_wider_delim(todo,",",names=annolistnames,too_many="drop",too_few="align_start"))
+  # Preprocessing: get into data.table format
 
-    hairopts =  optString_parse(pointers,"cross|hair")
-    hlineopts =  optString_parse(pointers,"hline")
-    hbaropts =  optString_parse(pointers,"hbar")
-    shadedates = data.table::data.table()
+  if( xts::is.xts(indt) ) { indt <- xts2df(indt) }
+  if(dplyr::is.tbl(indt)) { indt <- dplyr::ungroup(indt) }
+  if(!data.table::is.data.table(indt)) { indt <- data.table::data.table(indt) }  # Try setDT ?
 
-    if(meltvar %in% colnames(indt)) {
-        wasmelted=TRUE
-        lastoset = indt[,.SD[.N],by=meltvar]
-        lastobs  = as.vector(lastoset$value)
-        lastlabs = as.vector(lastoset[[meltvar]]) }
-    else {
-        wasmelted=FALSE
-        lastobs<-as.vector(indt[nrow(indt),])[2:ncol(indt)]
-        lastlabs=colnames(indt)[2:ncol(indt)]
-    }
+  # Local helpers
+  fcoal <- function(indta,...) { data.table::fcoalesce(indta,...) }
+  form_xlist <- function(instring) {
+    if(is.data.frame(instring)) return(instring)
+    suppressWarnings(tibble::tibble(todo=s(instring)) |>
+                                tidyr::separate_wider_delim(todo,",",names= c("todo","a1","a2","a3","a4","a5"),too_many="drop",too_few="align_start"))
+  }
+  get_fromlist <- function(indta,grepstr) {  dplyr::filter(indta,grepl(grepstr,todo)) }
+  add_titles <- function(what,...) { style="small";
+    stylednote = paste0("<",style,">",paste(...),"</",style,">")
+    titleadds <<- DTappend(titleadds,data.table::data.table(axis=what,note=stylednote))  }
 
+  # Wrangle original input
+  # Figure out date name and place first
+  dt_colnames <- list()
+  dt_colnames['date'] <- find_col_bytype(indt,lubridate::is.Date)
+  dt_colnames['value'] <- find_col_bytype(indt,is.numeric)
+  dt_colnames['meltvar'] <- meltvar
+  if(is.na(dt_colnames['date'])) {
+    stop("fgts_dygraph must have a date column")
+  }
 
-    # Set siglo and sighi if needed
-    # Preprocessing tstats
-    if(length(pvalue)==2) {
-        valrange=diff(range(indt$value,na.rm=T))
-        indt$siglo = as.vector(ifelse(indt[,pvalue[[1]]]<pvalue[[2]],indt$value-0.02*valrange,indt$value))
-        indt$sighi = as.vector(ifelse(indt[,pvalue[[1]]]<pvalue[[2]],indt$value+0.02*valrange,indt$value))
-        lownm="siglo"; hinm="sighi"
-    }
-    if(!is.logical(hbaropts) & is.logical(hairopts)) {
-        hbarranges = c(s(hbaropts,sep=","),NA_real_,NA_real_)
-        indt$siglo = fcoalesce(as.numeric(hbarranges[[1]]),min(indt[,1],na.rm=T))
-        indt$sighi = fcoalesce(as.numeric(hbarranges[[2]]),max(indt[,1],na.rm=T))
-        lownm="siglo"; hinm="sighi"
-    }
+  data.table::setcolorder(indt, dt_colnames[['date']])
 
-    # unMelt it all
-    #cAssign("meltvar;indt")
-    if(meltvar %in% colnames(indt)) {
-        indtnew=data.table::dcast(indt[,.(DT_ENTRY,variable=get(meltvar),value)],DT_ENTRY ~ variable)
-        }
-    else { indtnew=indt }
+  # Misc date stuff
+  col_date_list <- c(dt_colnames[['date']])
+  alldts <- sort(unique(indt[[1]]))
+  last_dt <- tail(alldts,1)
+  dtsrange_todisplay <- c(alldts[length(alldts)*dtstartfrac+1], max(alldts))
+  if(nchar(dtwindow)>1) dtsrange_todisplay <- gendtstr(dtwindow,rtn="list")
 
-    # Forecasts and Other things -------------------------------------------------------------------------------------
-    if (wasmelted) {
-        firstseries = indt[get(meltvar)==indt[[1,meltvar]],] }
-    else{
-        firstseries = xts2df(indt) |> relocate(DT_ENTRY) |> select(1:2) |> set_colnames(s("DT_ENTRY;value"))
-        }
+  wasmelted <- meltvar %in% colnames(indt)
+  # make indtnew is WIDE FORMAT, indt can be either
+  if(wasmelted) {
+    lastoset <- indt[,.SD[.N],by=meltvar]
+    lastobs  <- as.vector(lastoset$value)
+    lastlabs <- as.vector(lastoset[[meltvar]])
+    form1 <- paste0(dt_colnames[["date"]],"~ factor(", dt_colnames[["meltvar"]],", levels=unique(",dt_colnames[["meltvar"]],"))")
+    indtnew<- data.table::dcast(indt,eval(form1),value.var=dt_colnames[["value"]])
+  }
+  else {
+    lastobs <- as.vector(indt[nrow(indt),])[2:ncol(indt)]
+    lastlabs <- colnames(indt)[2:ncol(indt)]
+    indtnew <- indt
+  }
 
-    if( nrow( trow<-filter(flist,grepl("^lmregime",todo)) )>0) {
-        firstseries = firstseries[,time:=as.numeric(DT_ENTRY-min(DT_ENTRY))+1]
-        maxk = fcoalesce(as.integer(as.numeric(trow$a1)),nrow(firstseries))
-        regimeset = optimalRegimes(as.data.frame(firstseries), varnm="variable",max_k=maxk)
-        message("optRegimes maxk:",maxk)
-        if(grepl("res",trow$todo)) {
-            indtnew[,1] = regimeset$d$resid }
-        else {
-            indtnew$pred = regimeset$d$estimate }
-    }
-    if(nrow( trow<-filter(elist,todo=="sig") )>0) { # ALso added to events
-        title=paste(title,"<br><small>",trow$a1,"shaded at",trow$a2,"sig</small>")
-    }
-    if(nrow( trow<-filter(elist,todo=="stregime") )>0) { # ALso added to events
-        thiscat= fcoalesce(trow$a1,"")
-        title=paste(title,"<small>(Bars:",thiscat,"regimes)</small>")
-    }
-    if( nrow( trow<-filter(flist,todo=="var") )>0 & ncol(indtnew)>=2) {
-        #var_params=c(trow$a1,1)
-        #fc1=group_by(cdta,GP) |> do( { x=select(.,DT_ENTRY,S); as.data.frame(forecast(auto.arima(df2xts(x)),h=10)) |> mutate(DT_ENTRY=max(x$DT_ENTRY,na.rm=T)+row_number()) })
-        #fcst_set = xather(xts2df(indtnew,variable,value) |> group_by(variable) |> filter( (n()-row_number()) %% arima_params[[2]] == 0)
-        indtfct=copy(indtnew)
-        indtfct = df2xts(indtfct[complete.cases(indtfct),])
-        varfct=vars::VAR(indtfct,p=3,type="trend")
-        fcst = predict(varfct,n.ahead=forecast_periods)
-        fcstpts = as.data.frame(fcst$fcst) |> dplyr::select(ends_with("fcst")) |> magrittr::set_colnames(colnames(indtfct))
-        fcstpts$DT_ENTRY = seq(as.Date(end(indtfct)),by=unclass(periodicity(indtfct))$label,length.out=forecast_periods+1)[-1]
-        indtnew=bind_rows(indtnew,fcstpts)
-        title=paste(title,"<small><small>w",forecast_periods,"pd VARfcst</small></small>")
-        tevents=bind_rows(tevents,data.frame(text="TODAY",as.Date(end(indtfct)),loc="top",color="red", category="TODAY"))
-    }
-    if( nrow( trow<-filter(flist,grepl("^hp",todo)) )>0) {
-        library(mFilter)
-        hptmp = mFilter::hpfilter(indtnew[,1],freq=fcoalesce(as.integer(as.numeric(trow$a1)),as.integer(100)),type="lambda")
-        if(grepl("res",trow$todo)) {
-            indtnew[,1] = hptmp$cycle }
-        else {
-            indtnew$pred = as.numeric(hptmp$trend) }
+  tevents <-data.table::data.table()
+  elist <- form_xlist(events)
+  alist <- form_xlist(annotations)
+
+  # Add new columns used as highlights
+  # Add new series (e.g.) filters as necessary  For Future, make this a piped function
+  # to add from previous code: lmregine, sig, var, stregime
+
+    # Need to group together col.lo and .hi for color an style
+    all_series_names <- colnames(indtnew)[-1]
+    series_dets <- data.table::data.table( seriesnm=all_series_names, gpnm=gsub("(.lo|.hi)","",all_series_names), display=TRUE)
+
+    gps_series <- unique(series_dets[grepl("(lo|hi)$",series_dets$seriesnm),]$gpnm)
+    if(length(gps_series)>0) {
+      gps_tofillin <- data.table::CJ(gpnm=gps_series,suffix=c("lo","hi"))
+      gps_tofillin <- gps_tofillin[,.(gpnm,seriesnm=paste0(gpnm,".",suffix))]
+      gps_tofillin <- series_dets[gps_tofillin,on=.(seriesnm,gpnm)][is.na(display)]
+      # Copy old data to make sure both .lo and .hi exist; work with the downstream packages
+      indtnew <-  indtnew[,(gps_tofillin$seriesnm):=.SD, .SDcols= gps_tofillin$gpnm]
     }
 
-    #cAssign("wasmelted;indt;indtnew;lastoset;lastobs;lastlabs")
-    usehilo=(nchar(lownm)>0 | nchar(hinm)>0) & is.logical(hbaropts)
-    if(usehilo) {
-        hilownms=colnames(indtnew)[-1]
-        # hacks,order of hack important
-        if(is.xts(indt)) { indt=xts2df(indt) }
-        if(!wasmelted) { indt$variable=colnames(indt)[2]}
-        indt = as.data.table(indt)
-        lowdt=dcast(indt[,v2:=paste0(variable,".lo")],DT_ENTRY ~ v2, value.var=ifelse(lownm %in% colnames(indt), lownm, "value") )
-        hidt=dcast(indt[,v2:=paste0(variable,".hi")],DT_ENTRY ~ v2, value.var=ifelse(hinm %in% colnames(indt), hinm, "value"))
-        indtnew=cbind(indtnew,hidt[,`:=`(DT_ENTRY=NULL)])
-        indtnew=cbind(indtnew,lowdt[,`:=`(DT_ENTRY=NULL)])
+    series_dets <- data.table::data.table( seriesnm=colnames(indtnew)[-1], gpnm=gsub("(.lo|.hi)","",colnames(indtnew)[-1]),
+                                           axis='y',stepplot=FALSE,display=TRUE,width=1,style="solid")
+    curr_colors <- fg_get_colorstring("lines")
+    series_dets <- series_dets[,':='(color=curr_colors[.GRP]),by=.(gpnm)]
+
+    # Style setup
+    if(!(hidecols[1]==FALSE)) {
+      t_colnos <- match(hidecols,series_dets$gpnm,nomatch=0) # Can match more than one
+      series_dets[t_colnos]$display <- FALSE
     }
 
-    fmtdate <- 'function(d){ return d.getMonth() + "-" + d.getYear() }'
-    if(!is.null(hideseries)) {
-        indt = df2xts(indtnew |> select(-!!rlang::sym(hideseries)))
+    if(!(splitcols[1]==FALSE)) {
+      t_colnos <- match(splitcols,series_dets$gpnm,nomatch=1) # Can match more than one
+      series_dets[t_colnos]$axis <- "y2"
     }
-    else {
-        indt=df2xts(indtnew)
+
+    if(!(stepcols[1]==FALSE)) {
+      t_colnos <- match(stepcols,series_dets$gpnm,nomatch=0) # Can match more than one
+      if(t_colnos[1]==0) { t_colnos<- seq(1,nrow(series_dets)) }
+      series_dets[t_colnos]$stepplot <- TRUE
     }
-    indtdts=zoo::index(indt)
+
+    if(!(hilightcols[1]==FALSE)) {
+      t_colnos <- match(hilightcols,series_dets$seriesnm,nomatch=0) # Can match more than one
+      series_dets[t_colnos]$width <- hilightwidth
+      series_dets[t_colnos]$style <- hilightstyle
+    }
+
+    # Now forecasts
+
+    if(is.data.frame(forecast_ds)) {
+        dt_colnames['fdate'] <- find_col_bytype(forecast_ds,lubridate::is.Date)
+        fcst_series <- data.table::rbindlist(lapply(colnames(forecast_ds),
+                                          \(x) { y=s(x,sep="."); data.frame(gpnm=y[1],seriesnm=x)}))
+        sdets_base <- series_dets[gpnm==seriesnm, .SD,.SDcols=!c("seriesnm")]
+        fcst_dets <- sdets_base[fcst_series,on=.(gpnm)][,let(style="dashed")][!is.na(color)] # No date
+        fcst_dets <- fcst_dets[,let(gpnm=gsub("(lo|hi)$","",seriesnm))]
+        series_dets <- DTappend(series_dets,fcst_dets)
+        indtnew = merge(indtnew,forecast_ds,by.x=dt_colnames[['date']], by.y=dt_colnames[['fdate']],all=TRUE)
+        alldts <- indtnew[[1]]
+        dtsrange_todisplay <- c(alldts[length(alldts)*dtstartfrac+1], max(alldts))
+    }
+
+   # Set display ranges
+    yRange<-NULL
     if(length(ylimits)==2) {
-        indt=pmin(indt,ylimits[2])
-        indt=pmax(indt,ylimits[1])
+        yRange <-ylimits
     }
-    if(is.character(ylimits)) {
-        qlimit=as.numeric(c(s(ylimits),0.01)[[2]])
-        qset  =quantile(indtnew[[2]],c(qlimit,1-qlimit),na.rm=T)
-        title=paste(title,"<small><small>(Winsored@",qlimit,")</small></small><br>test")
-        indt=pmin(indt,qset[2])
-        indt=pmax(indt,qset[1])
+
+    if(is.character(ylimits)) { # Find wuantiles on given series
+      if( length( ylimsplit<-s(ylimits,","))==2 ) {
+        qlimit<-c(as.numeric(ylimsplit[2]),0.01)[1]
+        yRange <- quantile(indtnew[[ylimsplit[1]]],c(qlimit,1-qlimit),na.rm=T) |> as.numeric()
+        message_if(verbose,"fgts_dygraph: Displayed range limited to ",qlimit," quantiles on ",ylimsplit[1], " or ",yRange[1], ":",yRange[2])
+        add_titles("title","(Winsored@",qlimit,")")
+      }
     }
-    if(nchar(dtwindow)>1) {
-        dtsrange = gendtstr(dtwindow,rtn="list")
+    if(verbose) {
+      print(series_dets)
+    }
+    # Only way to take a series out is to take the data out.
+    indtnew <- indtnew[,.SD,.SDcols=!(series_dets[display==FALSE,]$seriesnm)]
+
+
+    titleadds <- data.table::data.table()
+    add_titles("y",ylab)
+    alltitles = paste0(title,paste0(titleadds[axis=="title"]$note,collapse=","))
+    ## cAssign("indtnew;alltitles;series_dets;dt_colnames")
+    g1 <- dygraphs::dygraph(indtnew,main=alltitles,group=groupnm)
+    for(seriesgp in sort(unique(series_dets[display==TRUE,]$gpnm))) {
+        trw <- series_dets[get("gpnm")==seriesgp,]
+        serset <- seriesgp
+        if(nrow(trw)>1) {
+          serset <- trw[,.(seriesnm,series_no=data.table::fcase(grepl("lo$",seriesnm),1,grepl("hi$",seriesnm),3,default=2))]
+          serset <- serset[data.table::data.table(series_no=c(1,2,3)),on=.(series_no)][,seriesnm:=fcoal(seriesnm,seriesgp)]
+          serset <- serset[order(series_no)]$seriesnm
         }
-    else {
-        alldts = sort(unique(indtdts))
-        dtsrange = c(as.Date(alldts[length(alldts)*dtstartpct+1]), as.Date(indtdts[length(alldts)]))
+        trw <- trw[gpnm==seriesnm,]
+        ## message(">>         group: ",seriesgp," Series Set: ",paste(serset,sep=","))
+        g1 = g1 |> dygraphs::dySeries(serset,color=trw[1,]$color,axis=trw[1,]$axis,stepPlot=trw[1,]$stepplot,strokeWidth=trw[1,]$width,
+                        strokePattern=trw[1,]$style,fillGraph=FALSE)
     }
-    #cAssign("dtwindow;indt;indtnew;title;ylab;groupnm;splitfirst;indtdts;dtstartpct;dtsrange")
-    #g1=dygraph(indt,xlab=NULL,ylab=ylab,group="variable") |> dyOptions(labelsKMB=TRUE,rightGap=2,colors=tcolors[1:5])
 
-        g1=dygraphs::dygraph(indt,main=title,xlab=NULL,ylab=ylab,group=groupnm) |>
-            dygraphs::dyLegend(width=600, show="always",hideOnMouseOut = FALSE) |>
-            dygraphs::dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.4, highlightSeriesOpts = list(strokeWidth = 3))
+    g1 <- g1 |> dygraphs::dyLegend(width=600, show="always",hideOnMouseOut = FALSE)
+    g1 <- g1 |> dygraphs::dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.4,
+                                      highlightSeriesOpts = list(strokeWidth = 3))
+    g1 <- g1 |> dygraphs::dyOptions(labelsKMB=TRUE,rightGap=2,fillAlpha=0.2,fillGraph=fillGraph,axisLabelFontSize=10)
 
-    if(usehilo) {for(nm in hilownms) {
-        g1=g1 |> dygraphs::dySeries(c(paste0(nm,".lo"), nm, paste0(nm,".hi")), label=nm, stepPlot=stepPlot) }    }
-    if(!is.logical(hairopts)) {
-        g1 =g1 |> dygraphs::dyCrosshair(direction = hairopts)
-    } # horizontal,both,veetical
-
-    g1 = g1 |> dygraphs::dyOptions(labelsKMB=TRUE,rightGap=2,colors=s(colors), fillAlpha=0.25,strokePattern=stroke,strokeWidth=strokewidth,stepPlot=stepPlot, axisLabelFontSize=10,fillGraph=fillGraph,...)
+# EVents on x axis
 
     # Statistical data turning points (dyEvent)
     # ======================================================================================
     # event Types:
     # in { [doi,startof|]doicategory ; break ; [tp,method,npts,maxwindow] ; data_frame  }
     # ======================================================================================
-    if(nrow( trow<-filter(elist,todo=="doi") )>0) {
-        thiseventstr= fcoalesce(trow$a1, "")
-        eventonly   = grepl("startof",thiseventstr,ignore.case=T)
-        g1 = g1 |> dygraphs::dyAxis("x",paste("Shaded Events:",thiseventstr),labelHeight=9)
-        tdates = filter(doidates,tolower(category)==tolower(gsub("startof","",thiseventstr)) & DT_ENTRY>=min(zoo::index(indt)))
-        tdates %<>% ungroup |> mutate(direct=str_sub(eventid,-1), rno=row_number())
-        if(nrow(tdates)>0) {
-            tdates %<>% left_join(tibble(direct=s("-;+;="), tcolor=s("#FFE6E6;#CCEBD6;white")), by="direct") |> mutate(color = fcoalesce(tcolor,ifelse(rno %% 2, "#FFE6E6","lightblue"))) |> select(-tcolor)
-            shadedates = copy(tdates)
-            for(irow in 1:nrow(tdates)) {
-                lineAssign(tdates[irow,])
-                #message("irow ",irow, "color = ",tcolor, " id: ",tdates[[irow,"eventid"]], " from : ",tdates[[irow,"DT_ENTRY"]], " to ",tdates[[irow,"END_DT_ENTRY"]])
-                if( eventonly | (END_DT_ENTRY - DT_ENTRY)<2 ) {
-                    g1=g1 |> dygraphs::dyEvent(as.Date(DT_ENTRY), eventid, labelLoc="bottom") }
-                else {
-                    g1=g1 |> dygraphs::dyShading(from=as.Date(DT_ENTRY), to=as.Date(END_DT_ENTRY),color=color)
-                }
-            }
-        }
-    }
-    # Need to add drivers dataset from EMFM_Correlation
-    # "break" adds statistical break levels as vertical dashed lines
-    if(nrow( trow<-filter(elist,todo=="KNN") )>0) {
-        thiscat= fcoalesce(trow$a1,"ALL")
-        tdates = filter(doidates,grepl("KNN",category)  & grepl(thiscat,category) & DT_ENTRY>=min(zoo::index(indt)))
-        tevents =bind_rows(tevents,transmute(tdates,text=paste0(thiscat,gsub("knnloc","",eventid)),DT_ENTRY,loc="top",color="darkgreen", category="KNN"))
-    }
-    if(nrow( trow<-filter(elist,todo=="scenset") )>0) {
-        if(!exists("scenario_dates")) { unzip_dfset("scenarios")}
-        tdates = filter(scenario_dates,grepl(trow$a1,scenario,fixed=TRUE)  & DT_ENTRY>=min(zoo::index(indt)))
-        tevents = bind_rows(tevents,transmute(tdates,DT_ENTRY,text=gsub("knnloc","",text),color="black",loc="bottom",category="scenarios"))
-    }
-    if(nrow( trow<-filter(elist,todo=="stregime") )>0) {
-        thiscat= fcoalesce(trow$a1,"")
-        title=paste(title,"<small><small>(Colors:",thiscat,"regimes)</small></small>")
-        tevents= bind_rows(tevents,inv.regimecuts(paste0("reglast,",thiscat))[,.(DT_ENTRY,END_DT_ENTRY,color)][,category:=paste0("ST:",thiscat)])
+    #  Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
+    # Dates of interest in memory.
+    if(nrow( trow<-get_fromlist(elist,"doi") )>0 ) {
+      dirbars <- fg_get_colors("mktregimes")[,.(direct=variable,tcolor=color)]
+      for(irow in seq(1,nrow(trow))) {
+          thiseventstr<- fcoal(trow[irow,]$a1, "")
+          eventonly   <- grepl("startof",thiseventstr,ignore.case=T)
+          thiseventstr<- tolower(gsub("startof","",thiseventstr))
+          tdates <- fg_get_dates_of_interest(thiseventstr,startdt=min(indtnew[[1]]))
+          if(nrow(tdates)>0) {
+              tdates1 <- tdates[, let(direct=stringr::str_sub(eventid,-1), rno=.I)]
+              tdates1 <- dirbars[tdates1,on=.(direct)][,let(color=fcoal(color,tcolor))]
+              tdates1 <- coalesce_DT_byentry(tdates1,data.table::data.table(color="gray70",loc="bottom",strokePattern="dashed"))
+              tdates1 <- tdates1[,let(text=eventid)][,.SD,.SDcols=!c("tcolor","direct","eventid","eventid2")]
+              tevents <- DTappend(tevents,tdates1)
+          }
+      }
+      add_titles("x","Shaded Events:",paste(trow[["a1"]],collapse=" "))
     }
 
-    # Still to do ...  Add to shadedates ...
-    if(nrow( trow<-filter(elist,todo=="break") )>0) {
-        firstcnm=grep("DT_ENTRY",colnames(indt),value=TRUE,invert=TRUE)
-        bodates=addonebreakout(xts2df(indt[,c(firstcnm)])[], annotationstyle="periodsonly")
-        bodates$nshadset=((1:nrow(bodates))-1) %% 3
-        bodates %<>% left_join( tibble(nshadset=c(0,1,2), tcolor=s("#FFE6E6;#CCEBD6;white")), by="nshadset")
-        for(irow in 1:nrow(bodates)) {
-            g1=g1 |> dyShading(from=as.Date(bodates[[irow,"DT_BEG"]]), to=as.Date(bodates[[irow,"DT_ENTRY"]]), color=bodates[[irow,"tcolor"]])
+    # Dates; from dtmap (roll,optexp,doy,doq) e.g. "seasonal,optexp,mo"
+    if(nrow( trow<-get_fromlist(elist,"seasonal") )>0) {
+      dtlimits <- range(alldts)
+      dttmp <- dtmap[data.table::between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
+      for(irow in seq(1,nrow(trow))) {
+        eventtype <- tolower(trow[irow,]$a1)
+        if(eventtype=="optexp") {
+          opttype <- trow[irow,][["a2"]]
+          dt_oi <- dttmp[grepl(opttype,optexp),][,.(DT_ENTRY,text=opttype)]
         }
-    }
-    # "roll" adds Rolls as vertical dashed lines
-    if(nrow( trow<-filter(elist,todo=="roll") )>0) {
-        tdates= tibble::tibble(END_DT_ENTRY=seq(ymd('2001-03-20'),ymd('2027-03-20'), by = '6 month'))
-        if(is.na(trow$a1)) {
-            tevents=bind_rows(tevents,filter(tdates,END_DT_ENTRY>=min(zoo::index(indt))) |> transmute(DT_ENTRY=END_DT_ENTRY, text="roll",loc="top",color="#40995c",strokePattern="dotted",category="roll")) }
-        else {
-            tdates= tdates |> mutate(DT_ENTRY=END_DT_ENTRY-as.numeric(trow$a1)) |> filter(END_DT_ENTRY>=min(zoo::index(indt)) & DT_ENTRY<=max(zoo::index(indt)))
-            for(irow in 1:nrow(tdates)) {
-                g1=g1 |> dygraphs::dyShading(from=as.Date(tdates[[irow,"DT_ENTRY"]]), to=as.Date(tdates[[irow,"END_DT_ENTRY"]]),color="#CCEBD6") }
-            }
-    }
-    # --------------------------
-    if(nrow( trow<-filter(elist,todo=="minmax" | todo=="extremes") )>0) {
-        indt_dt = melt(xts2df(indt),id.var="DT_ENTRY")
-        tp=rbindlist(list(
-            indt_dt[,.SD[which.min(value)],by=.(variable)][,.(DT_ENTRY,text=paste("min",variable),color="red",loc="bottom",category="extr")],
-            indt_dt[,.SD[which.max(value)],by=.(variable)][,.(DT_ENTRY,text=paste("max",variable),color="blue",loc="top",category="extr")]
-        ))
-        tevents=bind_rows(tevents,tp)
-    }
-    # "tp,nn" adds turning points as dotted vertical lines
-    if(nrow( trow<-filter(elist,todo=="tp" | todo=="tpa") )>0) {
-        tpds = df2xts(firstseries)
-        tmpmsg = paste0(trow$a1, "turning Points on ", colnames(indt)[1])
-        tp=findTurningPoints(tpds,npts=as.numeric(fcoalesce(trow$a1,"5")),rtn="dates",maxwindow=as.numeric(fcoalesce(trow$a2,"-1")),method=fcoalesce(trow$a3,"pctchg"))
-        #message("FInding Turning Points, converting ",tpset, " to tpset w ",nrow(tp), "rows")
-        tevents=bind_rows(tevents,tp |> mutate(category="tp", END_DT_ENTRY=DT_ENTRY))
-    }
-    # "dt,<datelist>" adds inddivudal dates as dotted vertical lines
-    if(nrow( trow<-filter(elist,todo=="dt") )>0) {
-        for(icol in 2:ncol(trow)) {
-            tdt = trow[[icol]]
-            if( !is.na(tdt) & nchar(tdt)>0) { g1=g1 |> dygraphs::dyEvent(as.Date(tdt), as.character(tdt), labelLoc="bottom",color="black") } }
-    }
-    # "sig,<variable>,<level> colors variable according to whether <variable> is between (-inf,-sig,+sig,Inf)
-    if(nrow( trow<-filter(elist,todo=="sig") )>0) {
-        valruns = runs_from_value(as.data.table(transmute(indtnew,DT_ENTRY,value=(!!rlang::sym(trow$a1)<=as.numeric(trow$a2)))))
-        tevents = bind_rows(tevents,filter(valruns,value==TRUE) |> mutate(category="sig", text="sig"))
-    }
-    # ratings,CREDIT
-    if(nrow( trow<-filter(elist,todo=="ratings") )>0) {
-        LIFN("ratings")
-        thiscredit = fcoalesce(trow$a1, "XX")
-        colorcol   = paste0(fcoalesce(trow$a2, ""),"color")
-        if(thiscredit!="XX") {
-            dtrg=range(index(indt))
-            tdates = ratings$ratruns[CREDIT==thiscredit & AGENCY=="COMP" & dtrg[1]<=END_DT_ENTRY][,`:=`(END_DT_ENTRY=pmin(END_DT_ENTRY,dtrg[2]),DT_ENTRY=pmax(DT_ENTRY,dtrg[1]))]
-            # To add both lines and colors, add colors here, text later
-            for(irow in 1:nrow(tdates)) {
-                #message(" Adding ",irow," .. ", as.Date(tdates[[irow,"DT_ENTRY"]]),"::",as.Date(tdates[[irow,"END_DT_ENTRY"]])," >> " , tdates[[irow,"color"]])
-                g1=g1 |> dygraphs::dyShading(from=as.Date(tdates[[irow,"DT_ENTRY"]]), to=as.Date(tdates[[irow,"END_DT_ENTRY"]]),color=tdates[[irow,colorcol]]) }
-            }
-            tevents = bind_rows(tevents, tdates[,.(DT_ENTRY,text=RTGTXT,loc=ifelse(c(0,diff(value,1))>0,"bot","top"),color="black",vcetegory="ratings")] )
+        if(eventtype=="rolldates") {
+          dt_oi <- dttmp[,.SD[1],by=.(rollpd),][,.(DT_ENTRY,text="cdsroll")]
         }
-    if(nrow( trow<-filter(elist,todo=="rtbubble") )>0) {
-        library(psymonitor)
-        ydta = indt[,1]
-        obs  = length(ydta)
-        swindow0 <- floor(obs * (0.01 + 1.8 / sqrt(obs))) # set minimal window size
-        yr       <- 2
-        Tb       <- 12*yr + swindow0 - 1  # Set the control sample size
-        sadf     <- PSY(ydta, swindow0 = swindow0, IC = 2,adflag = 6)  # estimate the PSY test statistics sequence
-        quantilesBsadf <- cvPSYwmboot(ydta, swindow0 = swindow0, IC = 2, adflag = 6, Tb = Tb, nboot = 40, nCores = 4)
-        dim          <- obs - swindow0 + 1
-        monitorDates <- zoo::index(indt[swindow0:obs])
-        quantile95   <- quantilesBsadf %*% matrix(1, nrow = 1, ncol = obs - swindow0 + 1 )
-        ind95        <- (bsadf > t(quantile95[2, ])) * 1
-        bubperiods   <- psymonitor::locate(ind95, monitorDates)  # Locate crisis periods
-        xevents = rename(bubperiods, DT_ENTRY=start,END_DT_ENTRY=end) |> mutate(category="rtbubble")
-        tevents = bind_rows(tevents,xevents)
+        if(eventtype %in% c("doy","doq","bdoy","roll")) {
+            valoi <- dttmp[,.SD[.N]][[eventtype]]
+            dt_oi <- dttmp[get(eventtype)==valoi,][,.(DT_ENTRY,text=eventtype)]
+        }
+        dt_oi <- dt_oi[,':='(color=fg_get_colorstring(eventtype),loc="top")]
+        tevents <- DTappend(tevents,dt_oi)
+      }
+    }
+    if(nrow( trow<-get_fromlist(elist,"(minmax|extremes)") )>0) {
+      dt_melt <- indt
+      if(!wasmelted) {
+          dt_melt <- data.table::melt(indtnew,id.vars= dt_colnames[['date']]) }
+      color_dt <- series_dets[,.SD[1],by=.(gpnm)][,.(variable=gpnm,color)]
+      minevents <- dt_melt[,.SD[which.min(value)],by=.(variable)][,c(1,2)][,let(text=paste("min",variable),loc="bottom")]
+      maxevents <- dt_melt[,.SD[which.max(value)],by=.(variable)][,c(1,2)][,let(text=paste("max",variable),loc="top")]
+      allevents <- data.table::rbindlist(list(minevents,maxevents))
+      allevents <- color_dt[allevents,on=.(variable)]
+      data.table::setnames(allevents,dt_colnames[['date']],"DT_ENTRY")
+      tevents <- DTappend(tevents,allevents)
+    }
+    if(nrow( trow<-get_fromlist(elist,"^(dt|date)")  )>0) {  # date,name,dtstart,dtend
+      trow <- trow |> dplyr::mutate(a2=lubridate::as_date(a2),a3=lubridate::as_date(a3))
+      for(irow in seq(1,nrow(trow))) {
+        this_nm <- fcoal(trow[[irow,"a1"]],"event")
+        start_dt <- trow[[irow,"a2"]]
+        if( lubridate::is.Date(start_dt) ) {
+            end_dt <- fcoal(trow[[irow,"a3"]],start_dt)
+            colornm <- fg_get_colorstring(data.table::fifelse(end_dt>start_dt,"date_range","date"))
+            newevent <- data.table::data.table(DT_ENTRY=start_dt,END_DT_ENTRY=end_dt,text=this_nm,loc="bottom",color=colornm)
+            tevents <- DTappend(tevents,newevent)
+         }
+      }
+    }
+    # "sig,<variable>,<level> colors variable according to whether <variable> is between (-inf,-sig,+sig,Inf) : taken out: Needs runs_from_value
+
+    # Statistical things ==================================
+
+      # Breakouts: Done
+      if(nrow( trow<-get_fromlist(elist,"break") )>0) {
+        bodates <- fg_addbreakouts(indtnew, annotationstyle=fcoal(trow[1,]$a1,"singleasdate")) # Renames first col to DT_ENTRY
+        bodates <- bodates[,let(color= fg_get_colorstring("breakout"),loc="top")]
+        tevents <- DTappend(tevents,bodates)
+      }
+        # "tp,nn" adds turning points as dotted vertical lines
+      if(nrow( trow<-get_fromlist(elist,"^(tp)") )>0) {
+        tmpmsg <- paste0(trow$a1, "turning Points on ", colnames(indt)[1])
+        tp <- fg_findTurningPoints(indtnew[,c(1,2)],npts=as.numeric(fcoal(trow$a1,"5")),rtn="dates",maxwindow=as.numeric(fcoal(trow$a2,"-1")),method=fcoal(trow$a3,"pctchg"))
+        message_if(verbose,"FInding Turning Points, w ",nrow(tp), "rows")
+        tevents <- DTappend(tevents,tp[,let(category="tp", END_DT_ENTRY=DT_ENTRY)])
     }
 
-    if(is.data.frame(eventdataset)) {
-        if(!("color" %in% colnames(eventdataset))) { eventdataset %<>% mutate(color="#FFE6E6") }
-        if(!("text" %in% colnames(eventdataset))) { eventdataset %<>% mutate(text="") }
-        if(!("loc" %in% colnames(eventdataset))) { eventdataset %<>% mutate(loc="top") }
-        if(!("END_DT_ENTRY" %in% colnames(eventdataset))) { eventdataset %<>% mutate(END_DT_ENTRY=DT_ENTRY) }
-        tevents=bind_rows(tevents,transmute(eventdataset,DT_ENTRY=as.Date(DT_ENTRY),END_DT_ENTRY=as.Date(END_DT_ENTRY),color,text,loc) |> mutate(category="eventdataset") )
-    }
-
-#    if(nrow( trow<-filter(elist,todo=="lmregime") )>0) {
-#        regimeset = optimalRegimes(xts2df(indtnew[,1]) |> xather(variable,value,-DT_ENTRY) |> mutate(time=as.numeric(DT_ENTRY-min(DT_ENTRY)+1)))
-#        g1 = g1 |> dySeriesData("linregime",regimeset$dtopplot$value)
-#        g1 = g1 |> dySeries("linregime")
-#         #g1=g1 |> dySeries(c(paste0(nm,".lo"), nm, paste0(nm,".hi")), label=nm, stepPlot=stepPlot) }    }
-#        tevents=bind_rows(tevents,regimeset$tevents)
-#    }
     # Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
+    if(is.data.frame(event_ds)) {
+        # Rename columns smartly, only first two date columns taken
+        event_ds <- data.table::data.table(event_ds)
+        dtcols <- head(find_col_bytype(event_ds,lubridate::is.Date,firstonly=FALSE),2)
+        dtcolnewnames <- sapply( dtcols, \(x) ifelse(grepl("end",x,ignore.case=TRUE),"END_DT_ENTRY","DT_ENTRY"))
+        data.table::setnames(event_ds,dtcols,dtcolnewnames)
+        tevents <- DTappend(tevents,event_ds)
+    }
 
-    if(exportevents) {
-        dyg_dates = shadedates
-        if(nrow(tevents)>0) {
-            dyg_dates = rbindlist(list(rename(tevents,eventid=text),shadedates),use.names=TRUE,fill=TRUE) }
-        cAssign("dyg_dates",silent=FALSE)
+    if(is.character(exportevents)) {
+      assign(exportevents,tevents,envir=.GlobalEnv)
+      message_if(verbose,"Copied events as ",exportevents," to Global Namespace")
+    }
+
+    # last,<label> ; last,value ; last,line ; hline, no; range lo,hi
+    # Add horizontal annotations
+    if(nrow( trow<-get_fromlist(alist,"^(last)")  )>0) { # last or last,line, can only specify one
+      labelstr <- fcoal(trow$a1,"label") |> tolower() # label,value,labelline,valueline
+      labeltype <- ifelse(grepl("value",labelstr),"value","gpnm")
+      labelcat <- ifelse(grepl("line",labelstr),"line","anno")
+      lastvals <- data.table::melt(last_dt,id.vars=dt_colnames[['date']], variable.name = "gpnm")[,let(value=as.character(round(value,1)))]
+      h_annos <- lastvals[series_dets[gpnm==seriesnm,],on=.(gpnm)]
+      h_annos <- h_annos[,.(category=labelcat,color,text=get(labeltype),seriesnm=gpnm,axis,value,loc=labelloc,DT_ENTRY=get(dt_colnames[['date']]))]
+      tevents <- DTappend(tevents,h_annos)
+    }
+
+    if(nrow( trow<-get_fromlist(alist,"^(hline)"))>0) { #hline,no
+        thiscolor <-  fg_get_colorstring("hline")
+        h_annos <- data.table::data.table(trow)[,let(text=fcoal(a2,""),value=as.numeric(a1),color=fcoal(a3,thiscolor))]
+        h_annos <- h_annos[,.(category="hline",color,text,value,DT_ENTRY=last_dt,axis="y")]
+        tevents <- DTappend(tevents,h_annos)
+    }
+
+    if(nrow( trow<-get_fromlist(alist,"^(range)"))>0) { #range,lo,hi,<color>
+      thiscolor <-  fg_get_colorstring("range")
+      h_annos <- data.table::data.table(trow)[,':='(a1=as.numeric(a1),a2=as.numeric(fcoal(a2,a1)))]
+      h_annos <- h_annos[,.(category="range",color=fcoal(a3,thiscolor),text="",value=pmin(a1,a2),value_2=pmax(a1,a2),axis="y",DT_ENTRY=last_dt)]
+      tevents <- DTappend(tevents,h_annos)
+    }
+
+    if (is.data.frame(annotation_ds)) { # date,series,text
+      ds_signature <- sapply(annotation_ds,class)[1:3] == c("Date","character","character")
+      annotation_ds <- data.table::data.table(annotation_ds)
+      if( all(ds_signature)==TRUE ) {
+        data.table::setnames(annotation_ds,c("DT_ENTRY","seriesnm","text"))
+        h_annos <- annotation_ds[,.(category="anno",DT_ENTRY,text,seriesnm,axis="y")]
+        tevents <- DTappend(tevents,h_annos)
+      } else {
+        message("fgts_dygraph problem: annotation_ds no in format (date,series,text)")
+      }
     }
 
     if(nrow(tevents)>0) {
-        if("END_DT_ENTRY" %in% colnames(tevents)) {
-            tevents=coalescedf(tevents,new_tibble(list(DT_ENTRY=Sys.Date(),END_DT_ENTRY=Sys.Date(),color="#FFE6E6"),nrow=1)) } # |> as.data.frame()
-        else {
-            tevents=coalescedf(tevents,new_tibble(list(DT_ENTRY=Sys.Date(),text="POI",loc="bottom",color="red",strokePattern="dashed"),nrow=1)) |> as.data.frame()
+       tevents <- coalesce_DT_byentry(tevents,the$tevents_defaults)
+       tevents <- tevents[, let(END_DT_ENTRY=as.Date(fcoal(as.integer(END_DT_ENTRY),as.integer(DT_ENTRY))))]  # What is NA?
+       for(irow in 1:nrow(tevents)) {
+        trw<-tevents[irow,]
+        if(trw$axis=="x") {
+          if(trw$eventonly | (trw$END_DT_ENTRY-trw$DT_ENTRY)<=3) {
+            g1 = g1 |> dygraphs::dyEvent(trw$DT_ENTRY,trw$text,labelLoc=trw$loc,color=trw$color,strokePattern=trw$strokePattern)  }
+          else {
+            g1 = g1 |> dygraphs::dyShading(from=trw$DT_ENTRY, to=trw$END_DT_ENTRY, color=trw$color) }
         }
-        for(irow in 1:nrow(tevents)) {
-            tdtstart = tevents[[irow,"DT_ENTRY"]]
-            tdtend = tevents[[irow,"END_DT_ENTRY"]]
-            if(is.na(tdtend) | (tdtstart==tdtend)) {
-                g1=g1 |> dygraphs::dyEvent(as.Date(tdtstart), tevents[[irow,"text"]], labelLoc = fcoalesce(tevents[[irow,"loc"]],"top"),
-                        color=fcoalesce(tevents[[irow,"color"]],"green"), strokePattern=fcoalesce(tevents[[irow,"strokePattern"]],"dotted"))
-                }
-            else {
-                g1=g1 |> dygraphs::dyShading(from=as.Date(tdtstart), to=as.Date(tdtend), color=tevents[[irow,"color"]])
-                }
-            }
+        if(trw$axis=="y" | trw$axis=="y2") {
+          if("value_2" %in% colnames(trw)) {
+            g1 = g1 |> dygraphs::dyShading(from=trw$value, to=trw$value_2, color=trw$color, axis=trw$axis) }
+          else if (trw$category %in% c("anno","last")) {
+            g1 = g1 |> dygraphs::dyAnnotation(x=trw$DT_ENTRY,text=trw$text,series=trw$seriesnm,width=6*nchar(trw$text)) }  # MOre options to explore
+          else {
+            g1 = g1 |> dygraphs::dyLimit(limit=trw$value,label=trw$text,labelLoc="right",color=trw$color,strokePattern="dashed") }
         }
-    if(addextraspace>0) {
-        indttmp =indt[paste0(dtsrange[1],"::",dtsrange[2])]
-        rangeall=c(min(apply(indt,2,min, na.rm=T)), max(apply(indt,2,max, na.rm=T)) )
-        rangelast=c(min(apply(indttmp,2,min, na.rm=T)), max(apply(indttmp,2,max, na.rm=T)) )
-        #cAssign("indt;dtsrange;indtdts;indttmp;colsformaingraph;rangeall;rangelast")
-        if( rangelast[1]>0.9*rangeall[2]) {
-            g1 = g1 |> dygraphs::dyAxis('y',valueRange=c(rangeall[1],rangeall[2]+addextraspace*(rangeall[2]-rangeall[1]))) }
+       }
     }
-    if(!(splitfirst==FALSE)) {
-        splitcol = ifelse( splitfirst %in% colnames(indt), splitfirst, setdiff(colnames(indt),"DT_ENTRY")[[1]] )
-        g1 = g1 |> dygraphs::yAxis("y2", independentTicks=TRUE, drawGrid = FALSE, label=paste0(splitcol,sep=" "))  |> dySeries( splitcol, axis="y2", strokeWidth=2)
-    }
-    rollpd=NA
-    if(roller=="default") {
-        rollpd=as.numeric(as.character(cut(as.numeric(max(indtdts,na.rm=T)-min(indtdts,na.rm=T)),breaks=c(1,360,3600,999999),labels=c(1,5,20)))) }
-    if(roller=="finest") { rollpd=1 }
-    # Annotations: last,last | last,label | data.frame
-    if (is.data.frame(miscannotation)) {
-        #cAssign("indt;lastlabs;miscannotation")
-        lastlabdf = data.frame(lastlabel=lastlabs, tlabeladd=rep("",length(lastlabs)))
-        lastlabdf %<>% left_join(miscannotation,by="lastlabel") |> mutate(lastlabel = paste(lastlabel,value))
-        lastlabs = dplyr::pull(lastlabdf,lastlabel)
-        miscannotation="last,label"
-    }
-    if(grepl("^last",miscannotation)) {
-        thisanno = gsub("last,","",miscannotation)
-        annodate = min(indtdts[length(indtdts)],dtsrange[2])
-        #cAssign("miscannotation;lastobs;g1;dtsrange;thisanno;annodate")
-        for(irow in 1:length(lastobs)) {
-            if(thisanno=="label") {
-                lastlabs[irow] = paste(lastlabs[irow], round(lastobs[irow],digits=1)) }
-            else {
-                g1 = g1 |> dygraphs::dyAnnotation(annodate, ifelse(thisanno=="last",round(lastobs[irow],digits=1), thisanno), series=lastlabs[irow])
-                }
-        }
-    }
-    if(!is.logical(hlineopts) & is.logical(hairopts)) {
-        if(any(grepl("last",hlineopts)) & length(lastobs)<=5) {
-            if(wasmelted) {
-                for(irow in 1:length(lastobs)) {
-                    g1 = g1 |> dygraphs::dyLimit(as.numeric(lastobs[irow]), label=lastlabs[irow], labelLoc="left", color=colors[irow]) }
-            }
-            else if (length(lastobs)>=1) {
-                if(is.data.frame(lastobs)) {
-                    ltmp=as.numeric(select(lastobs,-starts_with("DT")) |> slice(1))
-                    lastlabs = grep("^DT",colnames(lastobs),value=T,invert=T)
-                    }
-                else {
-                    ltmp=as.numeric(lastobs)
-                    lastlabs = round(ltmp,digits=1)
-                    colors=rep("blue",length(ltmp))
-                    }
-                for(irow in seq(1,length(ltmp))) {
-                    g1 = g1 |> dygraphs::dyLimit(as.numeric(ltmp[irow]), label=lastlabs[irow], labelLoc="left", color=colors[irow]) }
-            }
-        }
-        if(any(grepl("^[[:digit:]]+$",hlineopts))) {
-            hnums=hlineopts[grepl("^[[:digit:]]+$",hlineopts)]
-            for(irow in hnums) {
-                g1 =g1 |> dyLimit(as.numeric(irow),color="red") }
-            }
-        if(any(grepl("hlinedsn",hlineopts)) & is.data.frame(hlinedsn)) { # of form Variable,value
-            for(irow in 1:nrow(hlinedsn)) {
-                tcolor = ifelse("color" %in% colnames(hlinedsn), hlinedsn[[irow,"color"]],"red")
-                tpos = ifelse("loc" %in% colnames(hlinedsn), hlinedsn[[irow,"loc"]],"left")
-                g1 = g1 |> dygraphs::dyLimit(hlinedsn[[irow,"value"]], label=hlinedsn[[irow,"variable"]], labelLoc=tpos, color=tcolor)
-                }
-        }
-    }
-    g1 = g1 |> dygraphs::dyRangeSelector(height=20,dateWindow=dtsrange)
 
-    if(suppressWarnings(!is.na(as.numeric(roller)))) { rollpd = as.numeric(roller)}
-    if(!is.na(rollpd)) { g1 = g1 |> dygraphs::dyRoller(rollPeriod=rollpd) }
-    if(nchar(dylegend)>0)  { g1= g1 |>  dygraphs::dyLegend(width=600, show=dylegend,hideOnMouseOut = FALSE)  }
+    # Set up Axes
+    g1 <- g1 |> dygraphs::dyAxis('y',valueRange=yRange,label=paste0(titleadds[axis=="y"]$note,collapse="<br>"))
+    g1 <- g1 |> dygraphs::dyAxis("x",paste0(titleadds[axis=="x"]$note,collapse="<br>"))
+
+    if( nrow(y2dta <- series_dets[axis=="y2",])>0 ) {
+      g1 = g1 |> dygraphs::dyAxis('y2',independentTicks=TRUE, drawGrid = FALSE, label=paste(y2dta$seriesnm,collapse=","),
+                                  axisLineColor=y2dta[1,]$color, axisLabelColor = y2dta[1,]$color)
+    }
+
+    if(!is.logical(hairopts <- optString_parse(pointers,"cross|hair"))) {
+      g1 <- g1 |> dygraphs::dyCrosshair(direction = hairopts)
+    } # horizontal,both,veretical
+
+    if(!(optString_parse(pointers,"norange")=="TRUE")) {
+        g1 = g1 |> dygraphs::dyRangeSelector(height=20,dateWindow=dtsrange_todisplay)
+    }
+
+    # Rollers, Legends
+    suggest_rollpd <- c(1L,5L,10L,20L)[findInterval(as.numeric(diff(range(indtnew[[1]]))),c(1,360,2520,3600,+Inf))]
+    rollpd <- suppressWarnings(data.table::fcase(
+      roller=="default", suggest_rollpd,
+      roller=="finest", 1L,
+      is.numeric(roller), as.integer(roller),
+      default=NA_integer_ ))
+    if(!is.na(rollpd)) {
+      g1 = g1 |> dygraphs::dyRoller(rollPeriod=rollpd) }
+
+    if(nchar(dylegend)>0)  {
+      g1= g1 |>  dygraphs::dyLegend(width=600, show=dylegend,hideOnMouseOut = FALSE)  }
     return(g1)
 }
 
 
-#Line plots
-fgts_ggplot <- function(dta,title="",ylabel="",xlabel="",cutdata="",cutset="",cutname="",cutcolors="",linetypename="",ycoord=c(-Inf,+Inf),hlines=c(),panelvar="",colorvar="variable",
-                printlastdata="",boldline="",cutsuffix="",savetitle="",lastoffset=5,legend="topleft",alreadymelted=FALSE,fcstpds=0,
-                cornerannotations=NULL, colorset=c(s("black;red;green;blue;magenta;grey30;purple2;turquoise;pink;orange;dark green;light blue"),cbbPalette)) {
-    mindt<-min(zoo::index(dta))
-    dta<-xts2df(dta)
-    if(!("DT_ENTRY" %in% colnames(dta))) { dta$DT_ENTRY<-as.Date(rownames(dta)) }
-    if(alreadymelted) {
-        dtx<-dta }
-    else {
-        dtx<-dta |> select(which(sapply(.,class)=="numeric" | sapply(.,class)=="Date")) |> pivot_longer(-DT_ENTRY,names_to="variable")
-        # SOmetimes  I fucking hate Hadley
-        }
-    yrng<-range(dtx$value,na.rm=T)
-    drng<-range(dtx$DT_ENTRY,na.rm=T)
-    if(nchar(boldline)>0) { dtx$sizfactor<-as.factor(grepl(boldline,dtx[,"variable"],perl=T)) }
-    else {        dtx$sizfactor<-as.factor(1)        }
-    # ----------------------------- linetype
-    if (alreadymelted & linetypename %in% colnames(dta)) { dtx$ltype=dtx[,linetypename] }  else { dtx$ltype=1 }
-    if (alreadymelted & panelvar %in% colnames(dta)) { dtx$panel=dtx[,panelvar] }  else { dtx$panel=NA }
-    if(nchar(cutname)>0 & grepl(cutname,paste(colnames(dta),collapse=" "))) {
-        cutdata<-dta[,c("DT_ENTRY",cutname)]
-        cutdata$dtlag<-as.Date(c(NA,head(cutdata$DT_ENTRY,-1)))
-        cutdata$cid	<-dta[,c(cutname)]
-        cutnm <- cutname
-        cids<-unique(cutdata$cid)
-        cutdata$variable<-""
-        cutdata$value<-0
-    }
-    else if(is.xts(cutdata) | is.data.frame(cutdata)) {
-        cutdata<-as.data.frame(cutdata[paste0(mindt,'::'),])
-        cutnm <- ifelse(nchar(cutname)>1,cutname,colnames(cutdata)[1])
-        cutdata$DT_ENTRY<-as.Date(rownames(cutdata))
-        cutdata$dtlag<-as.Date(c(NA,head(cutdata$DT_ENTRY,-1)))
-        cutset<-c(-Inf,cutset,Inf)
-        cids<-paste0("<",cutset[-1]," ",cutsuffix,sep="")
-        cids[length(cids)]<-paste0(">",cutset[length(cutset)-1]," ",cutsuffix)
-        cutdata$cid	<-cids[as.numeric(cut(cutdata[,1],cutset))]
-        cutdata$variable<-""
-        cutdata$value<-0
-        }
-    if (fcstpds>0) {  # New 21 JUl 2014
-        fcstfunc=function(x) {
-            fc1=try( forecast(as.ts(df2xts(x[,s("DT_ENTRY;value")])),h=fcstpds), silent=TRUE)
-            if(!inherits(fc1, "try-error")) {
-                fc2=as.data.frame(fc1)
-                fc2$DT_ENTRY=bdayseq(max(x$DT_ENTRY),nrow(fc2))
-                fcfirst=head(subset(x,select=s("variable;sizfactor;panel")),1)
-                print(paste("FCST>", fcfirst[1,"variable"]," > ", fc1$model$method, " MAPE:",accuracy(fc1)[4]))
-                fc2=merge(select(fc2,DT_ENTRY,value=contains("Point Forecast")),fcfirst) |> mutate(ltype=2) }
-            else {  fc1=data.frame() }
-        }
-        dtxf=group_by(dtx,variable) |> do(fcstfunc(.))
-        dtx=rbind(dtx,as.data.frame(dtxf))
-    }
-    #dtx$ltype=as.factor(dtx$ltype)
-    dtx %<>% mutate(xcolorvar = !!rlang::sym(colorvar))
-    #dtx$xcolorvar=dtx[,colorvar]
-    u1<-ggplot(dtx,aes(x=DT_ENTRY,y=value))
-    if(nchar(printlastdata)>0) {
-        ulast=group_by(dtx,variable) |> filter(DT_ENTRY==max(DT_ENTRY)) |> select(variable,yy=value,DT_ENTRY)
-        if(grepl("^var",printlastdata,perl=T)) { ulast$ss = ulast$variable }
-        else { ulast$ss = sprintf(printlastdata,ulast$yy) }
-        if(abs(lastoffset)>0) { ulast$DT_ENTRY=ulast$DT_ENTRY+lastoffset}
-        u1<-u1+geom_text(aes(x=DT_ENTRY,y=yy,color=variable,label=ss,group="Region"),data=ulast, check_overlap=TRUE,position = position_jitter(width=5, height=0))
-    }
-    if(length(unique(dtx$ltype))>1) {
-        u1<-u1+geom_line(aes(size=sizfactor,color=xcolorvar,linetype=ltype))+scale_linetype_manual(values=c("solid", "dotted","dotdash")) }
-    else {
-        u1<-u1+geom_line(aes(size=sizfactor,color=xcolorvar))    } # Easier than turning guides off
-    if(is.data.frame(cutdata)) {
-        u1<-u1+geom_rect(data=cutdata,aes(xmin=dtlag,xmax=DT_ENTRY,fill=cid),ymin=-Inf,ymax=Inf,alpha=0.2,linetype=0)
-        if(length(cutcolors)>1) {
-            u1<-u1+scale_fill_manual(name=cutnm,values=cutcolors) }
-        else {
-            if(length(cids)<=2) {	u1<-u1+scale_fill_manual(name=cutnm,values=c("red","green")) }
-            else if (length(cids)==3) { u1<-u1+scale_fill_manual(name=cutnm,values=c("red","white","green")) }
-            else if (length(cids)==4) { u1<-u1+scale_fill_manual(name=cutnm,values=c("red","white","green","blue")) }
-            else {	 u1<-u1+scale_fill_brewer(name=cutnm,type="seq");		}
-        }
-    }
-    if(length(ycoord)==2) { u1<-u1+scale_y_continuous(limits=ycoord)}
-    else if (!is.na(dtx[1,"panel"])) {
-        u1=u1+facet_grid(panel~., scales="free_y")+theme(strip.text.y = element_text(size=11,color="black", face="bold"), strip.background=element_rect(fill="wheat")) }
-    else {
-        u1<-u1+coord_cartesian(ylim = c(0.95,1.05)*yrng) }
-    if(length(levels(dtx$sizfactor))>1) { u1<-u1+scale_size_manual(values=c(1,1.6)) }
-    else { u1<-u1+scale_size_manual(values=c(1,1.6),guide="none") }
-    u1<-u1+BaseTheme()+scale_color_manual(values=colorset)
-    for(ln in hlines) { u1<-u1+geom_hline(yintercept=ln,color="blue")    }
-    title=c(title,"")
-    u1=u1+labs(title=title[[1]],subtitle=title[[2]])
-    psave(savetitle,u1)
-}
-# mtsrecentboxplot:
-# colrename=c("fromcol","tocol"), premeltcols=c(melted cols), cutcol= factor to overrride breaks on date
-# ycoord = trim coordinates
 
 
 
-# labs doesnt work
-# Bugs here with colors
-
-BaseDefaults <- function(colordefaults=hicPalette, flip=FALSE,...) {
-    bd=list(
-        scale_fill_manual(values=colordefaults),
-        scale_color_manual(values=colordefaults),
-        scale_shape_manual(values=c(16,1,17,2,15,0,18,5)),
-        BaseTheme(...))
-    if(flip) {
-        bd=c(bd,coord_flip()) }
-    # if(nchar(title)>0) { bd=c(bd,labs(title=title)) }
-    bd
-}
-
-
-dottedGrid<-function() { theme(
-            panel.grid.minor.y=element_blank(), panel.grid.major.y=element_line(colour = 'gray', linetype = 'dashed'),
-            panel.grid.minor.x=element_blank(), panel.grid.major.x=element_line(colour = 'gray', linetype = 'dashed')
-            ) }
-
-
-
-
-# adddoi: add recents to date stream
-# annotionstyle : continuous, single, singleasdate
-addonebreakout<-function(x,annotationstyle="continuous") {
-    require(BreakoutDetection)
-    res=breakout(na.omit(as.numeric(x[[2]])), min.size=24, method='multi', degree=1, beta=0.005, plot=FALSE)
-    #print(paste("Breakout determines ", length(res$loc), "breakouts"))
-    #print(paste("Breakout determines ", length(res$loc), "breakouts"))
-    x$breakout<-NA;
-    if(annotationstyle=="singleasdate") {
-        x[res$loc,"breakout"]<-lapply(x[res$loc,"DT_ENTRY"],as.character) }
-    if(annotationstyle=="single") {
-        x[res$loc,"breakout"]<-"Brk" }
-    if(annotationstyle=="continuous") {
-        x[res$loc,"breakout"]<-paste0("rgm:",1:length(res$loc))
-        x$breakout <- na.locf(x$breakout) }
-    if(annotationstyle=="periodsonly") {
-        x = x[res$loc,"DT_ENTRY"][,`:=`(DT_BEG=fcoalesce(lag(DT_ENTRY,1),min(x$DT_ENTRY)))] }
-    x
-    }
-
-overlay_eventset<-function(indta,valname="value",ncutsperside=4,colorsign="redisnegative",center=0,melted=FALSE,alpha=0.2) {
-    if(melted) {
-        tmpdta = copy(indta)[variable==valname][,.(DT_ENTRY,xval=value)]
-    }
-    else {
-        tmpdta = copy(indta)[,xval:=get(valname)]
-    }
-    if(is.numeric(center)) { xcenter=center }
-    else if (center=="median") { xcenter = median(tmpdta[["xval"]]) }
-    else if (center=="zscore") {
-        xcenter = 0
-        tmpdta[["xval"]]=as.vector(scale(tmpdta[["xval"]]))
-    }
-    else if (center=="zscorezero") {
-        xcenter = 0
-        tmpdta[["xval"]]=tmpdta[["xval"]]/sd(tmpdta[["xval"]],na.rm=T)
-    }
-    tmpp = tmpdta[xval>xcenter,][,tmpcat := as.numeric(cut_interval(xval,ncutsperside))]
-    tmpn = tmpdta[xval<=xcenter,][,tmpcat := -1*( as.numeric(cut_interval(-xval,ncutsperside)))]
-    tmpall = rbindlist(list(tmpn,tmpp))[order(DT_ENTRY)]
-
-    hicolor = ifelse(colorsign=="redisnegative", "#6161ff", "#f56462")
-    locolor = ifelse(colorsign=="redisnegative", "#f56462", "#6161ff")
-    colorset = rbind( data.table(value=seq(1,ncutsperside),color=colorRampPalette(c("#ffffff",hicolor),alpha=alpha)(ncutsperside)),
-                        data.table(value=seq(-ncutsperside,-1),color=colorRampPalette(c(locolor,"#ffffff"),alpha=alpha)(ncutsperside)))
-    tmpruns = colorset[tmpall[,runs_from_value(.SD[,.(DT_ENTRY,value=tmpcat)],addrunlength=TRUE)],on=.(value)][,END_DT_ENTRY:=END_DT_ENTRY+1]
-    return(tmpruns)
-}
 

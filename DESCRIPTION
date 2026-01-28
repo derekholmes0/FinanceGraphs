@@ -1,6 +1,6 @@
 Package: FinanceGraphs
 Title: Flexible Graphs for Analysis of Financial Data and Time Series
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: 
     person("Derek", "Holmes", , "derek@derekholmes.com", role = c("aut", "cre", "cph"))
 Description: Flexible graphs for analysis of Financial Data and Time Series
@@ -9,20 +9,32 @@ Encoding: UTF-8
 Depends: 
     R (>= 4.1.0)
 Imports:
+    zoo (>= 1.8.0),
     dplyr (>= 1.0.0),
-    xts (>= 0.12.0),
+    purrr (>= 1.2.0),
+    tibble (>= 1.0.0),
+    xts (>= 0.14.1),
     glue (>= 1.1.1),
     httr (>= 1.2.1),
     stringr (>= 1.2.0),
     timeDate (>= 4000.0),
-    lubridate (>= 1.0.0),
+    lubridate (>= 1.7.0),
     utils (>= 4.0.0),
     tidyr (>= 0.6.3),
-    ggplot2 (>= 3.3.0),
     DT (>= 0.18),
-    data.table (>= 1.7.0),
+    RcppDynProg (>= 0.2.0),
+    cpm (>= 2.0.0),
+    BreakoutDetection (>= 1.0.0),
+    grDevices (>= 4.5.0),
+    graphics (>= 4.5.0),
+    stats (>= 4.5.0),
+    utils (>= 4.5.0),
+    data.table,
     dygraphs (>= 1.1.0)
 Suggests:
+    forecast (>= 9.0.0),
+    timetk (>= 2.9.0),
+    sweep (>= 0.2.0),
     testthat,
     knitr,
     rmarkdown
