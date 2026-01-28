@@ -7,6 +7,9 @@
 #' `fg_get_colors()` gets default color sets for graphs
 #' `fg_update_colors()` updates or replaces default colors
 #'
+#' @param search_categories Grep string of categories to return
+#' @param use_default (Default TRUE) use dedault dates if none else found
+#' @param startdt MInimum date for events to be returned
 #' @param item (Default: "") A grep string for categories desired.
 #' @param replace (Default: FALSE) If TRUE, replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.
 #' @param use_default (Default: TRUE) Use package level dates of interest
@@ -34,13 +37,16 @@
 #' \dontrun{
 #' tail(fg_get_dates_of_interest("fedmoves"),3)
 #' # To add (for example) a new FOMC cut of 50bps on 6/16/2026:
-#' newdoi <-data.table::data.table(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
+#' newdoi <-data.table::data.table(category="fedmoves",eventid="F:-50",
+#'             DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 #' fg_update_dates_of_interest(newdoi)
 #' tail(fg_get_dates_of_interest("fedmoves"),3)
 #'
 #' fg_get_colors("lines")
-#' # To switch out second (blue) line and 6th line (red).  Note use of sortable character variables to define the order of the set.
-#' fg_update_colors(data.table::data.table(category=rep("lines",2),variable=c("D02","D06"),color=c("red","blue")))
+#' # To switch out second (blue) line and 6th line (red).
+#' # Note use of sortable character variables to define the order of the set.
+#' fg_update_colors(data.table::data.table(category=rep("lines",2),variable=c("D02","D06"),
+#'                 color=c("red","blue")))
 #' fg_get_colors("lines")
 #' }
 #'
@@ -66,8 +72,6 @@ if(file.exists(the$colorfn)) {
   load(the$colorfn)
   the$default_colors <- newcolors
   }
-
-#' library(data.table)
 
 #'
 #' @rdname fg_dates_of_interest
@@ -150,6 +154,7 @@ fg_reset_to_default_state <- function() {
 }
 
 fg_create_defaults <- function() {
+  category <- variable <- NULL
   dtmap  <- make_dtmap()
   datecols <- c("DT_ENTRY","END_DT_ENTRY")
 
@@ -188,6 +193,8 @@ fg_create_defaults <- function() {
 #
 make_dtmap <- function(yrs_ahead=5) {
   # All Dates
+  tmp<-lapply(s("DT_ENTRY;isday;rolldt;isholiday;yr;yrmo;frino;yrqtr;optexp;xoptexp;isweek;ismo;isqtr;isyr"),
+                      \(x) assign(x,NULL,pos=1) )
   dtmap <- data.table::data.table(DT_ENTRY=seq(from =as.Date("1970-03-20"), to = Sys.Date()+yrs_ahead*365, by = "day")) |> .addseasonaldates()
   dtmap <- dtmap[,':='(isholiday=!timeDate::isBizday(timeDate::as.timeDate(DT_ENTRY), holidays =  timeDate::holidayNYSE(1970:2060), wday = 1:5))]
   cdsendpoints <-c(lubridate::ymd('1970-03-20'),lubridate::ymd(paste0(lubridate::year(Sys.Date())+yrs_ahead,'-09-20')))

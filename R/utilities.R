@@ -101,7 +101,7 @@ extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtn
     spl <- as.numeric(list(Sys.Date()-(as.Date(spl[1])+begchg),Sys.Date()-(as.Date(spl[2])+endchg)))
     rtnstyle <- "list"
   }
-  if(rtn=="totoday") { spl[2] <- NA_Date_ }
+  if(rtn=="totoday") { spl[2] <- NA_real_ }
   if(lubridate::is.Date(mindt)) { spl[1] <- max(spl[1],mindt) }
   if(lubridate::is.Date(maxdt)) { spl[2] <- min(spl[2],maxdt) }
   if(rtnstyle=="list") { return(spl) }
@@ -178,7 +178,7 @@ DTUpsert<-function(a,b,keys, fill=FALSE,verbose="") { # DT kind of tough to use 
 }
 
 coalesce_DT<-function(DT1,DT2) { # Adds columns as necessary, either row by row or single row
-
+  `.` <- jrep <- NULL
   if (!(nrow(DT2)==1 | nrow(DT1)==nrow(DT2))) {
     stop("coalesce_dt incompatile sizes")
   }
@@ -193,6 +193,7 @@ coalesce_DT<-function(DT1,DT2) { # Adds columns as necessary, either row by row 
 
 
 coalesce_DT_byentry<-function(DT1,DT2) { # Adds columns as necessary, either row by row or single row
+  `.` <- jrep <- NULL
   if (!(nrow(DT2)==1 | nrow(DT1)==nrow(DT2))) {
     stop("coalesce_DT_byentry incompatible sizes, either DT2 must be 1 row or nrow(DT1) rows")
   }

@@ -26,4 +26,5 @@ Event Helpers : fg_addbreakouts
 \examples{
 dta <- eqtypx[,.(date,QQQ,TLT)]
 fgts_dygraph(dta,event_ds=fg_addbreakouts(dta),title="With Breakouts")
+
 }

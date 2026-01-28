@@ -53,7 +53,6 @@
 #' @param extraoptions Additional options passed to [dygraphs::dyOptions()]
 #'
 #' @import data.table
-#' @importFrom data.table .SD,.I,.GRP
 #'
 #`
 #' @returns Dygraph of data

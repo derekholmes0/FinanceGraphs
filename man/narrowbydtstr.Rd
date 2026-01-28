@@ -14,7 +14,7 @@ narrowbydtstr(
 )
 }
 \arguments{
-\item{xin}{INput \code{data.frame} or \code{data.table}}
+\item{xin}{Input \code{data.frame} or \code{data.table} with a Date column}
 
 \item{dtstr}{Generalized Date string of the form \verb{<yyyy-mm-dd>::<yyyy-mm-dd>} or e.g. \verb{-3m::}}
 
@@ -25,6 +25,9 @@ narrowbydtstr(
 \item{invert}{(Default: FALSE) Return dates not in \code{dtstr}}
 
 \item{addindicator}{(Default: FALSE) Returns original dataset with logical variable \code{inrange} if date is in desired range.}
+}
+\value{
+dataset in same form as \code{xin}
 }
 \description{
 Narrow dataset by date string

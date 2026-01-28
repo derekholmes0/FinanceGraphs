@@ -28,7 +28,8 @@ fcst_one <- function(ticker) {
   t1_ts <- zoo::zoo(px_small[[ticker]],px_small[["date"]])
   forecast::ets(t1_ts) |> forecast::forecast(h=36) |>  fg_predict(seriesnm=ticker)
   }
-  fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
-fgts_dygraph(px_small,title="With FOrecasts", roller=1,dtstartfrac=0.7,forecast_ds=fpred,verbose=TRUE)
+fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
+fgts_dygraph(px_small,title="With Forecasts", roller=1,dtstartfrac=0.7,
+              forecast_ds=fpred,verbose=TRUE)
 
 }

@@ -18,6 +18,7 @@
 #' dta <- eqtypx[,.(date,QQQ)]
 #' fcst_eqtypx <- tk_ts(dta) |> ets() |> forecast::forecast(h=30) |> sw_sweep(timetk_idx=TRUE)
 #' fcst_in <- fg_sweep(fcst_eqtypx)
+#' fgts_dygraph(dta,title="With Forecasts", roller=1,dtstartfrac=0.7,forecast_ds=fcst_in)
 #'
 #' @import data.table
 #' @export
@@ -51,8 +52,9 @@ fg_sweep <- function(swept_data,confidence=80)  {
 #'   t1_ts <- zoo::zoo(px_small[[ticker]],px_small[["date"]])
 #'   forecast::ets(t1_ts) |> forecast::forecast(h=36) |>  fg_predict(seriesnm=ticker)
 #'   }
-#'   fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
-#' fgts_dygraph(px_small,title="With FOrecasts", roller=1,dtstartfrac=0.7,forecast_ds=fpred,verbose=TRUE)
+#' fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
+#' fgts_dygraph(px_small,title="With Forecasts", roller=1,dtstartfrac=0.7,
+#'               forecast_ds=fpred,verbose=TRUE)
 #'
 #' @import data.table
 #' @export

@@ -29,7 +29,7 @@ fgts_dygraph(
   dylegend = "always",
   groupnm = "common",
   fillGraph = FALSE,
-  verbose = TRUE,
+  verbose = FALSE,
   extraoptions = list()
 )
 }

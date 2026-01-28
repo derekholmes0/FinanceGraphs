@@ -21,7 +21,8 @@
 #' @import data.table
 #' @export
 fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
-  res <- BreakoutDetection::breakout(na.omit(as.numeric(indta[[2]])), min.size=24, method='multi', degree=1, beta=0.005, plot=FALSE)
+  indt2 <- stats::na.omit(as.numeric(indta[[2]]))
+  res <- BreakoutDetection::breakout(indt2, min.size=24, method='multi', degree=1, beta=0.005, plot=FALSE)
   bo_only <- indta[res$loc,]
   thiscolor <- fg_get_colorstring("breakout")
   tortn <- data.frame(DT_ENRY=bo_only[[1]],text="Bad Anotation Style",loc="top",color=thiscolor)
@@ -58,6 +59,8 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
 #' @export
 fg_findTurningPoints<-function(indta,rtn="dates",
                             method="pctchg",npts=10,pts_of_interest="change",pctabovemin=0.05,maxwindow=-1,addlast=FALSE,cpmmethod="GLR",...) {
+
+  tmp<-lapply(s("DT_ENTRY;value;daysfrommin;goodpt;ino;text;color;loc;pctchg_func"),\(x) assign(x,NULL,pos=-1) )
   pts <- data.table::data.table()
   v1a <- data.table::copy(indta)[,c(1,2)]
   data.table::setnames(v1a,c("DT_ENTRY","value"))
@@ -85,7 +88,7 @@ fg_findTurningPoints<-function(indta,rtn="dates",
   }
   if(grepl("cpm",method)) { # Needs to be on returns
     message("fg_findTurningPoints: Only non-missing values used for cpm")
-    indta <- na.omit(indta)
+    indta <- stats::a.omit(indta)
     cpts <- cpm::processStream(indta[[2]],cpmmethod,startup=floor(nrow(indta)/20),...)
     pts_toget <- ifelse(pts_of_interest=="detect","detectionTimes","changePoints")
     pts <- indta[cpts[[pts_toget]]][,1]
