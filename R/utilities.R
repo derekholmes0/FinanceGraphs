@@ -110,6 +110,7 @@ extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtn
 
 
 optString_parse <-function(x,item,default="TRUE") {
+    ops<-beg<-end<-NULL
     x1=tibble::tibble(ops=s(x)) |>
             tidyr::separate_wider_delim(ops,",",names=c("beg","end"),too_many="merge",too_few="align_start") |>
             dplyr::filter(grepl(item,beg)) |> dplyr::pull(end)
@@ -127,8 +128,6 @@ s<-function(x,sep=";",fixed=TRUE,rtn=NULL) {
     if(is.numeric(rtn)) { if(length(y)>=rtn) { y=y[rtn] } }
     return(y)
     }
-# g(lue) is glue
-g<-function(x,sep=";",...) { if(length(x)>1) { glue_collapse(x,sep=sep)  } else { glue::glue(x,...) } }
 
 message_if <- function(reallydothis,...) {
   if(reallydothis) { message(list(...)) }
@@ -154,6 +153,21 @@ ts2df <- function(x,prefix="",adddate=TRUE) {
     data.table::setcolorder(rtn,"DT_ENTRY")
   }
   return(rtn)
+}
+
+xts2df <- function(x) {
+  DT_ENTRY<-NULL
+  if(is.data.frame(x)) {
+    return(data.table::as.data.table(x)) }
+  if(is.null(colnames(x))) {
+    if(is.null(ncol(x))) {
+      return(data.table::data.table())
+    }
+    data.table::setnames(x,paste0("V",1:ncol(x)))
+  }
+  rtna = data.table::setnames(data.table::as.data.table(x),"index","DT_ENTRY")
+  rtna[,DT_ENTRY:=as.Date(DT_ENTRY)]
+  return(rtna)
 }
 
 
@@ -219,6 +233,7 @@ coalesce_DT_byentry<-function(DT1,DT2) { # Adds columns as necessary, either row
 #coalesce_DT(DT1,DT2n)
 
 runs_from_value <- function(indta, addrunlength=FALSE) {
+  '.' <- DT_ENTRY <- N <- value <- END_DT_ENTRY <- runasnum <- NULL
   if(!data.table::is.data.table(indta)) { indta <- data.table::data.table(indta) }
   if(nrow(indta[,.N,by=.(DT_ENTRY)][N>1])>0) {
     stop("runs_from_value needs one observation per date") }
@@ -237,7 +252,7 @@ runs_from_value <- function(indta, addrunlength=FALSE) {
 
 
 
-## -- to tkae out eventually
+## -- For Debusgging only
 cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trace=FALSE,dpath=tempdir(),dbgkey="zz",suffix="",
                   skipsaveiftoday=FALSE, nbig=10000,title="",usefst=TRUE,pframe=3,tmp=F) {
   #if(nchar(title)>1) { message("cAssign ---------------------------------------: ",title) }
@@ -259,8 +274,9 @@ cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trac
         }
         if(!silent) {
           thistrace=ifelse(trace,try(traceback(max.lines=1),silent=T),"--notrace--")
-          message("Assigning: ",ymessage, "(",paste(dim(cadtmp),collapse=";"),") ",paste(class(cadtmp),collapse=";"), " from ",tail(thistrace,1),">",title); }
-        assign(ynew,cadtmp,env=.GlobalEnv)}
+          message("Assigning: ",ymessage, "(",paste(dim(cadtmp),collapse=";"),") ",
+                    paste(class(cadtmp),collapse=";"), " from ",utils::tail(thistrace,1),">",title); }
+        assign(ynew,cadtmp,envir=.GlobalEnv)}
       else {
         if(!silent) { print(paste("cAssign: CANNOT FIND ",y)) } }
       } )

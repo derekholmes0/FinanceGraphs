@@ -6,7 +6,7 @@
 \alias{FinanceGraphs-package}
 \title{FinanceGraphs: Flexible Graphs for Analysis of Financial Data and Time Series}
 \description{
-Flexible graphs for analysis of Financial Data and Time Series
+Flexible wrapper and helper functions for display of Time Series using [dygraphs]. Helpers for adding date-specific events and ranges are included, as well as for adding forecasts and other annotations.
 }
 \seealso{
 Useful links:

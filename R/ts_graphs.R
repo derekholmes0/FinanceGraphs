@@ -54,8 +54,7 @@
 #'
 #' @import data.table
 #'
-#`
-#' @returns Dygraph of data
+#' @returns Dygraph [dygraphs](https://rstudio.github.io/dygraphs/) of input data, with annotations and other customizations.
 #'
 #' @details
 #'  Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
@@ -67,8 +66,6 @@
 #' **Events** are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
 #' using [fg_update_dates_of_interest()] which will persist across R sessions.  See examples and vignette for further details.
 #' Events can also be added using a `data.frame` passed via `event_ds` with the following columns:
-#'
-#' \preformatted{  xx zz 111}
 #'
 #'
 #' | column | required | type | description |
@@ -98,7 +95,11 @@
 #' @examples
 #' fgts_dygraph(eqtypx[,.(date,TLT)], title="Stock Prices", events="doi,regm;doi,fedmoves")
 #'
+#'
+#'
+#'
 #' @export
+#'
 fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,both",
                         splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
                         hilightcols=FALSE,hilightwidth=2,hilightstyle="solid",
@@ -110,23 +111,28 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
                         fillGraph=FALSE,verbose=FALSE,
                         extraoptions=list()) {
 
-  # Preprocessing: get into data.table format
+  # NSE crap.  There has to be a better way
+  `.`=gpnm=suffix=seriesnm=display=color=axis=series_no=variable=eventid=direct=tcolor=optexp=DT_ENTRY=NULL
+  value=a2=a3=labelloc=a1=text=END_DT_ENTRY = NULL
 
+  # Preprocessing: get into data.table format
   if( xts::is.xts(indt) ) { indt <- xts2df(indt) }
   if(dplyr::is.tbl(indt)) { indt <- dplyr::ungroup(indt) }
-  if(!data.table::is.data.table(indt)) { indt <- data.table::data.table(indt) }  # Try setDT ?
+  if(!is.data.table(indt)) { indt <- data.table(indt) }  # Try setDT ?
 
   # Local helpers
-  fcoal <- function(indta,...) { data.table::fcoalesce(indta,...) }
-  form_xlist <- function(instring) {
+  fcoal <- function(indta,...) { fcoalesce(indta,...) }
+  form_xlist <- function(instring) { todo <- NULL
     if(is.data.frame(instring)) return(instring)
     suppressWarnings(tibble::tibble(todo=s(instring)) |>
                                 tidyr::separate_wider_delim(todo,",",names= c("todo","a1","a2","a3","a4","a5"),too_many="drop",too_few="align_start"))
   }
-  get_fromlist <- function(indta,grepstr) {  dplyr::filter(indta,grepl(grepstr,todo)) }
-  add_titles <- function(what,...) { style="small";
+  get_fromlist <- function(indta,grepstr) { todo<-NULL;
+    dplyr::filter(indta,grepl(grepstr,todo)) }
+  add_titles <- function(what,...) {
+    style="small";
     stylednote = paste0("<",style,">",paste(...),"</",style,">")
-    titleadds <<- DTappend(titleadds,data.table::data.table(axis=what,note=stylednote))  }
+    titleadds <<- DTappend(titleadds,data.table(axis=what,note=stylednote))  }
 
   # Wrangle original input
   # Figure out date name and place first
@@ -138,12 +144,12 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     stop("fgts_dygraph must have a date column")
   }
 
-  data.table::setcolorder(indt, dt_colnames[['date']])
+  setcolorder(indt, dt_colnames[['date']])
 
   # Misc date stuff
   col_date_list <- c(dt_colnames[['date']])
   alldts <- sort(unique(indt[[1]]))
-  last_dt <- tail(alldts,1)
+  last_dt <- utils::tail(alldts,1)
   dtsrange_todisplay <- c(alldts[length(alldts)*dtstartfrac+1], max(alldts))
   if(nchar(dtwindow)>1) dtsrange_todisplay <- gendtstr(dtwindow,rtn="list")
 
@@ -154,7 +160,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     lastobs  <- as.vector(lastoset$value)
     lastlabs <- as.vector(lastoset[[meltvar]])
     form1 <- paste0(dt_colnames[["date"]],"~ factor(", dt_colnames[["meltvar"]],", levels=unique(",dt_colnames[["meltvar"]],"))")
-    indtnew<- data.table::dcast(indt,eval(form1),value.var=dt_colnames[["value"]])
+    indtnew<- dcast(indt,eval(form1),value.var=dt_colnames[["value"]])
   }
   else {
     lastobs <- as.vector(indt[nrow(indt),])[2:ncol(indt)]
@@ -162,7 +168,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     indtnew <- indt
   }
 
-  tevents <-data.table::data.table()
+  tevents <-data.table()
   elist <- form_xlist(events)
   alist <- form_xlist(annotations)
 
@@ -172,18 +178,18 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     # Need to group together col.lo and .hi for color an style
     all_series_names <- colnames(indtnew)[-1]
-    series_dets <- data.table::data.table( seriesnm=all_series_names, gpnm=gsub("(.lo|.hi)","",all_series_names), display=TRUE)
+    series_dets <- data.table( seriesnm=all_series_names, gpnm=gsub("(.lo|.hi)","",all_series_names), display=TRUE)
 
     gps_series <- unique(series_dets[grepl("(lo|hi)$",series_dets$seriesnm),]$gpnm)
     if(length(gps_series)>0) {
-      gps_tofillin <- data.table::CJ(gpnm=gps_series,suffix=c("lo","hi"))
+      gps_tofillin <- CJ(gpnm=gps_series,suffix=c("lo","hi"))
       gps_tofillin <- gps_tofillin[,.(gpnm,seriesnm=paste0(gpnm,".",suffix))]
       gps_tofillin <- series_dets[gps_tofillin,on=.(seriesnm,gpnm)][is.na(display)]
       # Copy old data to make sure both .lo and .hi exist; work with the downstream packages
       indtnew <-  indtnew[,(gps_tofillin$seriesnm):=.SD, .SDcols= gps_tofillin$gpnm]
     }
 
-    series_dets <- data.table::data.table( seriesnm=colnames(indtnew)[-1], gpnm=gsub("(.lo|.hi)","",colnames(indtnew)[-1]),
+    series_dets <- data.table( seriesnm=colnames(indtnew)[-1], gpnm=gsub("(.lo|.hi)","",colnames(indtnew)[-1]),
                                            axis='y',stepplot=FALSE,display=TRUE,width=1,style="solid")
     curr_colors <- fg_get_colorstring("lines")
     series_dets <- series_dets[,':='(color=curr_colors[.GRP]),by=.(gpnm)]
@@ -215,7 +221,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     if(is.data.frame(forecast_ds)) {
         dt_colnames['fdate'] <- find_col_bytype(forecast_ds,lubridate::is.Date)
-        fcst_series <- data.table::rbindlist(lapply(colnames(forecast_ds),
+        fcst_series <- rbindlist(lapply(colnames(forecast_ds),
                                           \(x) { y=s(x,sep="."); data.frame(gpnm=y[1],seriesnm=x)}))
         sdets_base <- series_dets[gpnm==seriesnm, .SD,.SDcols=!c("seriesnm")]
         fcst_dets <- sdets_base[fcst_series,on=.(gpnm)][,let(style="dashed")][!is.na(color)] # No date
@@ -235,7 +241,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     if(is.character(ylimits)) { # Find wuantiles on given series
       if( length( ylimsplit<-s(ylimits,","))==2 ) {
         qlimit<-c(as.numeric(ylimsplit[2]),0.01)[1]
-        yRange <- quantile(indtnew[[ylimsplit[1]]],c(qlimit,1-qlimit),na.rm=T) |> as.numeric()
+        yRange <- stats::quantile(indtnew[[ylimsplit[1]]],c(qlimit,1-qlimit),na.rm=T) |> as.numeric()
         message_if(verbose,"fgts_dygraph: Displayed range limited to ",qlimit," quantiles on ",ylimsplit[1], " or ",yRange[1], ":",yRange[2])
         add_titles("title","(Winsored@",qlimit,")")
       }
@@ -247,7 +253,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     indtnew <- indtnew[,.SD,.SDcols=!(series_dets[display==FALSE,]$seriesnm)]
 
 
-    titleadds <- data.table::data.table()
+    titleadds <- data.table()
     add_titles("y",ylab)
     alltitles = paste0(title,paste0(titleadds[axis=="title"]$note,collapse=","))
     ## cAssign("indtnew;alltitles;series_dets;dt_colnames")
@@ -256,8 +262,8 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
         trw <- series_dets[get("gpnm")==seriesgp,]
         serset <- seriesgp
         if(nrow(trw)>1) {
-          serset <- trw[,.(seriesnm,series_no=data.table::fcase(grepl("lo$",seriesnm),1,grepl("hi$",seriesnm),3,default=2))]
-          serset <- serset[data.table::data.table(series_no=c(1,2,3)),on=.(series_no)][,seriesnm:=fcoal(seriesnm,seriesgp)]
+          serset <- trw[,.(seriesnm,series_no=fcase(grepl("lo$",seriesnm),1,grepl("hi$",seriesnm),3,default=2))]
+          serset <- serset[data.table(series_no=c(1,2,3)),on=.(series_no)][,seriesnm:=fcoal(seriesnm,seriesgp)]
           serset <- serset[order(series_no)]$seriesnm
         }
         trw <- trw[gpnm==seriesnm,]
@@ -290,7 +296,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
           if(nrow(tdates)>0) {
               tdates1 <- tdates[, let(direct=stringr::str_sub(eventid,-1), rno=.I)]
               tdates1 <- dirbars[tdates1,on=.(direct)][,let(color=fcoal(color,tcolor))]
-              tdates1 <- coalesce_DT_byentry(tdates1,data.table::data.table(color="gray70",loc="bottom",strokePattern="dashed"))
+              tdates1 <- coalesce_DT_byentry(tdates1,data.table(color="gray70",loc="bottom",strokePattern="dashed"))
               tdates1 <- tdates1[,let(text=eventid)][,.SD,.SDcols=!c("tcolor","direct","eventid","eventid2")]
               tevents <- DTappend(tevents,tdates1)
           }
@@ -301,7 +307,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     # Dates; from dtmap (roll,optexp,doy,doq) e.g. "seasonal,optexp,mo"
     if(nrow( trow<-get_fromlist(elist,"seasonal") )>0) {
       dtlimits <- range(alldts)
-      dttmp <- dtmap[data.table::between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
+      dttmp <- dtmap[between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
       for(irow in seq(1,nrow(trow))) {
         eventtype <- tolower(trow[irow,]$a1)
         if(eventtype=="optexp") {
@@ -322,13 +328,13 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     if(nrow( trow<-get_fromlist(elist,"(minmax|extremes)") )>0) {
       dt_melt <- indt
       if(!wasmelted) {
-          dt_melt <- data.table::melt(indtnew,id.vars= dt_colnames[['date']]) }
+          dt_melt <- melt(indtnew,id.vars= dt_colnames[['date']]) }
       color_dt <- series_dets[,.SD[1],by=.(gpnm)][,.(variable=gpnm,color)]
       minevents <- dt_melt[,.SD[which.min(value)],by=.(variable)][,c(1,2)][,let(text=paste("min",variable),loc="bottom")]
       maxevents <- dt_melt[,.SD[which.max(value)],by=.(variable)][,c(1,2)][,let(text=paste("max",variable),loc="top")]
-      allevents <- data.table::rbindlist(list(minevents,maxevents))
+      allevents <- rbindlist(list(minevents,maxevents))
       allevents <- color_dt[allevents,on=.(variable)]
-      data.table::setnames(allevents,dt_colnames[['date']],"DT_ENTRY")
+      setnames(allevents,dt_colnames[['date']],"DT_ENTRY")
       tevents <- DTappend(tevents,allevents)
     }
     if(nrow( trow<-get_fromlist(elist,"^(dt|date)")  )>0) {  # date,name,dtstart,dtend
@@ -338,8 +344,8 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
         start_dt <- trow[[irow,"a2"]]
         if( lubridate::is.Date(start_dt) ) {
             end_dt <- fcoal(trow[[irow,"a3"]],start_dt)
-            colornm <- fg_get_colorstring(data.table::fifelse(end_dt>start_dt,"date_range","date"))
-            newevent <- data.table::data.table(DT_ENTRY=start_dt,END_DT_ENTRY=end_dt,text=this_nm,loc="bottom",color=colornm)
+            colornm <- fg_get_colorstring(fifelse(end_dt>start_dt,"date_range","date"))
+            newevent <- data.table(DT_ENTRY=start_dt,END_DT_ENTRY=end_dt,text=this_nm,loc="bottom",color=colornm)
             tevents <- DTappend(tevents,newevent)
          }
       }
@@ -365,10 +371,10 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     # Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
     if(is.data.frame(event_ds)) {
         # Rename columns smartly, only first two date columns taken
-        event_ds <- data.table::data.table(event_ds)
-        dtcols <- head(find_col_bytype(event_ds,lubridate::is.Date,firstonly=FALSE),2)
+        event_ds <- data.table(event_ds)
+        dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.Date,firstonly=FALSE),2)
         dtcolnewnames <- sapply( dtcols, \(x) ifelse(grepl("end",x,ignore.case=TRUE),"END_DT_ENTRY","DT_ENTRY"))
-        data.table::setnames(event_ds,dtcols,dtcolnewnames)
+        setnames(event_ds,dtcols,dtcolnewnames)
         tevents <- DTappend(tevents,event_ds)
     }
 
@@ -383,7 +389,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
       labelstr <- fcoal(trow$a1,"label") |> tolower() # label,value,labelline,valueline
       labeltype <- ifelse(grepl("value",labelstr),"value","gpnm")
       labelcat <- ifelse(grepl("line",labelstr),"line","anno")
-      lastvals <- data.table::melt(last_dt,id.vars=dt_colnames[['date']], variable.name = "gpnm")[,let(value=as.character(round(value,1)))]
+      lastvals <- melt(last_dt,id.vars=dt_colnames[['date']], variable.name = "gpnm")[,let(value=as.character(round(value,1)))]
       h_annos <- lastvals[series_dets[gpnm==seriesnm,],on=.(gpnm)]
       h_annos <- h_annos[,.(category=labelcat,color,text=get(labeltype),seriesnm=gpnm,axis,value,loc=labelloc,DT_ENTRY=get(dt_colnames[['date']]))]
       tevents <- DTappend(tevents,h_annos)
@@ -391,23 +397,23 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     if(nrow( trow<-get_fromlist(alist,"^(hline)"))>0) { #hline,no
         thiscolor <-  fg_get_colorstring("hline")
-        h_annos <- data.table::data.table(trow)[,let(text=fcoal(a2,""),value=as.numeric(a1),color=fcoal(a3,thiscolor))]
+        h_annos <- data.table(trow)[,let(text=fcoal(a2,""),value=as.numeric(a1),color=fcoal(a3,thiscolor))]
         h_annos <- h_annos[,.(category="hline",color,text,value,DT_ENTRY=last_dt,axis="y")]
         tevents <- DTappend(tevents,h_annos)
     }
 
     if(nrow( trow<-get_fromlist(alist,"^(range)"))>0) { #range,lo,hi,<color>
       thiscolor <-  fg_get_colorstring("range")
-      h_annos <- data.table::data.table(trow)[,':='(a1=as.numeric(a1),a2=as.numeric(fcoal(a2,a1)))]
+      h_annos <- data.table(trow)[,':='(a1=as.numeric(a1),a2=as.numeric(fcoal(a2,a1)))]
       h_annos <- h_annos[,.(category="range",color=fcoal(a3,thiscolor),text="",value=pmin(a1,a2),value_2=pmax(a1,a2),axis="y",DT_ENTRY=last_dt)]
       tevents <- DTappend(tevents,h_annos)
     }
 
     if (is.data.frame(annotation_ds)) { # date,series,text
       ds_signature <- sapply(annotation_ds,class)[1:3] == c("Date","character","character")
-      annotation_ds <- data.table::data.table(annotation_ds)
+      annotation_ds <- data.table(annotation_ds)
       if( all(ds_signature)==TRUE ) {
-        data.table::setnames(annotation_ds,c("DT_ENTRY","seriesnm","text"))
+        setnames(annotation_ds,c("DT_ENTRY","seriesnm","text"))
         h_annos <- annotation_ds[,.(category="anno",DT_ENTRY,text,seriesnm,axis="y")]
         tevents <- DTappend(tevents,h_annos)
       } else {
@@ -456,7 +462,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     # Rollers, Legends
     suggest_rollpd <- c(1L,5L,10L,20L)[findInterval(as.numeric(diff(range(indtnew[[1]]))),c(1,360,2520,3600,+Inf))]
-    rollpd <- suppressWarnings(data.table::fcase(
+    rollpd <- suppressWarnings(fcase(
       roller=="default", suggest_rollpd,
       roller=="finest", 1L,
       is.numeric(roller), as.integer(roller),

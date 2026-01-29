@@ -37,7 +37,7 @@ fg_sweep <- function(swept_data,confidence=80)  {
 #' @name fg_predict
 #' @description
 #' `fg_predict` Converts a [forecast::forecast()] output into [fgts_dygraph()] `forecastdataset` format.
-#' @param indta Time series `data.table` with a date as the first column and a value series as the second column
+#' @param p Output from [forecast::forecast()]
 #' @param confidence (Default: 80) Confidence interval (in percent) to display
 #' @param seriesnm Series name which has been forecast.  Note that [forecast::forecast()] loses the name
 #' of what's been forecast, necessitating this.

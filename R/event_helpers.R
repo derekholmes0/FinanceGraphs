@@ -19,6 +19,7 @@
 #' fgts_dygraph(dta,event_ds=fg_addbreakouts(dta),title="With Breakouts")
 #'
 #' @import data.table
+#' @import knitr
 #' @export
 fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
   indt2 <- stats::na.omit(as.numeric(indta[[2]]))
@@ -32,7 +33,7 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
                    "singleasvalue"= paste0("Brk:",format(bo_only[[2]],digits=3))
   )
   tortn$text <- rtntxt
-  return(data.table::data.table(tortn))
+  return(data.table(tortn))
 }
 
 #' Event Helpers : fg_findTurningPoints
@@ -59,24 +60,23 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
 #' @export
 fg_findTurningPoints<-function(indta,rtn="dates",
                             method="pctchg",npts=10,pts_of_interest="change",pctabovemin=0.05,maxwindow=-1,addlast=FALSE,cpmmethod="GLR",...) {
-
-  tmp<-lapply(s("DT_ENTRY;value;daysfrommin;goodpt;ino;text;color;loc;pctchg_func"),\(x) assign(x,NULL,pos=-1) )
-  pts <- data.table::data.table()
-  v1a <- data.table::copy(indta)[,c(1,2)]
-  data.table::setnames(v1a,c("DT_ENTRY","value"))
+  `.`<-DT_ENTRY<-value<-daysfrommin<-goodpt<-ino<-text<-color<-loc<-pctchg_func<-NULL
+  pts <- data.table()
+  v1a <- copy(indta)[,c(1,2)]
+  setnames(v1a,c("DT_ENTRY","value"))
   v1a  <- v1a[,let(DT_ENTRY=as.numeric(DT_ENTRY),goodpt=1,daysfrommin=0,origvalue=value,value=value-min(value,na.rm=T))]
   tcolors <- fg_get_colorstring("turningpoints")
   if(method=="pctchg") { # Not perfect, on values
     pctchg_func <- function(pts,v1a,dir,npts,maxwindow,pctabovemin) {
-      u1a <- data.table::copy(v1a);
+      u1a <- copy(v1a);
       for( i in 1:ceiling(npts/2)) {
         thiswindow <- maxwindow
         if(maxwindow<0) { thiswindow <- nrow(indta)/(10*(i/2)**0.7) }
         u2 <- u1a[order(dir*value)][,.SD[1]][,let(dir=dir,ino=i)]
         pts <- DTappend(pts,u2)
         u1a <- u1a[,let(daysfrommin=abs(DT_ENTRY-u2[[1,"DT_ENTRY"]]))][order(daysfrommin)]
-        u1a$goodpt <- data.table::fifelse(u1a$daysfrommin>thiswindow,1,0)
-        u1a$goodpt <- data.table::fifelse(u1a$goodpt==1 & (dir*u1a$value/u2$value<dir*(1+dir*pctabovemin)),0,u1a$goodpt)
+        u1a$goodpt <- fifelse(u1a$daysfrommin>thiswindow,1,0)
+        u1a$goodpt <- fifelse(u1a$goodpt==1 & (dir*u1a$value/u2$value<dir*(1+dir*pctabovemin)),0,u1a$goodpt)
         u1a <- u1a[goodpt==1,]
         if(nrow(u1a)<=0) { break; }
       }
@@ -88,15 +88,15 @@ fg_findTurningPoints<-function(indta,rtn="dates",
   }
   if(grepl("cpm",method)) { # Needs to be on returns
     message("fg_findTurningPoints: Only non-missing values used for cpm")
-    indta <- stats::a.omit(indta)
+    indta <- stats::na.omit(indta)
     cpts <- cpm::processStream(indta[[2]],cpmmethod,startup=floor(nrow(indta)/20),...)
     pts_toget <- ifelse(pts_of_interest=="detect","detectionTimes","changePoints")
     pts <- indta[cpts[[pts_toget]]][,1]
-    data.table::setnames(pts,c("DT_ENTRY"))
+    setnames(pts,c("DT_ENTRY"))
     pts <- pts[.(DT_ENTRY,text="CP",color=tcolors[[2]],loc="bottom")]
   }
   if(addlast & !any(grepl("CURR",pts$text))) { 0
-    pts <- data.table::rbindlist(list(pts,indta[DT_ENTRY==max(DT_ENTRY),][,.(DT_ENTRY,text="CURR",color="black",loc="bottom")]),fill=TRUE)
+    pts <- rbindlist(list(pts,indta[DT_ENTRY==max(DT_ENTRY),][,.(DT_ENTRY,text="CURR",color="black",loc="bottom")]),fill=TRUE)
   }
   if(rtn=="dates") {  tortn <- pts[,.(DT_ENTRY,text,color,loc)] }
   else if(rtn=="data") { tortn  <- pts[,.SD,.SDcols=!s("value;origvalue")][indta,on=.(DT_ENTRY)][order(DT_ENTRY)] }
@@ -130,8 +130,7 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 #' @rdname Event_Helpers
 #' @export
 fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RATINGS,DT_ENTRY
-  trats <- lapply(s("CREDIT;AGENCY;WATCH;WATCHNUM;NUMRAT;DT_ENTRY;RATING;END_DT_ENTRY;color"),
-                  \(x) assign(x,NULL,pos=1) )
+  tmp <- lapply(s("CREDIT;AGENCY;WATCH;WATCHNUM;NUMRAT;DT_ENTRY;RATING;END_DT_ENTRY;color"), \(x) assign(x,NULL,pos=1) )
   CREDIT <- AGENCY <- WATCH <- WATCHNUM <- NUMRAT <- DT_ENTRY <- RATING <- END_DT_ENTRY <- color <- NULL
   trats = ratings_db |> dplyr::filter(CREDIT==credit & AGENCY==agency)
   trats = trats |> dplyr::left_join(ratingsmapmelt,by=c("AGENCY",c("RATING"="RATCHAR"))) |> dplyr::mutate(WATCH= stringr::str_extract(WATCH,"(\\-|\\+)"))
@@ -139,9 +138,9 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
     dplyr::mutate(WATCHNUM=dplyr::coalesce(WATCHNUM,0)) |>
     dplyr::mutate(NUMRAT12=12*(NUMRAT+WATCHNUM)) |> dplyr::arrange(CREDIT,AGENCY,DT_ENTRY)
   trats = trats |> dplyr::group_by(CREDIT,AGENCY) |> dplyr::mutate(END_DT_ENTRY=dplyr::lead(DT_ENTRY,1,default=Sys.Date()))
-  ratingscolors = data.table::rbindlist(list(
-    data.frame(NUMRAT12=12*8+seq(0,3*12,1),color=colorRampPalette(c("#ffffff","#6161ff"),alpha=0.4)(37)),
-    data.frame(NUMRAT12=12*11+seq(1,5*12,1),color=colorRampPalette(c("#f56462","#ffffff"),alpha=0.4)(60))     ))
+  ratingscolors = rbindlist(list(
+    data.frame(NUMRAT12=12*8+seq(0,3*12,1),color=grDevices::colorRampPalette(c("#ffffff","#6161ff"),alpha=0.4)(37)),
+    data.frame(NUMRAT12=12*11+seq(1,5*12,1),color=grDevices::colorRampPalette(c("#f56462","#ffffff"),alpha=0.4)(60))     ))
   trats <- trats |> dplyr::left_join(ratingscolors,by="NUMRAT12") |> dplyr::ungroup()
   tdates <- trats |> dplyr::transmute(category="ratings",text=RATING,DT_ENTRY,END_DT_ENTRY,color,loc="bottom")
   return(tdates)
@@ -171,13 +170,14 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #' @import data.table
 #' @export
 overlay_eventset<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
+  `.` <- value <- tmpcat <- DT_ENTRY <- END_DT_ENTRY <- NULL
   dt_colname <- find_col_bytype(indta,lubridate::is.Date)
   val_colname <- find_col_bytype(indta,is.numeric)
-  tmpdta <- data.table::data.table(indta)[,.(DT_ENTRY=get(dt_colname), value=get(val_colname))]
+  tmpdta <- data.table(indta)[,.(DT_ENTRY=get(dt_colname), value=get(val_colname))]
   tcolors <- fg_get_colorstring("eventset")
   xcenter<-0
   if(is.numeric(center)) { xcenter <-center }
-  else if (center=="median") { xcenter <- median(tmpdta[["value"]]) }
+  else if (center=="median") { xcenter <- stats::median(tmpdta[["value"]]) }
   else if (center=="zscore") { tmpdta[["value"]] <- as.vector(scale(tmpdta[["value"]])) }
   else {
     stop("overlay_eventset: dont know how to deal with ",center)
@@ -188,7 +188,7 @@ overlay_eventset<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
   tmpall <- DTappend(tmpn,tmpp)[order(DT_ENTRY)]
   colorset <- rbind( data.frame(value=seq(1,ncutsperside),color=grDevices::colorRampPalette(c("#ffffff",tcolors[[2]]),alpha=TRUE)(ncutsperside)),
                     data.frame(value=seq(-ncutsperside,-1),color=grDevices::colorRampPalette(c(tcolors[[1]],"#ffffff"),alpha=TRUE)(ncutsperside)))
-  colorset <- data.table::data.table(colorset)
+  colorset <- data.table(colorset)
   tmpruns = colorset[tmpall[,runs_from_value(.SD[,.(DT_ENTRY,value=tmpcat)],addrunlength=TRUE)],on=.(value)][,END_DT_ENTRY:=END_DT_ENTRY+1][]
   return(tmpruns)
 }

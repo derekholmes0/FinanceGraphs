@@ -7,12 +7,12 @@
 fg_predict(p, confidence = 80, seriesnm = "")
 }
 \arguments{
+\item{p}{Output from \code{\link[forecast:reexports]{forecast::forecast()}}}
+
 \item{confidence}{(Default: 80) Confidence interval (in percent) to display}
 
 \item{seriesnm}{Series name which has been forecast.  Note that \code{\link[forecast:reexports]{forecast::forecast()}} loses the name
 of what's been forecast, necessitating this.}
-
-\item{indta}{Time series \code{data.table} with a date as the first column and a value series as the second column}
 }
 \value{
 \code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{forecastdataset} parameter

@@ -114,7 +114,7 @@ series, e.g \verb{-3m} or \verb{-2w}.  Example: \code{"-3m::-1m"} defines a 2 mo
 \item{extraoptions}{Additional options passed to \code{\link[dygraphs:dyOptions]{dygraphs::dyOptions()}}}
 }
 \value{
-Dygraph of data
+Dygraph \href{https://rstudio.github.io/dygraphs/}{dygraphs} of input data, with annotations and other customizations.
 }
 \description{
 TIme series in Dygraph form
@@ -128,9 +128,7 @@ Series are grouped together into bands around a series \code{series} if their na
 
 \strong{Events} are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
 using \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}} which will persist across R sessions.  See examples and vignette for further details.
-Events can also be added using a \code{data.frame} passed via \code{event_ds} with the following columns:
-
-\preformatted{  xx zz 111}\tabular{lccl}{
+Events can also be added using a \code{data.frame} passed via \code{event_ds} with the following columns:\tabular{lccl}{
    column \tab required \tab type \tab description \cr
    \code{date} \tab yes \tab Date \tab Start date \cr
    \code{date_end} \tab  \tab Date \tab End date to specify range of a colored band \cr
@@ -158,5 +156,8 @@ via the \code{annotations} parameter, annotations can be added using a \code{dat
 }
 \examples{
 fgts_dygraph(eqtypx[,.(date,TLT)], title="Stock Prices", events="doi,regm;doi,fedmoves")
+
+
+
 
 }

@@ -3,7 +3,7 @@ Title: Flexible Graphs for Analysis of Financial Data and Time Series
 Version: 0.1.0
 Authors@R: 
     person("Derek", "Holmes", , "derek@derekholmes.com", role = c("aut", "cre", "cph"))
-Description: Flexible graphs for analysis of Financial Data and Time Series
+Description: Flexible wrapper and helper functions for display of Time Series using [dygraphs].  Helpers for adding date-specific events and ranges are included, as well as for adding forecasts and other annotations.
 License: GPL (>= 3)
 Encoding: UTF-8
 Depends: 
@@ -14,29 +14,25 @@ Imports:
     purrr (>= 1.2.0),
     tibble (>= 1.0.0),
     xts (>= 0.14.1),
-    glue (>= 1.1.1),
-    httr (>= 1.2.1),
     stringr (>= 1.2.0),
     timeDate (>= 4000.0),
     lubridate (>= 1.7.0),
     utils (>= 4.0.0),
     tidyr (>= 0.6.3),
-    DT (>= 0.18),
-    RcppDynProg (>= 0.2.0),
     cpm (>= 2.0.0),
     BreakoutDetection (>= 0.9.0),
     grDevices (>= 4.5.0),
-    graphics (>= 4.5.0),
+    ggplot2 (>= 3.0.0),
+    knitr (>= 1.0.0),
     stats (>= 4.5.0),
     utils (>= 4.5.0),
-    data.table,
+    data.table (>= 1.9.8),
     dygraphs (>= 1.1.0)
 Suggests:
     forecast (>= 9.0.0),
     timetk (>= 2.9.0),
     sweep (>= 0.2.0),
     testthat,
-    knitr,
     rmarkdown
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

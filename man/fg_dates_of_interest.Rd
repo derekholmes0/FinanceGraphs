@@ -36,6 +36,8 @@ fg_update_colors(indta, replace = FALSE)
 
 \item{item}{(Default: "") A grep string for categories desired.}
 
+\item{indta}{\code{data.table} with columns as shown in details.}
+
 \item{replace}{(Default: FALSE) If TRUE, replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.}
 }
 \value{
@@ -64,7 +66,7 @@ New doi datasets must have at least three columns:\tabular{ll}{
 \dontrun{
 tail(fg_get_dates_of_interest("fedmoves"),3)
 # To add (for example) a new FOMC cut of 50bps on 6/16/2026:
-newdoi <-data.table::data.table(category="fedmoves",eventid="F:-50",
+newdoi <-data.table(category="fedmoves",eventid="F:-50",
             DT_ENTRY=as.Date("6/16/2026",format="\%m/\%d/\%Y"))
 fg_update_dates_of_interest(newdoi)
 tail(fg_get_dates_of_interest("fedmoves"),3)
@@ -72,10 +74,11 @@ tail(fg_get_dates_of_interest("fedmoves"),3)
 fg_get_colors("lines")
 # To switch out second (blue) line and 6th line (red).
 # Note use of sortable character variables to define the order of the set.
-fg_update_colors(data.table::data.table(category=rep("lines",2),variable=c("D02","D06"),
+fg_update_colors(data.table(category=rep("lines",2),variable=c("D02","D06"),
                 color=c("red","blue")))
 fg_get_colors("lines")
 }
+
 
 
 }
