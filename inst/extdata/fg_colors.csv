@@ -1,10 +1,10 @@
 category,variable,color,const
 lines,D01,black,
-lines,D02,blue,
+lines,D02,red,
 lines,D03,magenta,
 lines,D04,green,
 lines,D05,purple,
-lines,D06,red,
+lines,D06,blue,
 lines,D07,gray,
 lines,D08,pink,
 lines,D09,grey30,

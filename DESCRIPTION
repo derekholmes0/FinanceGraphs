@@ -26,12 +26,14 @@ Imports:
     knitr (>= 1.0.0),
     stats (>= 4.5.0),
     utils (>= 4.5.0),
+    tidyquant (>= 1.0.0),
     data.table (>= 1.9.8),
     dygraphs (>= 1.1.0)
 Suggests:
     forecast (>= 9.0.0),
     timetk (>= 2.9.0),
     sweep (>= 0.2.0),
+    alphavantagepf (>= 0.3.0),
     testthat,
     rmarkdown
 Roxygen: list(markdown = TRUE)

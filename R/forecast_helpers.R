@@ -16,7 +16,7 @@
 #' require(forecast)
 #' require(sweep)
 #' dta <- eqtypx[,.(date,QQQ)]
-#' fcst_eqtypx <- tk_ts(dta) |> ets() |> forecast::forecast(h=30) |> sw_sweep(timetk_idx=TRUE)
+#' fcst_eqtypx <- tk_ts(dta) |> ets() |> forecast::forecast(h=30) |> sweep::sw_sweep(timetk_idx=TRUE)
 #' fcst_in <- fg_sweep(fcst_eqtypx)
 #' fgts_dygraph(dta,title="With Forecasts", roller=1,dtstartfrac=0.7,forecast_ds=fcst_in)
 #'
@@ -24,12 +24,12 @@
 #' @export
 fg_sweep <- function(swept_data,confidence=80)  {
   #swept_data = data.table::copy(data.table::data.table(fcst_eqtypx))
-  swept_data <- data.table::data.table(swept_data)[key=="forecast",]
+  swept_data <- data.table(swept_data)[key=="forecast",]
   series_fctd <- colnames(swept_data)[3]
   cconf <- as.character(confidence)
   old_colname <- c("index",series_fctd,paste0("lo.",cconf),paste0("hi.",cconf))
   new_colname <- c("date",paste0(series_fctd, c(".f",".flo",".fhi")))
-  data.table::setnames(swept_data,old_colname,new_colname)
+  setnames(swept_data,old_colname,new_colname)
   return(swept_data[,.SD,.SDcols=new_colname])
 }
 
@@ -62,9 +62,9 @@ fg_predict <- function(p,confidence=80,seriesnm="") {
   predf <- ts2df(p$mean,prefix=seriesnm)
   predu <- ts2df(p$upper,paste0(seriesnm,".hi"),adddate=FALSE)
   predl <- ts2df(p$lower,paste0(seriesnm,".lo"),adddate=FALSE)
-  predall <- data.table::cbindlist(list(predf,predl,predu))
+  predall <- cbindlist(list(predf,predl,predu))
   rtn <- predall[,.SD,.SDcols=c("DT_ENTRY",grep(paste0("x|",confidence),names(predall),value=TRUE))][]
   newnames <- c("date",paste0(seriesnm,c(".f",".flo",".fhi")))
-  data.table::setnames(rtn,newnames)
+  setnames(rtn,newnames)
   return(rtn)
 }

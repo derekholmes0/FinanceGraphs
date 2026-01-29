@@ -21,12 +21,17 @@ fg_ratingsEvents(credit, ratings_db, agency = "S.P")
 \item{agency}{String (default 'S.P') with 'AGENCY to look up in 'ratings_db'}
 }
 \value{
-\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{eventdataset} parameter
+\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
 }
 \description{
 Event Helpers : fg_ratingsEvents
 }
+\details{
+Investment grade ratings are shaded in blue, High Yield are in red. Darker areas are closest to the cutoff between the two.
+}
 \examples{
-fg_ratingsEvents("COLOM",ratings_db,agency="S.P")
+copdta <- nomfxdta |> dplyr::filter(variable=="COP")
+fgts_dygraph(copdta,title="COP with Ratings",dtstartfrac=0.3,
+        event_ds=fg_ratingsEvents("COLOM",ratings_db,agency="S.P"))
 
 }

@@ -12,6 +12,7 @@
 #'  * integer >= 0 : User specified moving average length.
 #' @param pointers  Pointer options to use with mouse movement. (See [dygraphs::dyCrosshair()])
 #' @param splitcols,stepcols,hidecols  String or list of data series to show on a second y axis, to be shown as step plots, or to be hidden.
+#' Can also be `TRUE` in which case first series in the data is affected.
 #' @param hilightcols String or list of data series to plot in different style than other series.
 #' @param hilightwidth (Default: 2) relative width of series specified in `hilightcols`
 #' @param hilightstyle (Default: solid).  Line style of series specified in `hilightcols`.
@@ -44,6 +45,7 @@
 #' @param dtwindow String to specify date ranges applied [dygraphs::dyRangeSelector()] of the
 #' form `begin::end` where either end can take the form "yyyy-mm-dd" or a relative date to the other end of the
 #' series, e.g `-3m` or `-2w`.  Example: `"-3m::-1m"` defines a 2 month period 1 month back from the end of the series.
+#' @param rebase (Default "") String, either "percent" or coercable number to be applied to [dygraphs::dyRebase()]
 #' @param exportevents String of name of `data.frame` to create in  `.GlobalEnv` with event dates displayed on graph.
 #' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
 #' @param dylegend (Default: TRUE) include legend in graph
@@ -67,36 +69,80 @@
 #' using [fg_update_dates_of_interest()] which will persist across R sessions.  See examples and vignette for further details.
 #' Events can also be added using a `data.frame` passed via `event_ds` with the following columns:
 #'
-#'
-#' | column | required | type | description |
-#' |:---|:---:|:---:|:---|
-#' | `date` | yes | Date | Start date |
-#' | `date_end` |  | Date |End date to specify range of a colored band |
-#' | `text` | yes | character | Text to display |
-#' | `color` | |  | character | Color for line and text |
-#' | `eventonly` | | logical | Only draw line for for start of event, no band |
-#' | `strokePattern` | | character | `dashed` (default), one of ('solid','dashed','dotted','dotdash') |
-#' | `loc` | | character | 'bottom' (default), one of ('top','bottom') |
-#' | `series` | | character | Name of series to apply event to, if needed |
+#' | column | type | description |
+#' |:---|:---:|:---|
+#' | `date` | Date | (Required) Start date |
+#' | `date_end` | Date |End date to specify range of a colored band |
+#' | `text` | character | (Required) Text to display |
+#' | `color` | character | Color for line and text |
+#' | `eventonly` | logical | Only draw line for for start of event, no band |
+#' | `strokePattern` |  character | `dashed` (default), one of ('solid','dashed','dotted','dotdash') |
+#' | `loc` |  character | 'bottom' (default), one of ('top','bottom') |
+#' | `series` |  character | Name of series to apply event to, if needed |
+#' | `category` | character | Optional string used for exceptions. See notes below.  |
 #'
 #' Many times, events depend on outside data or statistical analysis on the original data.  The `event_ds` to be passed
-#' in can come from event helpers in [overlay_eventset()], [fg_addbreakouts()], [fg_findTurningPoints()], or  [fg_ratingsEvents()].
+#' in can come from event helpers in [fg_cut_to_events()], [fg_addbreakouts()], [fg_findTurningPoints()], or  [fg_ratingsEvents()].
+#' EVent columns are processed as is, with one current exception
+#' * `category=="series_color"` then `color` is replaced by the color of the series currently in the `color` column.
+#'    Tis allows annotations to be same color as the series to which they apply.
 #'
 #' **Annotiations** include any notes or highlights added to the graph on the 'y' axis or on an individual series.  In addition to those passed
 #' via the `annotations` parameter, annotations can be added using a `data.frame` with the following columns:
-#' | column | required | type | description |
-#' |:---|:---:|:---:|:---|
-#' | `date` | yes | Date | Start date |
-#' | `date_end` |  | Date |End date to specify range of a colored band |
-#' | `text` | yes | character | Text to display |
-#' | `color` | |  | character | Color for line and text |
-#' | `eventonly` | | logical | Only draw line for for start of event, no band |
+
+#' | column | type | description |
+#' |:---|:---:|:---|
+#' | `date` | Date | (Required) Start date |
+#' | `date_end` | Date |End date to specify range of a colored band |
+#' | `text` | character | (Required) Text to display |
+#' | `color` | character | Color for line and text |
+#' | `eventonly`  | logical | Only draw line for for start of event, no band |
 #'
 #' @examples
-#' fgts_dygraph(eqtypx[,.(date,TLT)], title="Stock Prices", events="doi,regm;doi,fedmoves")
+#' # See Vignette for more extensive examples.
+#' # Basic Example
+#' fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
+#'
+#' # With series Highlights, finer resolution and focused date range
+#' fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
+#'
+#' # Using bands (.lo, .hi)
 #'
 #'
+#' # Events Examples.  Notice how roller shortens with the series.  See Vignette for more extensive examples
+#' require(data.table)
+#' smalldta <- narrowbydtstr(eqtypx[,.(date,TLT,EEM)],"-3y::")
+#' fgts_dygraph(smalldta,events="doi,regm;doi,fedmoves")
+#' fgts_dygraph(smalldta,events="date,FOMO,2025-01-01,2025-06-01;date,xmas,2025-12-25")
 #'
+#' # Events passed in as data.frames
+#' myevents = data.frame(end_date =as.Date(c("2024-03-10","2024-01-10")),
+#'             date=as.Date(c("2024-01-10","2024-04-10")),text=c("range","event"),color=c("green","red"))
+#' fgts_dygraph(smalldta,events="doi,fedmoves",event_ds=myevents)
+#'
+#' # Annotations on y axis
+#' fgts_dygraph(eqtypx,annotations="last,linevalue")
+#' fgts_dygraph(eqtypx,annotations="hline,100,at100,red;hline,200,at200;range,300,400")
+#'
+#' # use with helpers
+#' require(data.table)
+#' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
+#' fgts_dygraph(smalldta,title="W Turning Points",event_ds=fg_findTurningPoints(smalldta[,.(date,QQQ)]))
+#' fgts_dygraph(smalldta,title="W Sentiment",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
+#' fgts_dygraph(smalldta,title="W dividends",event_ds=fg_tq_divs(c("IBM","QQQ")))
+#'
+#' # Other helpers for use with credit ratings, breakouts, and earnings data are available.
+#'
+#' # use with forecasts
+#'
+#' require(forecast)
+#' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
+#' fcst_one <- function(ticker) {
+#'   t1_ts <- zoo::zoo(smalldta[[ticker]],smalldta[["date"]])
+#'   forecast::ets(t1_ts) |> forecast::forecast(h=36) |>  fg_predict(seriesnm=ticker)
+#'   }
+#' fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
+#' fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=fpred)
 #'
 #' @export
 #'
@@ -106,8 +152,8 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
                         events="",event_ds=NULL,
                         annotations="",annotation_ds=NULL,
                         forecast_ds=NULL,
-                        ylimits=NULL,dtstartfrac=0,dtwindow="",exportevents=NULL,
-                        meltvar="variable",dylegend="always",groupnm="common",
+                        ylimits=NULL,dtstartfrac=0,dtwindow="",rebase="",
+                        exportevents=NULL, meltvar="variable",dylegend="always",groupnm="common",
                         fillGraph=FALSE,verbose=FALSE,
                         extraoptions=list()) {
 
@@ -149,7 +195,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
   # Misc date stuff
   col_date_list <- c(dt_colnames[['date']])
   alldts <- sort(unique(indt[[1]]))
-  last_dt <- utils::tail(alldts,1)
+  dtlimits <- range(alldts)
   dtsrange_todisplay <- c(alldts[length(alldts)*dtstartfrac+1], max(alldts))
   if(nchar(dtwindow)>1) dtsrange_todisplay <- gendtstr(dtwindow,rtn="list")
 
@@ -232,13 +278,12 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
         dtsrange_todisplay <- c(alldts[length(alldts)*dtstartfrac+1], max(alldts))
     }
 
-   # Set display ranges
+   # Set display ranges.  Focus in if dtstartfrac is specified
     yRange<-NULL
     if(length(ylimits)==2) {
         yRange <-ylimits
     }
-
-    if(is.character(ylimits)) { # Find wuantiles on given series
+    else if (is.character(ylimits)) { # Find wuantiles on given series
       if( length( ylimsplit<-s(ylimits,","))==2 ) {
         qlimit<-c(as.numeric(ylimsplit[2]),0.01)[1]
         yRange <- stats::quantile(indtnew[[ylimsplit[1]]],c(qlimit,1-qlimit),na.rm=T) |> as.numeric()
@@ -246,12 +291,17 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
         add_titles("title","(Winsored@",qlimit,")")
       }
     }
+    else if (dtstartfrac>0 | nchar(dtwindow)>1) {  # FOcus y axis if x is
+      focusdta <- narrowbydtstr(indtnew,paste0(dtsrange_todisplay,collapse="::"))
+      yrangetmp <-  range(focusdta[,2:ncol(focusdta)])
+      yRange <- c(yrangetmp[1]*0.8,yrangetmp[2]*1.05)
+    }
+
     if(verbose) {
       print(series_dets)
     }
     # Only way to take a series out is to take the data out.
     indtnew <- indtnew[,.SD,.SDcols=!(series_dets[display==FALSE,]$seriesnm)]
-
 
     titleadds <- data.table()
     add_titles("y",ylab)
@@ -306,7 +356,6 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     # Dates; from dtmap (roll,optexp,doy,doq) e.g. "seasonal,optexp,mo"
     if(nrow( trow<-get_fromlist(elist,"seasonal") )>0) {
-      dtlimits <- range(alldts)
       dttmp <- dtmap[between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
       for(irow in seq(1,nrow(trow))) {
         eventtype <- tolower(trow[irow,]$a1)
@@ -369,12 +418,18 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     }
 
     # Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
+    ## cAssign("indt;series_dets")
     if(is.data.frame(event_ds)) {
         # Rename columns smartly, only first two date columns taken
-        event_ds <- data.table(event_ds)
+        event_ds <- data.table(event_ds)[between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
         dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.Date,firstonly=FALSE),2)
         dtcolnewnames <- sapply( dtcols, \(x) ifelse(grepl("end",x,ignore.case=TRUE),"END_DT_ENTRY","DT_ENTRY"))
         setnames(event_ds,dtcols,dtcolnewnames)
+        if("category" %in% colnames(event_ds)) {  # Need to document
+            event_to_map <- event_ds[category=="series_color",let(gpnm=color)]
+            event_to_map <- series_dets[,.(gpnm,tcolor=color)][event_to_map,on=.(gpnm)][,let(color=fcoal(tcolor,color))]
+            event_ds <- event_to_map[,let(tcolor=NULL)]
+        }
         tevents <- DTappend(tevents,event_ds)
     }
 
@@ -389,7 +444,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
       labelstr <- fcoal(trow$a1,"label") |> tolower() # label,value,labelline,valueline
       labeltype <- ifelse(grepl("value",labelstr),"value","gpnm")
       labelcat <- ifelse(grepl("line",labelstr),"line","anno")
-      lastvals <- melt(last_dt,id.vars=dt_colnames[['date']], variable.name = "gpnm")[,let(value=as.character(round(value,1)))]
+      lastvals <- melt(indtnew[.N],id.vars=dt_colnames[['date']], variable.name = "gpnm")[,let(value=as.character(round(value,1)))]
       h_annos <- lastvals[series_dets[gpnm==seriesnm,],on=.(gpnm)]
       h_annos <- h_annos[,.(category=labelcat,color,text=get(labeltype),seriesnm=gpnm,axis,value,loc=labelloc,DT_ENTRY=get(dt_colnames[['date']]))]
       tevents <- DTappend(tevents,h_annos)
@@ -398,14 +453,14 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     if(nrow( trow<-get_fromlist(alist,"^(hline)"))>0) { #hline,no
         thiscolor <-  fg_get_colorstring("hline")
         h_annos <- data.table(trow)[,let(text=fcoal(a2,""),value=as.numeric(a1),color=fcoal(a3,thiscolor))]
-        h_annos <- h_annos[,.(category="hline",color,text,value,DT_ENTRY=last_dt,axis="y")]
+        h_annos <- h_annos[,.(category="hline",color,text,value,DT_ENTRY=dtlimits[2],axis="y")]
         tevents <- DTappend(tevents,h_annos)
     }
 
     if(nrow( trow<-get_fromlist(alist,"^(range)"))>0) { #range,lo,hi,<color>
       thiscolor <-  fg_get_colorstring("range")
       h_annos <- data.table(trow)[,':='(a1=as.numeric(a1),a2=as.numeric(fcoal(a2,a1)))]
-      h_annos <- h_annos[,.(category="range",color=fcoal(a3,thiscolor),text="",value=pmin(a1,a2),value_2=pmax(a1,a2),axis="y",DT_ENTRY=last_dt)]
+      h_annos <- h_annos[,.(category="range",color=fcoal(a3,thiscolor),text="",value=pmin(a1,a2),value_2=pmax(a1,a2),axis="y",DT_ENTRY=dtlimits[2])]
       tevents <- DTappend(tevents,h_annos)
     }
 
@@ -433,7 +488,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
             g1 = g1 |> dygraphs::dyShading(from=trw$DT_ENTRY, to=trw$END_DT_ENTRY, color=trw$color) }
         }
         if(trw$axis=="y" | trw$axis=="y2") {
-          if("value_2" %in% colnames(trw)) {
+          if("value_2" %in% colnames(trw) && !is.na(trw$value_2)) {
             g1 = g1 |> dygraphs::dyShading(from=trw$value, to=trw$value_2, color=trw$color, axis=trw$axis) }
           else if (trw$category %in% c("anno","last")) {
             g1 = g1 |> dygraphs::dyAnnotation(x=trw$DT_ENTRY,text=trw$text,series=trw$seriesnm,width=6*nchar(trw$text)) }  # MOre options to explore
@@ -443,7 +498,22 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
        }
     }
 
-    # Set up Axes
+    # Rollers
+    suggest_rollpd <- c(1L,5L,10L,20L)[findInterval(as.numeric(diff(range(indtnew[[1]]))),c(1,360,2520,3600,+Inf))]
+    rollpd <- suppressWarnings(fcase(
+      roller=="default", suggest_rollpd,
+      roller=="finest", 1L,
+      is.numeric(roller), as.integer(roller),
+      default=NA_integer_ ))
+
+    if(!is.na(rollpd)) {
+      g1 = g1 |> dygraphs::dyRoller(rollPeriod=rollpd) }
+
+    # Legends
+    if(nchar(dylegend)>0)  {
+      g1= g1 |>  dygraphs::dyLegend(width=600, show=dylegend,hideOnMouseOut = FALSE)  }
+
+    # Axes
     g1 <- g1 |> dygraphs::dyAxis('y',valueRange=yRange,label=paste0(titleadds[axis=="y"]$note,collapse="<br>"))
     g1 <- g1 |> dygraphs::dyAxis("x",paste0(titleadds[axis=="x"]$note,collapse="<br>"))
 
@@ -452,26 +522,23 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
                                   axisLineColor=y2dta[1,]$color, axisLabelColor = y2dta[1,]$color)
     }
 
+    # Errata
     if(!is.logical(hairopts <- optString_parse(pointers,"cross|hair"))) {
       g1 <- g1 |> dygraphs::dyCrosshair(direction = hairopts)
     } # horizontal,both,veretical
 
     if(!(optString_parse(pointers,"norange")=="TRUE")) {
-        g1 = g1 |> dygraphs::dyRangeSelector(height=20,dateWindow=dtsrange_todisplay)
+      g1 = g1 |> dygraphs::dyRangeSelector(height=20,dateWindow=dtsrange_todisplay)
     }
 
-    # Rollers, Legends
-    suggest_rollpd <- c(1L,5L,10L,20L)[findInterval(as.numeric(diff(range(indtnew[[1]]))),c(1,360,2520,3600,+Inf))]
-    rollpd <- suppressWarnings(fcase(
-      roller=="default", suggest_rollpd,
-      roller=="finest", 1L,
-      is.numeric(roller), as.integer(roller),
-      default=NA_integer_ ))
-    if(!is.na(rollpd)) {
-      g1 = g1 |> dygraphs::dyRoller(rollPeriod=rollpd) }
+    if(nchar(rebase)>0) {
+      if(tolower(rebase)=="percent") { rb_args<-c(100,TRUE)}
+      else if ( !is.na(suppressWarnings(rbtmp <- as.numeric(rebase))) ) {
+        rb_args <- c(rbtmp,FALSE)
+      }
+      g1 = g1 |> dygraphs::dyRebase(value=rb_args[1], percent=rb_args[2])
+    }
 
-    if(nchar(dylegend)>0)  {
-      g1= g1 |>  dygraphs::dyLegend(width=600, show=dylegend,hideOnMouseOut = FALSE)  }
     return(g1)
 }
 

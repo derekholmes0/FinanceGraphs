@@ -39,7 +39,7 @@ fg_findTurningPoints(
 \item{...}{Additional parameters passed to \link[cpm:cpmPackage]{cpm::cpm-package}}
 }
 \value{
-\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{eventdataset} parameter
+\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
 }
 \description{
 Event Helpers : fg_findTurningPoints

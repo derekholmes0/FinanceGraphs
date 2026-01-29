@@ -12,15 +12,9 @@ fg_addbreakouts(indta, annotationstyle = "singleasdate")
 \item{annotationstyle}{String in set (\code{singleasdate},\code{singleasvalue},'breakno')}
 }
 \value{
-\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{eventdataset} parameter
+\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
 }
 \description{
-\code{fg_get_dates_of_interest()} gets a set of time events for use in fg time series graphs
-\code{fg_update_dates_of_interest()} updates a set of time events for future use in time series graphs
-\code{fg_get_colors()} gets default color sets for graphs
-\code{fg_update_colors()} updates or replaces default colors
-}
-\details{
 Event Helpers : fg_addbreakouts
 }
 \examples{

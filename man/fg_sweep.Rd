@@ -26,7 +26,7 @@ require(timetk)
 require(forecast)
 require(sweep)
 dta <- eqtypx[,.(date,QQQ)]
-fcst_eqtypx <- tk_ts(dta) |> ets() |> forecast::forecast(h=30) |> sw_sweep(timetk_idx=TRUE)
+fcst_eqtypx <- tk_ts(dta) |> ets() |> forecast::forecast(h=30) |> sweep::sw_sweep(timetk_idx=TRUE)
 fcst_in <- fg_sweep(fcst_eqtypx)
 fgts_dygraph(dta,title="With Forecasts", roller=1,dtstartfrac=0.7,forecast_ds=fcst_in)
 

@@ -2,17 +2,10 @@
 #'
 #' @title Event_Helpers
 #' @name fg_addbreakouts
-#' @description
-#' `fg_get_dates_of_interest()` gets a set of time events for use in fg time series graphs
-#' `fg_update_dates_of_interest()` updates a set of time events for future use in time series graphs
-#' `fg_get_colors()` gets default color sets for graphs
-#' `fg_update_colors()` updates or replaces default colors
-#'
-
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
 #' @param annotationstyle String in set (`singleasdate`,`singleasvalue`,'breakno')
 #'
-#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `eventdataset` parameter
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #'
 #' @examples
 #' dta <- eqtypx[,.(date,QQQ,TLT)]
@@ -50,7 +43,7 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
 #' @param addlast Logical (default: FALSE) to add an event with final observation.
 #' @param ... Additional parameters passed to [cpm-package]
 #'
-#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `eventdataset` parameter
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #'
 #' @examples
 #' dta <-eqtypx[,.(date,QQQ,TLT)]
@@ -121,10 +114,15 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 
 #' @param agency String (default 'S.P') with 'AGENCY to look up in 'ratings_db'
 #'
-#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `eventdataset` parameter
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
+#'
+#' @details
+#' Investment grade ratings are shaded in blue, High Yield are in red. Darker areas are closest to the cutoff between the two.
 #'
 #' @examples
-#' fg_ratingsEvents("COLOM",ratings_db,agency="S.P")
+#' copdta <- nomfxdta |> dplyr::filter(variable=="COP")
+#' fgts_dygraph(copdta,title="COP with Ratings",dtstartfrac=0.3,
+#'         event_ds=fg_ratingsEvents("COLOM",ratings_db,agency="S.P"))
 #'
 #' @import data.table
 #' @rdname Event_Helpers
@@ -146,30 +144,27 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
   return(tdates)
 }
 
-
-#' Event Helpers: overlay_eventset
+#' Event Helpers: fg_cut_to_events
 #'
-#' @name overlay_eventset
+#' @name fg_cut_to_events
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
 #' @param ncutsperside : Integer with number of colors to use on each side of 'center'
 #' @param center : String or Double as follows:
 #' * Double (default 0) Normalize data by subtracting `center`
-#' * "median" Normalize data by subtracting median of all observations.
-#' * "zscore" Normalize data by using standard [scale()] function
-#'
+#' * `"median"` Normalize data by subtracting median of all observations.
+#' * `"zscore"` Normalize data by using standard [scale()] function
 #' @param invert Use opposite color schemes for data, i.e. "red" for good outcomes
 #'
-#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `eventdataset` parameter
-#'
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #' @examples
-#' overlay_eventset(consumer_sent,center="zscore")
-#'
+#' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
+#' fgts_dygraph(smalldta,title="With Sentiment ranges",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
 #' @details
 #' Always uses first date column and first numeric columns in data.  If `indta` has multiple series, filter them before calling the function.
 #'
 #' @import data.table
 #' @export
-overlay_eventset<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
+fg_cut_to_events<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
   `.` <- value <- tmpcat <- DT_ENTRY <- END_DT_ENTRY <- NULL
   dt_colname <- find_col_bytype(indta,lubridate::is.Date)
   val_colname <- find_col_bytype(indta,is.numeric)
@@ -192,4 +187,66 @@ overlay_eventset<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
   tmpruns = colorset[tmpall[,runs_from_value(.SD[,.(DT_ENTRY,value=tmpcat)],addrunlength=TRUE)],on=.(value)][,END_DT_ENTRY:=END_DT_ENTRY+1][]
   return(tmpruns)
 }
+
+#' Event Helpers: fg_tq_divs
+#'
+#' @name fg_tq_divs
+#' @description
+#' Calls [tidyquant::tq_get()] to get dividends for a given set of tickers.  A previously created `data.frame` can also be input.
+#'
+#' @param tickers List of tickers to get dividends for.
+#' @param divs_ds Alternatively a `data.frame` previously obtained using [tidyquant::tq_get()] with columns (`symbol`,`date`,`value`)
+#' @param ticker_in_label (Default: TRUE) Make label ticker and the dividend.
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
+#'
+#' @examples
+#' require(tidyquant)
+#' fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
+#'
+#' @import data.table
+#' @import tidyquant
+#' @export
+fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
+  `.`=value=symbol=color=text=NULL
+  if(is.data.frame(divs_ds)) {
+    rtn <- data.table(divs_ds)
+  }
+  else {
+    rtn <- tidyquant::tq_get(tickers,"dividends") |> data.table()
+  }
+  rtn <-rtn[,.(DT_ENTRY=date,text=format(value,digits=2),color=symbol,loc="bottom",category="series_color")]
+  if(ticker_in_label==TRUE) {
+    rtn <- rtn[,let(text=paste0(color,":",text))]
+  }
+  return(rtn[])
+}
+
+#' Event Helpers: fg_av_earnings
+#'
+#' @name fg_av_earnings
+#' @description
+#' Created `event_ds` from [alphavantagepf::av_get_pf] quarterly earnings data.
+#'
+#' @param indt `data.frame` obtained from alphavantage earnings data.
+#' @param field (Default: `reportedEPS`) String in (`reportedEPS`,`estimatedEPS`,`surprise`,`surprisePercentage`)
+#' @param ticker_in_label (Default: TRUE) Make label ticker and the earnings
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
+#'
+#' @examples
+#' require(alphavantagepf)
+#' earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |> alphavantagepf::av_extract_df("quarterlyEarnings")
+#' toplot = dplyr::select(eqtypx,date,IBM)
+#' fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=fg_av_earnings(earnings))
+#'
+#' @import data.table
+#' @export
+fg_av_earnings<-function(indt,field="reportedEPS",ticker_in_label=TRUE) {
+  `.`=reportedDate=symbol=color=text=NULL
+  rtn <- data.table(indt)[,.(DT_ENTRY=reportedDate,color=symbol,category="series_color",text=format(get(field),digits=2))]
+  if(ticker_in_label==TRUE) {
+    rtn <- rtn[,let(text=paste0(color,":",text))]
+  }
+  return(rtn[])
+}
+
 
