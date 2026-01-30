@@ -128,7 +128,7 @@ TIme series in Dygraph form
 Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
 ('date','variable','value') format.  This package infers date columns names from column types and seeks to be as agnostic
 as possible as to column names.
-Colors can be managed using \code{\link[=fg_update_colors]{fg_update_colors()}} and will persist across R sessions,
+Colors can be managed using \code{\link[=fg_update_colors]{fg_update_colors()}} and will persist across R sessions, See vignette for details.
 Series are grouped together into bands around a series \code{series} if their names end as in 'series.lo' or 'series.hi'.  See examples and vignette for details.
 
 \strong{Events} are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
@@ -201,7 +201,7 @@ fgts_dygraph(eqtypx,annotations="hline,100,at100,red;hline,200,at200;range,300,4
 # use with helpers
 require(data.table)
 smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
-fgts_dygraph(smalldta,title="W Turning Points",event_ds=fg_findTurningPoints(smalldta[,.(date,QQQ)]))
+fgts_dygraph(smalldta,title="W TurnPts",event_ds=fg_findTurningPoints(smalldta[,.(date,QQQ)]))
 fgts_dygraph(smalldta,title="W Sentiment",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
 fgts_dygraph(smalldta,title="W dividends",event_ds=fg_tq_divs(c("IBM","QQQ")))
 

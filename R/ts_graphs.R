@@ -63,7 +63,7 @@
 #'  Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
 #' ('date','variable','value') format.  This package infers date columns names from column types and seeks to be as agnostic
 #' as possible as to column names.
-#' Colors can be managed using [fg_update_colors()] and will persist across R sessions,
+#' Colors can be managed using [fg_update_colors()] and will persist across R sessions, See vignette for details.
 #' Series are grouped together into bands around a series `series` if their names end as in 'series.lo' or 'series.hi'.  See examples and vignette for details.
 #'
 #' **Events** are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
