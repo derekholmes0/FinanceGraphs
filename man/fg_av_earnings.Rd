@@ -21,8 +21,10 @@ Created \code{event_ds} from \link[alphavantagepf:av_get_pf]{alphavantagepf::av_
 }
 \examples{
 require(alphavantagepf)
-earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |> alphavantagepf::av_extract_df("quarterlyEarnings")
+earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
+        alphavantagepf::av_extract_df("quarterlyEarnings") |>
+        fg_av_earnings()
 toplot = dplyr::select(eqtypx,date,IBM)
-fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=fg_av_earnings(earnings))
+fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=earnings)
 
 }

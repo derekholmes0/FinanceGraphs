@@ -128,7 +128,7 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 #' @rdname Event_Helpers
 #' @export
 fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RATINGS,DT_ENTRY
-  tmp <- lapply(s("CREDIT;AGENCY;WATCH;WATCHNUM;NUMRAT;DT_ENTRY;RATING;END_DT_ENTRY;color"), \(x) assign(x,NULL,pos=1) )
+  CREDIT=AGENCY=WATCH=WATCHNUM=NUMRAT=DT_ENTRY=RATING=END_DT_ENTRY=color=NULL
   CREDIT <- AGENCY <- WATCH <- WATCHNUM <- NUMRAT <- DT_ENTRY <- RATING <- END_DT_ENTRY <- color <- NULL
   trats = ratings_db |> dplyr::filter(CREDIT==credit & AGENCY==agency)
   trats = trats |> dplyr::left_join(ratingsmapmelt,by=c("AGENCY",c("RATING"="RATCHAR"))) |> dplyr::mutate(WATCH= stringr::str_extract(WATCH,"(\\-|\\+)"))
@@ -158,7 +158,8 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #' @examples
 #' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
-#' fgts_dygraph(smalldta,title="With Sentiment ranges",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
+#' events <- fg_cut_to_events(consumer_sent,center="zscore")
+#' fgts_dygraph(smalldta,title="With Sentiment ranges",event_ds=events)
 #' @details
 #' Always uses first date column and first numeric columns in data.  If `indta` has multiple series, filter them before calling the function.
 #'
@@ -234,9 +235,11 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #'
 #' @examples
 #' require(alphavantagepf)
-#' earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |> alphavantagepf::av_extract_df("quarterlyEarnings")
+#' earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
+#'         alphavantagepf::av_extract_df("quarterlyEarnings") |>
+#'         fg_av_earnings()
 #' toplot = dplyr::select(eqtypx,date,IBM)
-#' fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=fg_av_earnings(earnings))
+#' fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=earnings)
 #'
 #' @import data.table
 #' @export

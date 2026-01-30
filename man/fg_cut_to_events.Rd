@@ -31,5 +31,6 @@ Always uses first date column and first numeric columns in data.  If \code{indta
 }
 \examples{
 smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
-fgts_dygraph(smalldta,title="With Sentiment ranges",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
+events <- fg_cut_to_events(consumer_sent,center="zscore")
+fgts_dygraph(smalldta,title="With Sentiment ranges",event_ds=events)
 }

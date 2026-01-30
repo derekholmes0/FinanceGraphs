@@ -45,7 +45,8 @@
 #' @param dtwindow String to specify date ranges applied [dygraphs::dyRangeSelector()] of the
 #' form `begin::end` where either end can take the form "yyyy-mm-dd" or a relative date to the other end of the
 #' series, e.g `-3m` or `-2w`.  Example: `"-3m::-1m"` defines a 2 month period 1 month back from the end of the series.
-#' @param rebase (Default "") String, either "percent" or coercable number to be applied to [dygraphs::dyRebase()]
+#' @param rebase String of the form `yyyy-mm-dd,<value>` with `<value>` assumed 100 if not specified.  This normalizes all series to `<value>`
+#' as of the given date.  See examples.
 #' @param exportevents String of name of `data.frame` to create in  `.GlobalEnv` with event dates displayed on graph.
 #' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
 #' @param dylegend (Default: TRUE) include legend in graph
@@ -106,10 +107,16 @@
 #' # With series Highlights, finer resolution and focused date range
 #' fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
 #'
+#' # Rebasing to 1/1/2022
+#' fgts_dygraph(eqtypx, title="Rebased Prices", ylab="Adjusted Close",rebase="2022-01-01")
+#'
 #' # Using bands (.lo, .hi)
+#' toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(IMFCC=="COL")),
+#'               cop.lo=min(value),cop.hi=max(value)),by=.(date)]
+#' fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3)
 #'
-#'
-#' # Events Examples.  Notice how roller shortens with the series.  See Vignette for more extensive examples
+#' # Events Examples.  Notice how roller shortens with the series.
+#' # See Vignette for more extensive examples
 #' require(data.table)
 #' smalldta <- narrowbydtstr(eqtypx[,.(date,TLT,EEM)],"-3y::")
 #' fgts_dygraph(smalldta,events="doi,regm;doi,fedmoves")
@@ -117,7 +124,8 @@
 #'
 #' # Events passed in as data.frames
 #' myevents = data.frame(end_date =as.Date(c("2024-03-10","2024-01-10")),
-#'             date=as.Date(c("2024-01-10","2024-04-10")),text=c("range","event"),color=c("green","red"))
+#'             date=as.Date(c("2024-01-10","2024-04-10")),
+#'             text=c("range","event"),color=c("green","red"))
 #' fgts_dygraph(smalldta,events="doi,fedmoves",event_ds=myevents)
 #'
 #' # Annotations on y axis
@@ -127,7 +135,7 @@
 #' # use with helpers
 #' require(data.table)
 #' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
-#' fgts_dygraph(smalldta,title="W Turning Points",event_ds=fg_findTurningPoints(smalldta[,.(date,QQQ)]))
+#' fgts_dygraph(smalldta,title="W TurnPts",event_ds=fg_findTurningPoints(smalldta[,.(date,QQQ)]))
 #' fgts_dygraph(smalldta,title="W Sentiment",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
 #' fgts_dygraph(smalldta,title="W dividends",event_ds=fg_tq_divs(c("IBM","QQQ")))
 #'
@@ -159,7 +167,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
   # NSE crap.  There has to be a better way
   `.`=gpnm=suffix=seriesnm=display=color=axis=series_no=variable=eventid=direct=tcolor=optexp=DT_ENTRY=NULL
-  value=a2=a3=labelloc=a1=text=END_DT_ENTRY = NULL
+  value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category = NULL
 
   # Preprocessing: get into data.table format
   if( xts::is.xts(indt) ) { indt <- xts2df(indt) }
@@ -171,7 +179,8 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
   form_xlist <- function(instring) { todo <- NULL
     if(is.data.frame(instring)) return(instring)
     suppressWarnings(tibble::tibble(todo=s(instring)) |>
-                                tidyr::separate_wider_delim(todo,",",names= c("todo","a1","a2","a3","a4","a5"),too_many="drop",too_few="align_start"))
+                                tidyr::separate_wider_delim(todo,",",names= c("todo","a1","a2","a3","a4","a5"),
+                                too_many="drop",too_few="align_start"))
   }
   get_fromlist <- function(indta,grepstr) { todo<-NULL;
     dplyr::filter(indta,grepl(grepstr,todo)) }
@@ -214,6 +223,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     indtnew <- indt
   }
 
+  titleadds <- data.table()
   tevents <-data.table()
   elist <- form_xlist(events)
   alist <- form_xlist(annotations)
@@ -264,7 +274,6 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     }
 
     # Now forecasts
-
     if(is.data.frame(forecast_ds)) {
         dt_colnames['fdate'] <- find_col_bytype(forecast_ds,lubridate::is.Date)
         fcst_series <- rbindlist(lapply(colnames(forecast_ds),
@@ -276,6 +285,16 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
         indtnew = merge(indtnew,forecast_ds,by.x=dt_colnames[['date']], by.y=dt_colnames[['fdate']],all=TRUE)
         alldts <- indtnew[[1]]
         dtsrange_todisplay <- c(alldts[length(alldts)*dtstartfrac+1], max(alldts))
+    }
+    # Rebase if desired
+    if( nchar(rebase)>0 && length( rebtmp <- s(rebase,sep=",") ) <=2 ) { # Overengineering
+       rebdate <- fcoal(lubridate::as_date(rebtmp[1]),dtlimits[1])
+       rebval <- ifelse(length(rebtmp)==1 & lubridate::is.Date(rebdate),100,as.numeric(utils::tail(rebtmp,1)))
+       rebloc <- max(which(indtnew[[1]]<=rebdate))
+       indtnew <- indtnew[,names(.SD):=lapply(.SD,\(x) rebval*x/x[[rebloc]]),.SDcols=!c(1)]
+       add_titles("x","Rebased data to ",rebval," as of ",rebdate)
+       tevents <- DTappend(tevents,data.table(DT_ENTRY=as.Date(rebdate),text="",color=fg_get_colorstring("rebase"),strokePattern="solid"))
+       message_if(verbose,"fgts_dygraph: Rebased data to ",rebval," as of ",format(rebdate,"%m/%d/%Y"))
     }
 
    # Set display ranges.  Focus in if dtstartfrac is specified
@@ -303,7 +322,6 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
     # Only way to take a series out is to take the data out.
     indtnew <- indtnew[,.SD,.SDcols=!(series_dets[display==FALSE,]$seriesnm)]
 
-    titleadds <- data.table()
     add_titles("y",ylab)
     alltitles = paste0(title,paste0(titleadds[axis=="title"]$note,collapse=","))
     ## cAssign("indtnew;alltitles;series_dets;dt_colnames")
@@ -529,14 +547,6 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     if(!(optString_parse(pointers,"norange")=="TRUE")) {
       g1 = g1 |> dygraphs::dyRangeSelector(height=20,dateWindow=dtsrange_todisplay)
-    }
-
-    if(nchar(rebase)>0) {
-      if(tolower(rebase)=="percent") { rb_args<-c(100,TRUE)}
-      else if ( !is.na(suppressWarnings(rbtmp <- as.numeric(rebase))) ) {
-        rb_args <- c(rbtmp,FALSE)
-      }
-      g1 = g1 |> dygraphs::dyRebase(value=rb_args[1], percent=rb_args[2])
     }
 
     return(g1)

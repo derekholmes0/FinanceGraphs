@@ -18,6 +18,7 @@ imf_ctrylist <- data.table::fread("./inst/extdata/imf_ctrylist.csv")
 reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
 reerdta <- reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][imf_ctrylist,on=.(COUNTRY=IMFCC)]
 reerdta <- reerdta[!is.na(OBS_VALUE),][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,REGION,value=OBS_VALUE)]
+reerdta <- reerdta[date>=as.Date("2005-01-01")]
 
 consumer_sent <- tq_get("UMCSENT",get="economic.data")
 

@@ -7,7 +7,7 @@
 \format{
 \subsection{\code{reerdta}}{
 
-A tibble with 13134 observations and 3 columns
+A tibble with 1920 observations and 3 columns
 \describe{
 \item{date}{Date Of Observation}
 \item{variable}{ISO Country code}

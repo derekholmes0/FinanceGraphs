@@ -101,7 +101,8 @@ See \code{\link[dygraphs:dyRangeSelector]{dygraphs::dyRangeSelector()}}}
 form \code{begin::end} where either end can take the form "yyyy-mm-dd" or a relative date to the other end of the
 series, e.g \verb{-3m} or \verb{-2w}.  Example: \code{"-3m::-1m"} defines a 2 month period 1 month back from the end of the series.}
 
-\item{rebase}{(Default "") String, either "percent" or coercable number to be applied to \code{\link[dygraphs:dyRebase]{dygraphs::dyRebase()}}}
+\item{rebase}{String of the form \verb{yyyy-mm-dd,<value>} with \verb{<value>} assumed 100 if not specified.  This normalizes all series to \verb{<value>}
+as of the given date.  See examples.}
 
 \item{exportevents}{String of name of \code{data.frame} to create in  \code{.GlobalEnv} with event dates displayed on graph.}
 
@@ -172,10 +173,16 @@ fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
 # With series Highlights, finer resolution and focused date range
 fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
 
+# Rebasing to 1/1/2022
+fgts_dygraph(eqtypx, title="Rebased Prices", ylab="Adjusted Close",rebase="2022-01-01")
+
 # Using bands (.lo, .hi)
+toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(IMFCC=="COL")),
+              cop.lo=min(value),cop.hi=max(value)),by=.(date)]
+fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3)
 
-
-# Events Examples.  Notice how roller shortens with the series.  See Vignette for more extensive examples
+# Events Examples.  Notice how roller shortens with the series.
+# See Vignette for more extensive examples
 require(data.table)
 smalldta <- narrowbydtstr(eqtypx[,.(date,TLT,EEM)],"-3y::")
 fgts_dygraph(smalldta,events="doi,regm;doi,fedmoves")
@@ -183,7 +190,8 @@ fgts_dygraph(smalldta,events="date,FOMO,2025-01-01,2025-06-01;date,xmas,2025-12-
 
 # Events passed in as data.frames
 myevents = data.frame(end_date =as.Date(c("2024-03-10","2024-01-10")),
-            date=as.Date(c("2024-01-10","2024-04-10")),text=c("range","event"),color=c("green","red"))
+            date=as.Date(c("2024-01-10","2024-04-10")),
+            text=c("range","event"),color=c("green","red"))
 fgts_dygraph(smalldta,events="doi,fedmoves",event_ds=myevents)
 
 # Annotations on y axis
