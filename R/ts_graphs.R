@@ -1,6 +1,14 @@
 #' TIme series in Dygraph form
 #'
 #' @name fgts_dygraph
+#' @usage  fgts_dygraph( indt,
+#'  title = "",  ylab = "",  roller = "default",  pointers = "hair,both",
+#'  splitcols = FALSE,  stepcols = FALSE,  hidecols = FALSE,  hilightcols = FALSE,
+#'  hilightwidth = 2,  hilightstyle = "solid",
+#'  events = "",  event_ds = NULL,  annotations = "",  annotation_ds = NULL,  forecast_ds = NULL,
+#'  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
+#'  meltvar = "variable",  dylegend = "always",  groupnm = "common",  fillGraph = FALSE,
+#'  verbose = FALSE,  extraoptions = list() )
 #'
 #' @param indt Input data in long or wide format.  THere must be at least one date column, one
 #' character column and one numeric column.  Ideal format is `date,variable,value`
@@ -54,9 +62,6 @@
 #' @param fillGraph (Default: FALSE) Shade area underneath each series.
 #' @param verbose (Default: FALSE) Print extra details about what will be graphed.
 #' @param extraoptions Additional options passed to [dygraphs::dyOptions()]
-#'
-#' @import data.table
-#'
 #' @returns Dygraph [dygraphs](https://rstudio.github.io/dygraphs/) of input data, with annotations and other customizations.
 #'
 #' @details
@@ -70,34 +75,34 @@
 #' using [fg_update_dates_of_interest()] which will persist across R sessions.  See examples and vignette for further details.
 #' Events can also be added using a `data.frame` passed via `event_ds` with the following columns:
 #'
-#' | column | type | description |
-#' |:---|:---:|:---|
-#' | `date` | Date | (Required) Start date |
-#' | `date_end` | Date |End date to specify range of a colored band |
-#' | `text` | character | (Required) Text to display |
-#' | `color` | character | Color for line and text |
-#' | `eventonly` | logical | Only draw line for for start of event, no band |
-#' | `strokePattern` |  character | `dashed` (default), one of ('solid','dashed','dotted','dotdash') |
-#' | `loc` |  character | 'bottom' (default), one of ('top','bottom') |
-#' | `series` |  character | Name of series to apply event to, if needed |
-#' | `category` | character | Optional string used for exceptions. See notes below.  |
+#' | column | description | type |
+#' |:---|:---|:---:|
+#' | `date` | (Required) Start date | `Date` |
+#' | `date_end` | End date to specify range of a colored band | `Date` |
+#' | `text` | (Required) Text to display | `character` |
+#' | `color` | Color for line and text |  `character` |
+#' | `eventonly` | Only draw line for for start of event, no band | `logical` |
+#' | `strokePattern` | One of ('solid','dashed' (Default) ,'dotted','dotdash') |`character` |
+#' | `loc` |  one of ('top','bottom' (Default)) |`character` |
+#' | `series`  | Name of series to apply event to, if needed |`character` |
+#' | `category` | Optional string used for exceptions. See notes below.  |`character` |
 #'
 #' Many times, events depend on outside data or statistical analysis on the original data.  The `event_ds` to be passed
 #' in can come from event helpers in [fg_cut_to_events()], [fg_addbreakouts()], [fg_findTurningPoints()], or  [fg_ratingsEvents()].
-#' EVent columns are processed as is, with one current exception
+#' Event columns are processed as is, with one current exception
 #' * `category=="series_color"` then `color` is replaced by the color of the series currently in the `color` column.
 #'    Tis allows annotations to be same color as the series to which they apply.
 #'
 #' **Annotiations** include any notes or highlights added to the graph on the 'y' axis or on an individual series.  In addition to those passed
 #' via the `annotations` parameter, annotations can be added using a `data.frame` with the following columns:
 
-#' | column | type | description |
-#' |:---|:---:|:---|
-#' | `date` | Date | (Required) Start date |
-#' | `date_end` | Date |End date to specify range of a colored band |
-#' | `text` | character | (Required) Text to display |
-#' | `color` | character | Color for line and text |
-#' | `eventonly`  | logical | Only draw line for for start of event, no band |
+#' | column | description | type |
+#' |:---|:---|:---:|
+#' | `date` | (Required) Start date | `Date` |
+#' | `date_end` |End date to specify range of a colored band | `Date` |
+#' | `text` | (Required) Text to display | `character` |
+#' | `color` | Color for line and text | `character` |
+#' | `eventonly`| Only draw line for for start of event, no band | `logical` |
 #'
 #' @examples
 #' # See Vignette for more extensive examples.
@@ -111,9 +116,9 @@
 #' fgts_dygraph(eqtypx, title="Rebased Prices", ylab="Adjusted Close",rebase="2022-01-01")
 #'
 #' # Using bands (.lo, .hi)
-#' toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(IMFCC=="COL")),
-#'               cop.lo=min(value),cop.hi=max(value)),by=.(date)]
-#' fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3)
+#' toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
+#'               reer=mean(value),reer.lo=min(value),reer.hi=max(value)),by=.(date)]
+#' fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3,hilightcols="cop",hilightwidth=4)
 #'
 #' # Events Examples.  Notice how roller shortens with the series.
 #' # See Vignette for more extensive examples
@@ -123,7 +128,7 @@
 #' fgts_dygraph(smalldta,events="date,FOMO,2025-01-01,2025-06-01;date,xmas,2025-12-25")
 #'
 #' # Events passed in as data.frames
-#' myevents = data.frame(end_date =as.Date(c("2024-03-10","2024-01-10")),
+#' myevents = data.frame(end_date=as.Date(c("2024-03-10","2024-01-10")),
 #'             date=as.Date(c("2024-01-10","2024-04-10")),
 #'             text=c("range","event"),color=c("green","red"))
 #' fgts_dygraph(smalldta,events="doi,fedmoves",event_ds=myevents)
@@ -152,8 +157,8 @@
 #' fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
 #' fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=fpred)
 #'
+#' @import data.table
 #' @export
-#'
 fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,both",
                         splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
                         hilightcols=FALSE,hilightwidth=2,hilightstyle="solid",

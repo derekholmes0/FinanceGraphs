@@ -30,6 +30,7 @@ Imports:
     data.table (>= 1.9.8),
     dygraphs (>= 1.1.0)
 Suggests:
+    RColorBrewer (>= 1.0.0),
     forecast (>= 9.0.0),
     timetk (>= 2.9.0),
     sweep (>= 0.2.0),

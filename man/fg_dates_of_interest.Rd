@@ -8,6 +8,7 @@
 \alias{fg_get_colors}
 \alias{fg_update_dates_of_interest}
 \alias{fg_update_colors}
+\alias{fg_reset_to_default_state}
 \title{Maintain Constants and Dates of Interest}
 \format{
 An object of class \code{environment} of length 10.
@@ -21,24 +22,30 @@ fg_get_dates_of_interest(
   startdt = NULL
 )
 
-fg_get_colors(item = "")
+fg_get_colors(item = "", n_max = NA_integer_)
 
 fg_update_dates_of_interest(indta, replace = FALSE)
 
 fg_update_colors(indta, replace = FALSE)
+
+fg_reset_to_default_state(reset = "all")
 }
 \arguments{
-\item{search_categories}{Grep string of categories to return}
+\item{search_categories}{Grep string of categories to return.}
 
-\item{use_default}{(Default: TRUE) Use package level dates of interest}
+\item{use_default}{(Default: TRUE) Use package level dates of interest.}
 
-\item{startdt}{MInimum date for events to be returned}
+\item{startdt}{MInimum date for events to be returned.}
 
 \item{item}{(Default: "") A grep string for categories desired.}
+
+\item{n_max}{Maximum number of rows to return.}
 
 \item{indta}{\code{data.table} with columns as shown in details.}
 
 \item{replace}{(Default: FALSE) If TRUE, replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.}
+
+\item{reset}{(Default: "all"), options in ("all","colors","doi") to reset to defaults with the package.}
 }
 \value{
 Filtered datasets
@@ -48,6 +55,7 @@ Filtered datasets
 \code{fg_update_dates_of_interest()} updates a set of time events for future use in time series graphs
 \code{fg_get_colors()} gets default color sets for graphs
 \code{fg_update_colors()} updates or replaces default colors
+\code{fg_reset_to_default_state()} resets colors and/or dates of interest
 }
 \details{
 Retrieves default dates of interest given a grepstring of categories.  There are a default set of categories provided which may not be up to date.
@@ -72,14 +80,15 @@ fg_update_dates_of_interest(newdoi)
 tail(fg_get_dates_of_interest("fedmoves"),3)
 
 fg_get_colors("lines")
-# To switch out second (blue) line and 6th line (red).
-# Note use of sortable character variables to define the order of the set.
-fg_update_colors(data.table(category=rep("lines",2),variable=c("D02","D06"),
-                color=c("red","blue")))
-fg_get_colors("lines")
+
+# To switch to graduated scales, with darkest being first
+require(RColorBrewer)
+fg_get_colors("lines",n_max=3) -> oldcolors
+fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:5])][] )
+fg_get_colors("lines",n_max=3)
+
+fg_reset_to_default_state("color")
 }
-
-
 
 }
 \seealso{

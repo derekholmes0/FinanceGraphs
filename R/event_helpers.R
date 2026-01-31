@@ -120,6 +120,7 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 #' Investment grade ratings are shaded in blue, High Yield are in red. Darker areas are closest to the cutoff between the two.
 #'
 #' @examples
+#' data("nomfxdta")
 #' copdta <- nomfxdta |> dplyr::filter(variable=="COP")
 #' fgts_dygraph(copdta,title="COP with Ratings",dtstartfrac=0.3,
 #'         event_ds=fg_ratingsEvents("COLOM",ratings_db,agency="S.P"))
@@ -206,6 +207,7 @@ fg_cut_to_events<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
 #'
 #' @import data.table
 #' @import tidyquant
+#' @rdname Event_Helpers
 #' @export
 fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
   `.`=value=symbol=color=text=NULL
@@ -242,6 +244,7 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=earnings)
 #'
 #' @import data.table
+#' @rdname Event_Helpers
 #' @export
 fg_av_earnings<-function(indt,field="reportedEPS",ticker_in_label=TRUE) {
   `.`=reportedDate=symbol=color=text=NULL

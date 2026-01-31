@@ -112,4 +112,36 @@
 #' @source <https://ratingshistory.info/>
 "ratings_db"
 
+#' IBM Earnings
+#'
+#' IBM Earnings download
+#'
+#' @format ## `earnings_ibm`
+#' A `data.table` with 120 observations and e columns
+#' \describe{
+#'  \item{reportedDate}{Earnings announcement date}
+#'  \item{reportedEPS}{Reported Earnings per Share}
+#'  \item{symbol}{Company}
+#' }
+#'
+#' @source <https://alphavantage.co>
+"earnings_ibm"
+
+#' Example forecasts
+#'
+#' IBM Stock price forecasts from ets baseline ets model
+#'
+#' @format ## `example_fcst_set`
+#' A named list of two outputs from forecasts on equity stock prices.
+#' \describe{
+#'  \item{Point Forecast}{Forecast}
+#'  \item{Lo 80}{80th percentile lower confidence bound}
+#'  \item{Lo 95}{95th percentile lower confidence bound}
+#'  \item{Hi 80}{80th percentile upper confidence bound}
+#'  \item{Hi 95}{95th percentile upper confidence bound}
+#' }
+#'
+#' @source <https://finance.yahoo.com>
+"example_fcst_set"
+
 

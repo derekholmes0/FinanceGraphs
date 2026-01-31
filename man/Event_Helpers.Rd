@@ -2,9 +2,15 @@
 % Please edit documentation in R/event_helpers.R
 \name{fg_ratingsEvents}
 \alias{fg_ratingsEvents}
+\alias{fg_tq_divs}
+\alias{fg_av_earnings}
 \title{Event Helpers : fg_ratingsEvents}
 \usage{
 fg_ratingsEvents(credit, ratings_db, agency = "S.P")
+
+fg_tq_divs(tickers, divs_ds = NULL, ticker_in_label = TRUE)
+
+fg_av_earnings(indt, field = "reportedEPS", ticker_in_label = TRUE)
 }
 \arguments{
 \item{credit}{String with name of credit to look up in 'ratings_db'}
@@ -19,19 +25,46 @@ fg_ratingsEvents(credit, ratings_db, agency = "S.P")
 | DT_ENTRY  | Date | Date which ratings or ratings change was issued |}
 
 \item{agency}{String (default 'S.P') with 'AGENCY to look up in 'ratings_db'}
+
+\item{tickers}{List of tickers to get dividends for.}
+
+\item{divs_ds}{Alternatively a \code{data.frame} previously obtained using \code{\link[tidyquant:tq_get]{tidyquant::tq_get()}} with columns (\code{symbol},\code{date},\code{value})}
+
+\item{ticker_in_label}{(Default: TRUE) Make label ticker and the earnings}
+
+\item{indt}{\code{data.frame} obtained from alphavantage earnings data.}
+
+\item{field}{(Default: \code{reportedEPS}) String in (\code{reportedEPS},\code{estimatedEPS},\code{surprise},\code{surprisePercentage})}
 }
 \value{
 \code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
+
+\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
+
+\code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
 }
 \description{
-Event Helpers : fg_ratingsEvents
+Calls \code{\link[tidyquant:tq_get]{tidyquant::tq_get()}} to get dividends for a given set of tickers.  A previously created \code{data.frame} can also be input.
+
+Created \code{event_ds} from \link[alphavantagepf:av_get_pf]{alphavantagepf::av_get_pf} quarterly earnings data.
 }
 \details{
 Investment grade ratings are shaded in blue, High Yield are in red. Darker areas are closest to the cutoff between the two.
 }
 \examples{
+data("nomfxdta")
 copdta <- nomfxdta |> dplyr::filter(variable=="COP")
 fgts_dygraph(copdta,title="COP with Ratings",dtstartfrac=0.3,
         event_ds=fg_ratingsEvents("COLOM",ratings_db,agency="S.P"))
+
+require(tidyquant)
+fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
+
+require(alphavantagepf)
+earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
+        alphavantagepf::av_extract_df("quarterlyEarnings") |>
+        fg_av_earnings()
+toplot = dplyr::select(eqtypx,date,IBM)
+fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=earnings)
 
 }

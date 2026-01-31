@@ -4,35 +4,14 @@
 \alias{fgts_dygraph}
 \title{TIme series in Dygraph form}
 \usage{
-fgts_dygraph(
-  indt,
-  title = "",
-  ylab = "",
-  roller = "default",
-  pointers = "hair,both",
-  splitcols = FALSE,
-  stepcols = FALSE,
-  hidecols = FALSE,
-  hilightcols = FALSE,
-  hilightwidth = 2,
-  hilightstyle = "solid",
-  events = "",
-  event_ds = NULL,
-  annotations = "",
-  annotation_ds = NULL,
-  forecast_ds = NULL,
-  ylimits = NULL,
-  dtstartfrac = 0,
-  dtwindow = "",
-  rebase = "",
-  exportevents = NULL,
-  meltvar = "variable",
-  dylegend = "always",
-  groupnm = "common",
-  fillGraph = FALSE,
-  verbose = FALSE,
-  extraoptions = list()
-)
+fgts_dygraph( indt,
+ title = "",  ylab = "",  roller = "default",  pointers = "hair,both",
+ splitcols = FALSE,  stepcols = FALSE,  hidecols = FALSE,  hilightcols = FALSE,
+ hilightwidth = 2,  hilightstyle = "solid",
+ events = "",  event_ds = NULL,  annotations = "",  annotation_ds = NULL,  forecast_ds = NULL,
+ ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
+ meltvar = "variable",  dylegend = "always",  groupnm = "common",  fillGraph = FALSE,
+ verbose = FALSE,  extraoptions = list() )
 }
 \arguments{
 \item{indt}{Input data in long or wide format.  THere must be at least one date column, one
@@ -133,36 +112,36 @@ Series are grouped together into bands around a series \code{series} if their na
 
 \strong{Events} are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
 using \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}} which will persist across R sessions.  See examples and vignette for further details.
-Events can also be added using a \code{data.frame} passed via \code{event_ds} with the following columns:\tabular{lcl}{
-   column \tab type \tab description \cr
-   \code{date} \tab Date \tab (Required) Start date \cr
-   \code{date_end} \tab Date \tab End date to specify range of a colored band \cr
-   \code{text} \tab character \tab (Required) Text to display \cr
-   \code{color} \tab character \tab Color for line and text \cr
-   \code{eventonly} \tab logical \tab Only draw line for for start of event, no band \cr
-   \code{strokePattern} \tab character \tab \code{dashed} (default), one of ('solid','dashed','dotted','dotdash') \cr
-   \code{loc} \tab character \tab 'bottom' (default), one of ('top','bottom') \cr
-   \code{series} \tab character \tab Name of series to apply event to, if needed \cr
-   \code{category} \tab character \tab Optional string used for exceptions. See notes below. \cr
+Events can also be added using a \code{data.frame} passed via \code{event_ds} with the following columns:\tabular{llc}{
+   column \tab description \tab type \cr
+   \code{date} \tab (Required) Start date \tab \code{Date} \cr
+   \code{date_end} \tab End date to specify range of a colored band \tab \code{Date} \cr
+   \code{text} \tab (Required) Text to display \tab \code{character} \cr
+   \code{color} \tab Color for line and text \tab \code{character} \cr
+   \code{eventonly} \tab Only draw line for for start of event, no band \tab \code{logical} \cr
+   \code{strokePattern} \tab One of ('solid','dashed' (Default) ,'dotted','dotdash') \tab \code{character} \cr
+   \code{loc} \tab one of ('top','bottom' (Default)) \tab \code{character} \cr
+   \code{series} \tab Name of series to apply event to, if needed \tab \code{character} \cr
+   \code{category} \tab Optional string used for exceptions. See notes below. \tab \code{character} \cr
 }
 
 
 Many times, events depend on outside data or statistical analysis on the original data.  The \code{event_ds} to be passed
 in can come from event helpers in \code{\link[=fg_cut_to_events]{fg_cut_to_events()}}, \code{\link[=fg_addbreakouts]{fg_addbreakouts()}}, \code{\link[=fg_findTurningPoints]{fg_findTurningPoints()}}, or  \code{\link[=fg_ratingsEvents]{fg_ratingsEvents()}}.
-EVent columns are processed as is, with one current exception
+Event columns are processed as is, with one current exception
 \itemize{
 \item \code{category=="series_color"} then \code{color} is replaced by the color of the series currently in the \code{color} column.
 Tis allows annotations to be same color as the series to which they apply.
 }
 
 \strong{Annotiations} include any notes or highlights added to the graph on the 'y' axis or on an individual series.  In addition to those passed
-via the \code{annotations} parameter, annotations can be added using a \code{data.frame} with the following columns:\tabular{lcl}{
-   column \tab type \tab description \cr
-   \code{date} \tab Date \tab (Required) Start date \cr
-   \code{date_end} \tab Date \tab End date to specify range of a colored band \cr
-   \code{text} \tab character \tab (Required) Text to display \cr
-   \code{color} \tab character \tab Color for line and text \cr
-   \code{eventonly} \tab logical \tab Only draw line for for start of event, no band \cr
+via the \code{annotations} parameter, annotations can be added using a \code{data.frame} with the following columns:\tabular{llc}{
+   column \tab description \tab type \cr
+   \code{date} \tab (Required) Start date \tab \code{Date} \cr
+   \code{date_end} \tab End date to specify range of a colored band \tab \code{Date} \cr
+   \code{text} \tab (Required) Text to display \tab \code{character} \cr
+   \code{color} \tab Color for line and text \tab \code{character} \cr
+   \code{eventonly} \tab Only draw line for for start of event, no band \tab \code{logical} \cr
 }
 }
 \examples{
@@ -177,9 +156,9 @@ fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
 fgts_dygraph(eqtypx, title="Rebased Prices", ylab="Adjusted Close",rebase="2022-01-01")
 
 # Using bands (.lo, .hi)
-toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(IMFCC=="COL")),
-              cop.lo=min(value),cop.hi=max(value)),by=.(date)]
-fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3)
+toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
+              reer=mean(value),reer.lo=min(value),reer.hi=max(value)),by=.(date)]
+fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3,hilightcols="cop",hilightwidth=4)
 
 # Events Examples.  Notice how roller shortens with the series.
 # See Vignette for more extensive examples
@@ -189,7 +168,7 @@ fgts_dygraph(smalldta,events="doi,regm;doi,fedmoves")
 fgts_dygraph(smalldta,events="date,FOMO,2025-01-01,2025-06-01;date,xmas,2025-12-25")
 
 # Events passed in as data.frames
-myevents = data.frame(end_date =as.Date(c("2024-03-10","2024-01-10")),
+myevents = data.frame(end_date=as.Date(c("2024-03-10","2024-01-10")),
             date=as.Date(c("2024-01-10","2024-04-10")),
             text=c("range","event"),color=c("green","red"))
 fgts_dygraph(smalldta,events="doi,fedmoves",event_ds=myevents)
