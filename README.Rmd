@@ -4,7 +4,7 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -86,7 +86,9 @@ last observations of each series.
 #| fig.alt: "Hi/Lo series, used to show currency values against local peers"
 toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
                reer=mean(value),reer.lo=min(value),reer.hi=max(value)),by=.(date)]
-fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3,hilightcols="cop",hilightwidth=4,annotations="last,linevalue")
+fgts_dygraph(toplot,title="COP REER vs Latam peers",ylab="Price",
+             roller=3,hilightcols="cop",
+             hilightwidth=4,annotations="last,linevalue")
 ```
 
 ## Events
@@ -105,7 +107,7 @@ Event strings can be added together with semicolons, as in the following example
 #| label: Events1
 #| fig.alt: "Graph of Equity Prices showing Event styles"
 smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,TLT,EEM)]
-fgts_dygraph(smalldta,events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
+fgts_dygraph(smalldta,title="With Events",ylab="Price",events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
 ```
 Several types of events are predefined in [fgts_dygraph()] including equity option expirations, IMM CDS roll dates, seasonal events (e.g. "same day in quarter as last observation") and series extremes.
 See the vignette for more examples.  Events can also be passed in as a `data.frame` using the `event_ds` parameter, as shown next.
@@ -127,11 +129,13 @@ fgts_dygraph(smalldta,title="Equity Prices w Sentiment",event_ds=events_consumer
 ```
 Current event helpers are:
 
-* [fg_findTurningPoints()]  Statistically identify possible turning points in a series
-* [fg_ratingsEvents()]  Add colored ranges based on analyst credit ratings
-* [fg_cut_to_events()]  "cut" a univariate series into colored bands, with two different colors for positive and negative values.
-* [fg_tq_divs()] Add dividend events from TidyQuant dividend data
-* [fg_av_earnings()] Add earnings events from AlphaVantage earnings data
+|Function|Description|
+|:-------|:-----------|
+|`fg_findTurningPoints()`|  Statistically identify turning points in a series.|
+|`fg_ratingsEvents()`|  Add colored ranges based on analyst credit ratings.|
+|`fg_cut_to_events()`| "Cut" a univariate series into colored bands, with two different colors for positive and negative values.|
+|`fg_tq_divs()`|Add dividend events from TidyQuant dividend data|
+|`fg_av_earnings()`|Add earnings events from AlphaVantage earnings data|
 
 ## Forecasts
 

@@ -1,15 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-``` r
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
-
 # FinanceGraphs
 
 <!-- badges: start -->
@@ -112,7 +103,9 @@ fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
 ``` r
 toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
                reer=mean(value),reer.lo=min(value),reer.hi=max(value)),by=.(date)]
-fgts_dygraph(toplot,title="COP REER vs Latam peers",roller=3,hilightcols="cop",hilightwidth=4,annotations="last,linevalue")
+fgts_dygraph(toplot,title="COP REER vs Latam peers",ylab="Price",
+             roller=3,hilightcols="cop",
+             hilightwidth=4,annotations="last,linevalue")
 ```
 
 <img src="man/figures/README-simple_example3-1.png" alt="Hi/Lo series, used to show currency values against local peers" width="100%" />
@@ -138,7 +131,7 @@ be added together with semicolons, as in the following example:
 
 ``` r
 smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,TLT,EEM)]
-fgts_dygraph(smalldta,events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
+fgts_dygraph(smalldta,title="With Events",ylab="Price",events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
 ```
 
 <img src="man/figures/README-Events1-1.png" alt="Graph of Equity Prices showing Event styles" width="100%" />
@@ -174,15 +167,13 @@ fgts_dygraph(smalldta,title="Equity Prices w Sentiment",event_ds=events_consumer
 <img src="man/figures/README-Events2-1.png" alt="Graph of equity prices showing sentiment ranges" width="100%" />
 Current event helpers are:
 
-- \[fg_findTurningPoints()\] Statistically identify possible turning
-  points in a series
-- \[fg_ratingsEvents()\] Add colored ranges based on analyst credit
-  ratings
-- \[fg_cut_to_events()\] “cut” a univariate series into colored bands,
-  with two different colors for positive and negative values.
-- \[fg_tq_divs()\] Add dividend events from TidyQuant dividend data
-- \[fg_av_earnings()\] Add earnings events from AlphaVantage earnings
-  data
+| Function | Description |
+|:---|:---|
+| `fg_findTurningPoints()` | Statistically identify turning points in a series. |
+| `fg_ratingsEvents()` | Add colored ranges based on analyst credit ratings. |
+| `fg_cut_to_events()` | “Cut” a univariate series into colored bands, with two different colors for positive and negative values. |
+| `fg_tq_divs()` | Add dividend events from TidyQuant dividend data |
+| `fg_av_earnings()` | Add earnings events from AlphaVantage earnings data |
 
 ## Forecasts
 
