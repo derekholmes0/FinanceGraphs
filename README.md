@@ -56,6 +56,10 @@ require(FinanceGraphs)
 #>   method            from
 #>   as.zoo.data.frame zoo
 fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
+#> Assigning:    indtnew(2031;5) data.table;data.frame from --notrace-->
+#> Assigning:  alltitles() character from --notrace-->
+#> Assigning: series_dets(4;8) data.table;data.frame from --notrace-->
+#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-simple_example1-1.png" alt="Simple Graph of a few Equity Prices" width="100%" />
@@ -86,6 +90,10 @@ or a relative date string (e.g. “-6m” for 6 months ago.
 
 ``` r
 fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
+#> Assigning:    indtnew(2031;5) data.table;data.frame from --notrace-->
+#> Assigning:  alltitles() character from --notrace-->
+#> Assigning: series_dets(4;8) data.table;data.frame from --notrace-->
+#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-simple_example2-1.png" alt="Graph of Equity Prices showing highlights and date selection methods" width="100%" />
@@ -106,6 +114,10 @@ toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
 fgts_dygraph(toplot,title="COP REER vs Latam peers",ylab="Price",
              roller=3,hilightcols="cop",
              hilightwidth=4,annotations="last,linevalue")
+#> Assigning:    indtnew(252;5) data.table;data.frame from --notrace-->
+#> Assigning:  alltitles() character from --notrace-->
+#> Assigning: series_dets(4;8) data.table;data.frame from --notrace-->
+#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-simple_example3-1.png" alt="Hi/Lo series, used to show currency values against local peers" width="100%" />
@@ -132,6 +144,10 @@ be added together with semicolons, as in the following example:
 ``` r
 smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,TLT,EEM)]
 fgts_dygraph(smalldta,title="With Events",ylab="Price",events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
+#> Assigning:    indtnew(772;3) data.table;data.frame from --notrace-->
+#> Assigning:  alltitles() character from --notrace-->
+#> Assigning: series_dets(2;8) data.table;data.frame from --notrace-->
+#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-Events1-1.png" alt="Graph of Equity Prices showing Event styles" width="100%" />
@@ -161,7 +177,12 @@ head(events_consumer_sent,2)
 #>    <int>    <char>       <Date>     <Date>  <int>
 #> 1:     3 #9595FFFF   2016-03-02 2016-01-01      3
 #> 2:     2 #CACAFFFF   2016-04-02 2016-03-02      1
+
 fgts_dygraph(smalldta,title="Equity Prices w Sentiment",event_ds=events_consumer_sent)
+#> Assigning:    indtnew(772;3) data.table;data.frame from --notrace-->
+#> Assigning:  alltitles() character from --notrace-->
+#> Assigning: series_dets(2;8) data.table;data.frame from --notrace-->
+#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-Events2-1.png" alt="Graph of equity prices showing sentiment ranges" width="100%" />
@@ -184,16 +205,31 @@ forecast is shown as the same color as the original series, but dashed
 to show the transition.
 
 ``` r
+smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,IBM,QQQ)]
 head(example_fcst_set,2)
 #> Key: <date>
 #>          date    QQQ.f  QQQ.flo  QQQ.fhi    IBM.f  IBM.flo  IBM.fhi
 #>        <Date>     <ts>    <num>    <num>     <ts>    <num>    <num>
 #> 1: 2026-01-31 622.6611 615.9843 629.3379 306.9482 301.3265 312.5699
 #> 2: 2026-02-01 622.9118 613.7795 632.0441 307.1080 299.3237 314.8924
+
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
+#> Assigning:    indtnew(808;9) data.table;data.frame from --notrace-->
+#> Assigning:  alltitles() character from --notrace-->
+#> Assigning: series_dets(8;8) data.table;data.frame from --notrace-->
+#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-Forecasts1-1.png" alt="Adding forecasts to original data" width="100%" />
+
+Like events, forecasts can be generated from many packages with
+different output formats. There are also “forecast helpers” to get their
+outputs into the appropriate `foreast_ds` forms
+
+| Function | Description |
+|:---|:---|
+| `fg_sweep()` | Converts [tidy forecast objects](https://business-science.github.io/sweep/) to `forecast_ds` form. |
+| `fg_forecast()` | Converts [tidy forecast objects](https://pkg.robjhyndman.com/forecast/) to `forecast_ds` form. |
 
 ## Changing colors and adding dates of interest
 

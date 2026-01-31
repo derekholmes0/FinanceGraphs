@@ -41,7 +41,6 @@ fg_sweep <- function(swept_data,confidence=80)  {
 #' @param confidence (Default: 80) Confidence interval (in percent) to display
 #' @param seriesnm Series name which has been forecast.  Note that [forecast::forecast()] loses the name
 #' of what's been forecast, necessitating this.
-#'
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `forecastdataset` parameter
 #'
 #' @examples

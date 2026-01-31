@@ -329,7 +329,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     add_titles("y",ylab)
     alltitles = paste0(title,paste0(titleadds[axis=="title"]$note,collapse=","))
-    ## cAssign("indtnew;alltitles;series_dets;dt_colnames")
+    cAssign("indtnew;alltitles;series_dets;dt_colnames")
     g1 <- dygraphs::dygraph(indtnew,main=alltitles,group=groupnm)
     for(seriesgp in sort(unique(series_dets[display==TRUE,]$gpnm))) {
         trw <- series_dets[get("gpnm")==seriesgp,]
