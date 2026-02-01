@@ -212,7 +212,6 @@ head(example_fcst_set,2)
 #>        <Date>     <ts>    <num>    <num>     <ts>    <num>    <num>
 #> 1: 2026-01-31 622.6611 615.9843 629.3379 306.9482 301.3265 312.5699
 #> 2: 2026-02-01 622.9118 613.7795 632.0441 307.1080 299.3237 314.8924
-
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 #> Assigning:    indtnew(808;9) data.table;data.frame from --notrace-->
 #> Assigning:  alltitles() character from --notrace-->
@@ -229,7 +228,7 @@ outputs into the appropriate `foreast_ds` forms
 | Function | Description |
 |:---|:---|
 | `fg_sweep()` | Converts [tidy forecast objects](https://business-science.github.io/sweep/) to `forecast_ds` form. |
-| `fg_forecast()` | Converts [tidy forecast objects](https://pkg.robjhyndman.com/forecast/) to `forecast_ds` form. |
+| `fg_forecast()` | Converts [forecasts](https://pkg.robjhyndman.com/forecast/) to `forecast_ds` form. |
 
 ## Changing colors and adding dates of interest
 
@@ -240,23 +239,15 @@ for the first 5 series.
 
 ``` r
 fg_get_colors("lines",n_max=3) -> oldcolors
-fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:5])][] )
-#> Warning in `[.data.table`(oldcolors, , let(color =
-#> rev(RColorBrewer::brewer.pal(8, : Coercing 'list' RHS to 'character' to match
-#> the type of column 3 named 'color'.
+fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
 #> Saved Colors of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_colors.RD
 fg_get_colors("lines",n_max=3)
 #> Key: <category, variable>
-#>    category variable                                                    color
-#>      <char>   <char>                                                   <char>
-#> 1:    lines      D01 c("#08589E", "#2B8CBE", "#4EB3D3", "#7BCCC4", "#A8DDB5")
-#> 2:    lines      D02 c("#08589E", "#2B8CBE", "#4EB3D3", "#7BCCC4", "#A8DDB5")
-#> 3:    lines      D03 c("#08589E", "#2B8CBE", "#4EB3D3", "#7BCCC4", "#A8DDB5")
-#>     const
-#>    <lgcl>
-#> 1:     NA
-#> 2:     NA
-#> 3:     NA
+#>    category variable   color  const
+#>      <char>   <char>  <char> <lgcl>
+#> 1:    lines      D01 #08589E     NA
+#> 2:    lines      D02 #2B8CBE     NA
+#> 3:    lines      D03 #4EB3D3     NA
 ```
 
 New dates of interest used for the `events` parameter can also be added.
@@ -268,17 +259,15 @@ Resetting the lists (and colors) can also be done.
 newdoi <-data.table(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 fg_update_dates_of_interest(newdoi)
 #> Saved dates of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_doi.RD
-tail(fg_get_dates_of_interest("fedmoves"),3)
+tail(fg_get_dates_of_interest("fedmoves"),2)
 #> Key: <category, DT_ENTRY>
 #>    category eventid eventid2   DT_ENTRY END_DT_ENTRY  color strokePattern
 #>      <char>  <char>   <char>     <Date>       <Date> <char>        <char>
-#> 1: fedmoves   F:-25     rt:4 2025-10-29   2025-10-29   <NA>          <NA>
-#> 2: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   <NA>          <NA>
-#> 3: fedmoves   F:-50     <NA> 2026-06-16   2026-06-16   <NA>          <NA>
+#> 1: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   <NA>          <NA>
+#> 2: fedmoves   F:-50     <NA> 2026-06-16   2026-06-16   <NA>          <NA>
 #>       loc
 #>    <char>
 #> 1:   <NA>
 #> 2:   <NA>
-#> 3:   <NA>
 fg_reset_to_default_state()
 ```

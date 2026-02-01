@@ -149,7 +149,6 @@ series, but dashed to show the transition.
 #| fig.alt: "Adding forecasts to original data"
 smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,IBM,QQQ)]
 head(example_fcst_set,2)
-
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 ```
 
@@ -159,8 +158,7 @@ get their outputs into the appropriate `foreast_ds` forms
 |Function|Description|
 |:-------|:-----------|
 |`fg_sweep()`|Converts [tidy forecast objects](https://business-science.github.io/sweep/) to `forecast_ds` form.|
-|`fg_forecast()`|Converts [tidy forecast objects](https://pkg.robjhyndman.com/forecast/) to `forecast_ds` form.|
-
+|`fg_forecast()`|Converts [forecasts](https://pkg.robjhyndman.com/forecast/) to `forecast_ds` form.|
 
 ## Changing colors and adding dates of interest
 
@@ -169,7 +167,7 @@ loads of the package.  As an example, to make a graduated set of colors for the 
 
 ```{r}
 fg_get_colors("lines",n_max=3) -> oldcolors
-fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:5])][] )
+fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
 fg_get_colors("lines",n_max=3)
 ```
 
@@ -179,7 +177,7 @@ New dates of interest used for the `events` parameter can also be added.  To add
 ```{r}
 newdoi <-data.table(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 fg_update_dates_of_interest(newdoi)
-tail(fg_get_dates_of_interest("fedmoves"),3)
+tail(fg_get_dates_of_interest("fedmoves"),2)
 fg_reset_to_default_state()
 ```
 

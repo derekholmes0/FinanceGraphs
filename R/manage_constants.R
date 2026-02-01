@@ -51,7 +51,7 @@
 #' # To switch to graduated scales, with darkest being first
 #' require(RColorBrewer)
 #' fg_get_colors("lines",n_max=3) -> oldcolors
-#' fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:5])][] )
+#' fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
 #' fg_get_colors("lines",n_max=3)
 #'
 #' fg_reset_to_default_state("color")
