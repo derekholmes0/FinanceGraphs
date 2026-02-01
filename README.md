@@ -215,12 +215,11 @@ graduated set of colors for the first 3 series.
 
 ``` r
 fg_get_colors("lines",n_max=4)
-#> Key: <category, variable>
 #>    category variable   color  const
 #>      <char>   <char>  <char> <lgcl>
-#> 1:    lines      D01 #08589E     NA
-#> 2:    lines      D02 #2B8CBE     NA
-#> 3:    lines      D03 #4EB3D3     NA
+#> 1:    lines      D01   black     NA
+#> 2:    lines      D02     red     NA
+#> 3:    lines      D03 magenta     NA
 #> 4:    lines      D04   green     NA
 fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3] )
 #> Saved Colors of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_colors.RD
