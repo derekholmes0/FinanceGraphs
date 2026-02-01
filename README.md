@@ -48,18 +48,12 @@ changed (again persisantly) using the \[fg_update_colors()\] function.
 ## Simple Examples
 
 ``` r
-require(data.table)
-#> Loading required package: data.table
 require(FinanceGraphs)
 #> Loading required package: FinanceGraphs
 #> Registered S3 method overwritten by 'quantmod':
 #>   method            from
 #>   as.zoo.data.frame zoo
 fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
-#> Assigning:    indtnew(2031;5) data.table;data.frame from --notrace-->
-#> Assigning:  alltitles() character from --notrace-->
-#> Assigning: series_dets(4;8) data.table;data.frame from --notrace-->
-#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-simple_example1-1.png" alt="Simple Graph of a few Equity Prices" width="100%" />
@@ -87,13 +81,11 @@ or a relative date string (e.g. “-6m” for 6 months ago.
     (possibly list) of series names.
   - Hidden from using the `hidecols` argument with a string (possibly
     list) of series names.
+  - Rebased to a given constant at a particular date.
 
 ``` r
-fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
-#> Assigning:    indtnew(2031;5) data.table;data.frame from --notrace-->
-#> Assigning:  alltitles() character from --notrace-->
-#> Assigning: series_dets(4;8) data.table;data.frame from --notrace-->
-#> Assigning: dt_colnames() list from --notrace-->
+fgts_dygraph(eqtypx, title="W/ Focused range, highlights, rebasing",
+             dtstartfrac=0.6,hilightcols="QQQ",hilightwidth=4,rebase="2024-01-01,100",roller=3)
 ```
 
 <img src="man/figures/README-simple_example2-1.png" alt="Graph of Equity Prices showing highlights and date selection methods" width="100%" />
@@ -110,14 +102,9 @@ fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
 
 ``` r
 toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
-               reer=mean(value),reer.lo=min(value),reer.hi=max(value)),by=.(date)]
+               peers=mean(value),peers.lo=min(value),peers.hi=max(value)),by=.(date)]
 fgts_dygraph(toplot,title="COP REER vs Latam peers",ylab="Price",
-             roller=3,hilightcols="cop",
-             hilightwidth=4,annotations="last,linevalue")
-#> Assigning:    indtnew(252;5) data.table;data.frame from --notrace-->
-#> Assigning:  alltitles() character from --notrace-->
-#> Assigning: series_dets(4;8) data.table;data.frame from --notrace-->
-#> Assigning: dt_colnames() list from --notrace-->
+             roller=1,hilightcols="cop",hilightwidth=4,annotations="last,linevalue")
 ```
 
 <img src="man/figures/README-simple_example3-1.png" alt="Hi/Lo series, used to show currency values against local peers" width="100%" />
@@ -144,10 +131,6 @@ be added together with semicolons, as in the following example:
 ``` r
 smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,TLT,EEM)]
 fgts_dygraph(smalldta,title="With Events",ylab="Price",events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
-#> Assigning:    indtnew(772;3) data.table;data.frame from --notrace-->
-#> Assigning:  alltitles() character from --notrace-->
-#> Assigning: series_dets(2;8) data.table;data.frame from --notrace-->
-#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-Events1-1.png" alt="Graph of Equity Prices showing Event styles" width="100%" />
@@ -177,12 +160,7 @@ head(events_consumer_sent,2)
 #>    <int>    <char>       <Date>     <Date>  <int>
 #> 1:     3 #9595FFFF   2016-03-02 2016-01-01      3
 #> 2:     2 #CACAFFFF   2016-04-02 2016-03-02      1
-
 fgts_dygraph(smalldta,title="Equity Prices w Sentiment",event_ds=events_consumer_sent)
-#> Assigning:    indtnew(772;3) data.table;data.frame from --notrace-->
-#> Assigning:  alltitles() character from --notrace-->
-#> Assigning: series_dets(2;8) data.table;data.frame from --notrace-->
-#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-Events2-1.png" alt="Graph of equity prices showing sentiment ranges" width="100%" />
@@ -190,9 +168,10 @@ Current event helpers are:
 
 | Function | Description |
 |:---|:---|
-| `fg_findTurningPoints()` | Statistically identify turning points in a series. |
-| `fg_ratingsEvents()` | Add colored ranges based on analyst credit ratings. |
-| `fg_cut_to_events()` | “Cut” a univariate series into colored bands, with two different colors for positive and negative values. |
+| `fg_findTurningPoints()` | Statistically identify turning points in a series |
+| `fg_ratingsEvents()` | Add colored ranges based on analyst credit ratings |
+| `fg_cut_to_events()` | “Cut” a univariate series into colored bands, with two different colors for positive and negative values |
+| `fg_signal_to_events()` | Map a long/short signal to events |
 | `fg_tq_divs()` | Add dividend events from TidyQuant dividend data |
 | `fg_av_earnings()` | Add earnings events from AlphaVantage earnings data |
 
@@ -213,10 +192,6 @@ head(example_fcst_set,2)
 #> 1: 2026-01-31 622.6611 615.9843 629.3379 306.9482 301.3265 312.5699
 #> 2: 2026-02-01 622.9118 613.7795 632.0441 307.1080 299.3237 314.8924
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
-#> Assigning:    indtnew(808;9) data.table;data.frame from --notrace-->
-#> Assigning:  alltitles() character from --notrace-->
-#> Assigning: series_dets(8;8) data.table;data.frame from --notrace-->
-#> Assigning: dt_colnames() list from --notrace-->
 ```
 
 <img src="man/figures/README-Forecasts1-1.png" alt="Adding forecasts to original data" width="100%" />
@@ -233,21 +208,30 @@ outputs into the appropriate `foreast_ds` forms
 ## Changing colors and adding dates of interest
 
 Default colors for series and annotations can be changed using
-\[fg_update_colors()\]. Any changes made to colors will persist across
-loads of the package. As an example, to make a graduated set of colors
-for the first 5 series.
+\[fg_update_colors()\] or \[fg_update_line_colors()\].  
+Any changes made to colors will persist across loads of the package
+(unless `persist=FALSE` is specified). As an example, to make a
+graduated set of colors for the first 3 series.
 
 ``` r
-fg_get_colors("lines",n_max=3) -> oldcolors
-fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
-#> Saved Colors of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_colors.RD
-fg_get_colors("lines",n_max=3)
+fg_get_colors("lines",n_max=4)
 #> Key: <category, variable>
 #>    category variable   color  const
 #>      <char>   <char>  <char> <lgcl>
 #> 1:    lines      D01 #08589E     NA
 #> 2:    lines      D02 #2B8CBE     NA
 #> 3:    lines      D03 #4EB3D3     NA
+#> 4:    lines      D04   green     NA
+fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3] )
+#> Saved Colors of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_colors.RD
+fg_get_colors("lines",n_max=4)
+#> Key: <category, variable>
+#>    category variable   color  const
+#>      <char>   <char>  <char> <lgcl>
+#> 1:    lines      D01 #08589E     NA
+#> 2:    lines      D02 #2B8CBE     NA
+#> 3:    lines      D03 #4EB3D3     NA
+#> 4:    lines      D04   green     NA
 ```
 
 New dates of interest used for the `events` parameter can also be added.
@@ -256,18 +240,12 @@ development of this package), use \[fg_update_dates_of_interest()\].
 Resetting the lists (and colors) can also be done.
 
 ``` r
-newdoi <-data.table(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
+newdoi <-data.frame(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 fg_update_dates_of_interest(newdoi)
 #> Saved dates of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_doi.RD
-tail(fg_get_dates_of_interest("fedmoves"),2)
-#> Key: <category, DT_ENTRY>
-#>    category eventid eventid2   DT_ENTRY END_DT_ENTRY  color strokePattern
-#>      <char>  <char>   <char>     <Date>       <Date> <char>        <char>
-#> 1: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   <NA>          <NA>
-#> 2: fedmoves   F:-50     <NA> 2026-06-16   2026-06-16   <NA>          <NA>
-#>       loc
-#>    <char>
-#> 1:   <NA>
-#> 2:   <NA>
+tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
+#>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
+#> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
+#> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
 fg_reset_to_default_state()
 ```
