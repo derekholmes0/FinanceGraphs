@@ -4,7 +4,13 @@
 \alias{fg_cut_to_events}
 \title{Event Helpers: fg_cut_to_events}
 \usage{
-fg_cut_to_events(indta, ncutsperside = 4, center = 0, invert = FALSE)
+fg_cut_to_events(
+  indta,
+  ncutsperside = 4,
+  center = 0,
+  extend = TRUE,
+  invert = FALSE
+)
 }
 \arguments{
 \item{indta}{Time series \code{data.table} with a date as the first column and a value series as the second column.}
@@ -17,6 +23,8 @@ fg_cut_to_events(indta, ncutsperside = 4, center = 0, invert = FALSE)
 \item \code{"median"} Normalize data by subtracting median of all observations.
 \item \code{"zscore"} Normalize data by using standard \code{\link[=scale]{scale()}} function
 }}
+
+\item{extend}{Logical (Default: TRUE) to extend data to today (\code{Sys.Date()})}
 
 \item{invert}{Use opposite color schemes for data, i.e. "red" for good outcomes}
 }

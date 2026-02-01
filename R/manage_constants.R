@@ -4,28 +4,18 @@
 #' @description
 #' `fg_get_dates_of_interest()` gets a set of time events for use in fg time series graphs
 #' `fg_update_dates_of_interest()` updates a set of time events for future use in time series graphs
-#' `fg_get_colors()` gets default color sets for graphs
-#' `fg_update_colors()` updates or replaces default colors
-#' `fg_reset_to_default_state()` resets colors and/or dates of interest
-#'
 #' @param search_categories Grep string of categories to return.
 #' @param use_default (Default TRUE) use dedault dates if none else found.
 #' @param startdt MInimum date for events to be returned.
-#' @param item (Default: "") A grep string for categories desired.
-#' @param replace (Default: FALSE) If TRUE, replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.
-#' @param use_default (Default: TRUE) Use package level dates of interest.
 #' @param indta `data.table` with columns as shown in details.
-#' @param n_max Maximum number of rows to return.
-#' @param reset (Default: "all"), options in ("all","colors","doi") to reset to defaults with the package.
-#'
+#' @param replace (Default: FALSE) If TRUE, replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.
 #' @returns Filtered datasets
 #'
 #' @details
 #' Retrieves default dates of interest given a grepstring of categories.  There are a default set of categories provided which may not be up to date.
-#'
 #' New data passed into [fg_update_dates_of_interest()] or [fg_update_colors()] persists across future loads of the package. Any duplicates in the new file will be taken out.
 #'
-#' New doi datasets must have at least three columns:
+#' New doi `data.frames` must have at least three columns:
 #'
 #' | Column | Meaning |
 #' |:-------|:--------|
@@ -34,9 +24,7 @@
 #' |`DT_ENTRY`| Start Date of event |
 #' |`END_DT_ENTRY`| Optional end of period to define regimes or ranges of events.|
 #'
-#'
 #' @seealso [fgts_dygraph()]
-#'
 #' @examples
 #' \dontrun{
 #' tail(fg_get_dates_of_interest("fedmoves"),3)
@@ -45,16 +33,7 @@
 #'             DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 #' fg_update_dates_of_interest(newdoi)
 #' tail(fg_get_dates_of_interest("fedmoves"),3)
-#'
-#' fg_get_colors("lines")
-#'
-#' # To switch to graduated scales, with darkest being first
-#' require(RColorBrewer)
-#' fg_get_colors("lines",n_max=3) -> oldcolors
-#' fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
-#' fg_get_colors("lines",n_max=3)
-#'
-#' fg_reset_to_default_state("color")
+#' fg_reset_to_default_state("doi")
 #'}
 #'
 
@@ -94,21 +73,6 @@ fg_get_dates_of_interest <- function(search_categories="",use_default=TRUE,start
   return(rtn)
 }
 
-
-#' @import data.table
-#' @rdname fg_dates_of_interest
-#' @export
-fg_get_colors <- function(item="",n_max=NA_integer_) {
-  rtn <- the$default_colors[which(the$default_colors$category==item),]
-  if(!is.na(n_max)) { rtn <- rtn[1:n_max,] }
-  if(item=="") { rtn <- the$default_colors }
-  return(rtn)
-}
-
-fg_get_colorstring <- function(item="") {
-  return( fg_get_colors(item)[["color"]] )
-}
-
 #' @import data.table
 #' @rdname fg_dates_of_interest
 #' @export
@@ -136,10 +100,66 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 }
 
 
+#' Maintain Colors
+#'
+#' @name fg_update_colors
+#' @description
+#' `fg_get_colors()` gets default color sets for graphs
+#' `fg_update_colors()` updates or replaces default colors
+#' `fg_update_line_colors()` replaces line colors only
+#' `fg_reset_to_default_state()` resets colors and/or dates of interest
+#'
+#' @param item (Default: "") A grep string for categories desired.
+#' @param n_max Maximum number of rows to return.
+#' @param indta `data.table` with columns as shown in details.
+#' @param colorlist List with up to 14 new colors just for line (series) coloring
+#' @param replace (Default: FALSE) Replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.
+#' @param persist (Default: TRUE) Keep changes across invocations of the package.
+#' @param reset (Default: "all"), options in ("all","colors","doi") to reset to defaults with the package.
+#'
+#' @returns `data.frame` or message
+#'
+#' @details
+#' New data passed into [fg_update_colors()] persists across future loads of the package unless `persist=FALSE`.
+#' New color datasets must have at least three columns:
+#' | Column | Meaning |
+#' |:-------|:--------|
+#' |`category`| Coloring category, typically `"lines"` for line colors.
+#' |`variable`| Any string that can be sorted or grepped to map to data.
+#' |`color`| Color desired |
+#' @seealso [fgts_dygraph()]
+#' @examples
+#' \dontrun{
+#' fg_get_colors("lines")
+#' # To switch to graduated scales, with darkest being first
+#' require(RColorBrewer)
+#' fg_get_colors("lines",n_max=3) -> oldcolors
+#' fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
+#' fg_get_colors("lines",n_max=3)
+#' fg_update_line_colors(c("black","green","red","blue"),persist=FALSE)
+#' fg_get_colors("lines",n_max=4)
+#' fg_reset_to_default_state("color")
+#'}
+#'
+
 #' @import data.table
-#' @rdname fg_dates_of_interest
+#' @rdname fg_update_colors
 #' @export
-fg_update_colors <- function(indta,replace=FALSE) {
+fg_get_colors <- function(item="",n_max=NA_integer_) {
+  rtn <- the$default_colors[which(the$default_colors$category==item),]
+  if(!is.na(n_max)) { rtn <- rtn[1:n_max,] }
+  if(item=="") { rtn <- the$default_colors }
+  return(rtn)
+}
+
+fg_get_colorstring <- function(item="") {
+  return( fg_get_colors(item)[["color"]] )
+}
+
+#' @import data.table
+#' @rdname fg_update_colors
+#' @export
+fg_update_colors <- function(indta,replace=FALSE,persist=TRUE) {
   category<-variable<-NULL
   mincolset <- c("category","variable","color")
   mincolsmissing <- setdiff(mincolset,names(indta))
@@ -152,14 +172,31 @@ fg_update_colors <- function(indta,replace=FALSE) {
     newcolors <- DTUpsert(the$default_colors,indta,c("category","variable"))
   }
   newcolors <- newcolors[order(category,variable)]
-  save(newcolors,file=the$colorfn)
   assign("default_colors",newcolors,envir=the)
-  message("Saved Colors of interest file to ",the$colorfn)
+  if(persist==TRUE) {
+    save(newcolors,file=the$colorfn)
+    message("Saved Colors of interest file to ",the$colorfn)
+  }
   invisible(newcolors)
 }
 
 #' @import data.table
-#' @rdname fg_dates_of_interest
+#' @rdname fg_update_colors
+#' @export
+fg_update_line_colors <- function(colorlist,replace=FALSE,persist=TRUE) {
+  ncolors <- length(colorlist)
+  if (ncolors>14) {
+    message("Only taking first 14 colors...")
+    ncolors <- 14
+  }
+  old_colors <- fg_get_colors("lines",n_max=ncolors)
+  old_colors$color = colorlist
+  fg_update_colors(old_colors,replace=replace,persist=persist)
+  invisible(old_colors)
+}
+
+#' @import data.table
+#' @rdname fg_update_colors
 #' @export
 fg_reset_to_default_state <- function(reset="all") {
   if(reset %in% c("all","doi","dates")) {
@@ -176,7 +213,7 @@ fg_reset_to_default_state <- function(reset="all") {
 
 # =========================================================================
 # Unexported functions, but still needed with the package
-
+#
 #' @import data.table
 fg_create_defaults <- function() {
   category <- variable <- NULL
@@ -199,7 +236,7 @@ fg_create_defaults <- function() {
     as.numeric(strftime(x,convstr[[to]])) }
   if(!is.data.frame(x)) {
     if(x=="vars") { return("doy|yr|qtr|doq|yrwk|week") }
-    else { message("addseasonaldates(x,toadd =(all|yr|qtr|doq|ywk|week),dtname)")} }
+    else {  message("addseasonaldates(x,toadd =(all|yr|qtr|doq|ywk|week),dtname)")} }
   if (sum(grepl(dtname,colnames(x)))<=0 ) { xdt=as.Date(rownames(x)) }
   else { xdt=as.Date(x[[dtname]],use.names=FALSE) }
   if(grepl("doy|all",toadd)) { x$doy<-as.numeric(format(xdt,"%j")) }

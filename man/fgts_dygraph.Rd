@@ -6,9 +6,10 @@
 \usage{
 fgts_dygraph( indt,
  title = "",  ylab = "",  roller = "default",  pointers = "hair,both",
- splitcols = FALSE,  stepcols = FALSE,  hidecols = FALSE,  hilightcols = FALSE,
- hilightwidth = 2,  hilightstyle = "solid",
- events = "",  event_ds = NULL,  annotations = "",  annotation_ds = NULL,  forecast_ds = NULL,
+ splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
+ hilightwidth = 2, hilightstyle = "solid",
+ events = "", event_ds = NULL,
+ annotations = "", annotation_ds = NULL, forecast_ds = NULL,
  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
  meltvar = "variable",  dylegend = "always",  groupnm = "common",  fillGraph = FALSE,
  verbose = FALSE,  extraoptions = list() )

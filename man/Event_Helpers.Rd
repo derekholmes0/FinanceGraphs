@@ -15,14 +15,14 @@ fg_av_earnings(indt, field = "reportedEPS", ticker_in_label = TRUE)
 \arguments{
 \item{credit}{String with name of credit to look up in 'ratings_db'}
 
-\item{ratings_db}{A 'data.table' or 'data.frame' with the all of the following columns:
-| column | type | description |
-|: --- |: --- :|: --- |
-| CREDIT | character | Name of credit  |
-| AGENCY | character | Name of ratings agency  |
-| RATING   | character | Rating assigned  |
-| WATCH   | character | Watch denoted by anything with "+" or "-" in the string |
-| DT_ENTRY  | Date | Date which ratings or ratings change was issued |}
+\item{ratings_db}{A 'data.table' or 'data.frame' with the all of the following columns:\tabular{lll}{
+   column \tab description \tab type \cr
+   \code{CREDIT} \tab Name of credit \tab \code{character} \cr
+   \code{AGENCY} \tab Name of ratings agency \tab \code{character} \cr
+   \code{RATING} \tab Rating assigned \tab \code{character} \cr
+   \code{WATCH} \tab Watch denoted by anything with "+" or "-" in the string \tab \code{character} \cr
+   \code{DT_ENTRY} \tab Date which ratings or ratings change was issued \tab \code{Date} \cr
+}}
 
 \item{agency}{String (default 'S.P') with 'AGENCY to look up in 'ratings_db'}
 

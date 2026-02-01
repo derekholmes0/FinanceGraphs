@@ -248,10 +248,6 @@ runs_from_value <- function(indta, addrunlength=FALSE) {
 }
 
 
-# ------------------------------------ Unsure if neeeded anymore ---------------------------------------------
-
-
-
 ## -- For Debusgging only
 cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trace=FALSE,dpath=tempdir(),dbgkey="zz",suffix="",
                   skipsaveiftoday=FALSE, nbig=10000,title="",usefst=TRUE,pframe=3,tmp=F) {
@@ -276,7 +272,8 @@ cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trac
           thistrace=ifelse(trace,try(traceback(max.lines=1),silent=T),"--notrace--")
           message("Assigning: ",ymessage, "(",paste(dim(cadtmp),collapse=";"),") ",
                     paste(class(cadtmp),collapse=";"), " from ",utils::tail(thistrace,1),">",title); }
-        assign(ynew,cadtmp,envir=.GlobalEnv)}
+##>        assign(ynew,cadtmp,envir=.GlobalEnv)
+        }
       else {
         if(!silent) { print(paste("cAssign: CANNOT FIND ",y)) } }
       } )

@@ -104,13 +104,14 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 #' @name fg_ratingsEvents
 #' @param credit String with name of credit to look up in 'ratings_db'
 #' @param ratings_db A 'data.table' or 'data.frame' with the all of the following columns:
-#' | column | type | description |
-#' |: --- |: --- :|: --- |
-#' | CREDIT | character | Name of credit  |
-#' | AGENCY | character | Name of ratings agency  |
-#' | RATING   | character | Rating assigned  |
-#' | WATCH   | character | Watch denoted by anything with "+" or "-" in the string |
-#' | DT_ENTRY  | Date | Date which ratings or ratings change was issued |
+#'
+#' | column | description | type |
+#' |:-----|:-----|:---|
+#' | `CREDIT` | Name of credit  | `character` |
+#' | `AGENCY` | Name of ratings agency  | `character` |
+#' | `RATING`   | Rating assigned  | `character` |
+#' | `WATCH`   | Watch denoted by anything with "+" or "-" in the string | `character` |
+#' | `DT_ENTRY`  | Date which ratings or ratings change was issued | `Date` |
 
 #' @param agency String (default 'S.P') with 'AGENCY to look up in 'ratings_db'
 #'
@@ -155,6 +156,7 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #' * `"median"` Normalize data by subtracting median of all observations.
 #' * `"zscore"` Normalize data by using standard [scale()] function
 #' @param invert Use opposite color schemes for data, i.e. "red" for good outcomes
+#' @param extend Logical (Default: TRUE) to extend data to today (`Sys.Date()`)
 #'
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #' @examples
@@ -166,11 +168,15 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #'
 #' @import data.table
 #' @export
-fg_cut_to_events<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
+fg_cut_to_events<-function(indta,ncutsperside=4,center=0,extend=TRUE,invert=FALSE) {
   `.` <- value <- tmpcat <- DT_ENTRY <- END_DT_ENTRY <- NULL
   dt_colname <- find_col_bytype(indta,lubridate::is.Date)
   val_colname <- find_col_bytype(indta,is.numeric)
   tmpdta <- data.table(indta)[,.(DT_ENTRY=get(dt_colname), value=get(val_colname))]
+  if(extend==TRUE) {
+    tmpdta <- rbindlist(list(tmpdta,data.table(DT_ENTRY=Sys.Date(),value=NA_real_)))
+    setnafill(tmpdta,"locf")
+  }
   tcolors <- fg_get_colorstring("eventset")
   xcenter<-0
   if(is.numeric(center)) { xcenter <-center }
@@ -186,7 +192,35 @@ fg_cut_to_events<-function(indta,ncutsperside=4,center=0,invert=FALSE) {
   colorset <- rbind( data.frame(value=seq(1,ncutsperside),color=grDevices::colorRampPalette(c("#ffffff",tcolors[[2]]),alpha=TRUE)(ncutsperside)),
                     data.frame(value=seq(-ncutsperside,-1),color=grDevices::colorRampPalette(c(tcolors[[1]],"#ffffff"),alpha=TRUE)(ncutsperside)))
   colorset <- data.table(colorset)
-  tmpruns = colorset[tmpall[,runs_from_value(.SD[,.(DT_ENTRY,value=tmpcat)],addrunlength=TRUE)],on=.(value)][,END_DT_ENTRY:=END_DT_ENTRY+1][]
+  tmpruns <- colorset[tmpall[,runs_from_value(.SD[,.(DT_ENTRY,value=tmpcat)],addrunlength=TRUE)],on=.(value)][,END_DT_ENTRY:=END_DT_ENTRY+1][]
+  return(tmpruns)
+}
+
+#' Event Helpers: fg_signal_to_events
+#'
+#' @name fg_signal_to_events
+#' @param signal_df A two-column `data.frame` with first being a date and second being any (factor-like) signal parameter.
+#' @param colormap A two column `data.frame` with the first being the possible signal (see Example) and the second a color.
+#'  description
+#' @details This helper applies run-length encoding to match the signal in `signal_df` to the color in `colormap`
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
+#' @examples
+#' # A simple moving average strategy with threshold
+#' require(data.table)
+#' ma_signal<-eqtypx[,.(date,sig=cut(frollmean(EEM,5)-frollmean(EEM,20),
+#'                     c(-10,-0.5,0.5,10),labels=c("long","flat","short")),EEM)]
+#' colormap<-data.frame(sig=c("long","flat","short"),color=c("#f56462","white","#6161ff"))
+#' fgts_dygraph(eqtypx[,.(date,EEM)],event_ds=fg_signal_to_events(ma_signal,colormap),
+#'     dtstartfrac=0.8,roller=1,title="5/20 MA positions")
+#' @import data.table
+#' @export
+fg_signal_to_events<-function(signal_df,colormap) {
+  `.`=value=NULL
+  signal_df <- data.table(signal_df)
+  colormap <- data.table(colormap)
+  setnames(signal_df,colnames(signal_df)[1:2],c("DT_ENTRY","value")) # May have other columns
+  setnames(colormap,colnames(colormap)[1:2],c("value","color"))
+  tmpruns <- colormap[runs_from_value(signal_df,addrunlength=TRUE),on=.(value)]
   return(tmpruns)
 }
 

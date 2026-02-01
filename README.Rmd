@@ -50,7 +50,6 @@ be changed (again persisantly) using the [fg_update_colors()] function.
 ```{r}
 #| label: simple_example1
 #| fig.alt: "Simple Graph of a few Equity Prices"
-require(data.table)
 require(FinanceGraphs)
 fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
 ```
@@ -67,11 +66,13 @@ of the specified width (in data points).  A default smoothing parameter is chose
   - Highlighted with different stroke patterns and width using the `hilightcols` argument with a string (possibly list) of series names, `hilightwidth` for a new width, and `hilightstyle` for a new stroke pattern.
   - Shown a step plot using the `stepcols` argument with a string (possibly list) of series names.
   - Hidden from using the `hidecols` argument with a string (possibly list) of series names.
+  - Rebased to a given constant at a particular date.
 
 ```{r}
 #| label: simple_example2
 #| fig.alt: "Graph of Equity Prices showing highlights and date selection methods"
-fgts_dygraph(eqtypx, dtstartfrac=0.8,hilightcols="IBM",hilightwidth=4,roller=3)
+fgts_dygraph(eqtypx, title="W/ Focused range, highlights, rebasing",
+             dtstartfrac=0.6,hilightcols="QQQ",hilightwidth=4,rebase="2024-01-01,100",roller=3)
 ```
 
 * Series can be grouped together into bands by adding new columns in the data with names ending in '`.lo`' and '`.hi`' for lower and upper bounds. 
@@ -85,10 +86,9 @@ last observations of each series.
 #| label: simple_example3
 #| fig.alt: "Hi/Lo series, used to show currency values against local peers"
 toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
-               reer=mean(value),reer.lo=min(value),reer.hi=max(value)),by=.(date)]
+               peers=mean(value),peers.lo=min(value),peers.hi=max(value)),by=.(date)]
 fgts_dygraph(toplot,title="COP REER vs Latam peers",ylab="Price",
-             roller=3,hilightcols="cop",
-             hilightwidth=4,annotations="last,linevalue")
+             roller=1,hilightcols="cop",hilightwidth=4,annotations="last,linevalue")
 ```
 
 ## Events
@@ -125,16 +125,16 @@ The package includes a few "event helpers" to make it easy  to generate the righ
 #| fig.alt: "Graph of equity prices showing sentiment ranges"
 events_consumer_sent <- fg_cut_to_events(consumer_sent,center="zscore")
 head(events_consumer_sent,2)
-
 fgts_dygraph(smalldta,title="Equity Prices w Sentiment",event_ds=events_consumer_sent)
 ```
 Current event helpers are:
 
 |Function|Description|
 |:-------|:-----------|
-|`fg_findTurningPoints()`|  Statistically identify turning points in a series.|
-|`fg_ratingsEvents()`|  Add colored ranges based on analyst credit ratings.|
-|`fg_cut_to_events()`| "Cut" a univariate series into colored bands, with two different colors for positive and negative values.|
+|`fg_findTurningPoints()`|  Statistically identify turning points in a series|
+|`fg_ratingsEvents()`|  Add colored ranges based on analyst credit ratings|
+|`fg_cut_to_events()`| "Cut" a univariate series into colored bands, with two different colors for positive and negative values|
+|`fg_signal_to_events()`| Map a long/short signal to events |
 |`fg_tq_divs()`|Add dividend events from TidyQuant dividend data|
 |`fg_av_earnings()`|Add earnings events from AlphaVantage earnings data|
 
@@ -177,7 +177,7 @@ New dates of interest used for the `events` parameter can also be added.  To add
 ```{r}
 newdoi <-data.table(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 fg_update_dates_of_interest(newdoi)
-tail(fg_get_dates_of_interest("fedmoves"),2)
+tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 fg_reset_to_default_state()
 ```
 

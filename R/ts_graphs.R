@@ -3,9 +3,10 @@
 #' @name fgts_dygraph
 #' @usage  fgts_dygraph( indt,
 #'  title = "",  ylab = "",  roller = "default",  pointers = "hair,both",
-#'  splitcols = FALSE,  stepcols = FALSE,  hidecols = FALSE,  hilightcols = FALSE,
-#'  hilightwidth = 2,  hilightstyle = "solid",
-#'  events = "",  event_ds = NULL,  annotations = "",  annotation_ds = NULL,  forecast_ds = NULL,
+#'  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
+#'  hilightwidth = 2, hilightstyle = "solid",
+#'  events = "", event_ds = NULL,
+#'  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
 #'  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
 #'  meltvar = "variable",  dylegend = "always",  groupnm = "common",  fillGraph = FALSE,
 #'  verbose = FALSE,  extraoptions = list() )
@@ -329,7 +330,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     add_titles("y",ylab)
     alltitles = paste0(title,paste0(titleadds[axis=="title"]$note,collapse=","))
-    cAssign("indtnew;alltitles;series_dets;dt_colnames")
+    #cAssign("indtnew;alltitles;series_dets;dt_colnames")
     g1 <- dygraphs::dygraph(indtnew,main=alltitles,group=groupnm)
     for(seriesgp in sort(unique(series_dets[display==TRUE,]$gpnm))) {
         trw <- series_dets[get("gpnm")==seriesgp,]
