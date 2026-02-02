@@ -1,0 +1,137 @@
+---
+title: "fgts_dygraphs"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(FinanceGraphs)
+```
+
+# Financial Time Series visualization
+
+Visualizing financial time series is critical to communicating ideas and deciding how to trade or invest.  
+While [ggplot2](https://ggplot2.tidyverse.org/) is the gold standard for static graphs, 
+[Dygraphs](https://rstudio.github.io/dygraphs/index.html) is an excellent package to mix interactivity with flexibility
+and visual aesthetics, and is well suited to Financial time series in particular.  
+
+That flexibility is great, but can take some time (and code) to set up and customize well.  This package is designed
+to reduce the time spent going from data to finished and enhanced visualization.  Rather than emphasize pipes and
+complicated coding, this package offers just a few flexible functions and a simplified parameter-based approach
+to graph customization. Aesthetic details have sensible defaults, but are almost always customizable.  The package is designed 
+to be as agnostic as possible about input data, and also seeks to manage other *common data* which may add 
+useful information to the graph. 
+
+# Dygraphs with `fgts_dygraph`
+
+`fgts_dygraph()` is a flexible wrapper around [dygraphs](https://rstudio.github.io/dygraphs/index.html) building blocks.
+Internally, it makes extensive use of `data.table` functionality, both for flexibility and speed.  
+Key concepts useful to use this function are 
+
+* **Input data** is always a `data.frame` or `data.table` with a `Date` coercible column.  It can either be narrow/long,
+with a character variable such as `variable` (needed as a parameter if different) for series names and a single numeric column,
+or wide, with a `Date` column and multiple numeric columns whose names are used as series.
+
+* **Events** are annotations added to the graph with a date or date range associated with it.  There are several "event helpers"
+provided which help to find and map various types of annotations to a common format used internally within the function.  The most
+common examples are **dates of interest** where market moving events or regime periods may be added.  
+
+* **Annotations** are notes or annotations on axes other than the date axis.  Examples (shown below) include lines which show
+the last values or series names at their endpoints, or ranges highlighting (e.g.) buy or sell targets.
+
+* **Range highlighting** are options to focus the graph on subsets of the plotted data.
+
+## Simple Examples
+
+Most financial time series are just prices of various assets.  Most of the examples will use a simple prepared data set of prices.
+Simply plotting these prices can be done with just a few parameters.
+
+```{r}
+head(eqtypx,3)
+fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
+```
+
+Note two important features of this graph. First, the series is smoothed by taking moving averages specified by the number in the lower
+left hand column.  These values are determined by the length of the input series, can be changed using the `roller` parameter.  Second,
+there is a nice date range selector below the graph.  This can be interactively used to focus on parts of the graph, and double
+clicking within the graph always resets the view to the broadest possible one.
+
+Let's enhance the graph with a few more parameters that can be added to the `fgts_dygraph` function call:
+
+| Parameter call | Feature |
+|:---------------|:---------------|
+|`roller=3`| Lessen the smoothing by only averaging every 3 prices|
+|`dtstartfrac=0.6`| Start the graph 60 percent of the way from input series beginning to the end|
+|`splitcols=TRUE`| Split the first series found (leftmost if wide, first if narrow) onto a second axis|
+|| A list of series names can also be given|
+
+```{r}
+fgts_dygraph(eqtypx, title="Stock Prices, focused", roller=3,dtstartfrac=0.6,splitcols=TRUE)
+```
+
+To highlight or hide series and focus in on a particular date range, use these:
+
+| Parameter call | Feature |
+|:---------------|:---------------|
+|`dtwindow="-3y::"`| focus the date range selector to 1 year prior to 'Sys.Date()`|
+|`hidecols="TLT"`| Hide a series |
+|`hilightcols="IBM`| Highlight a series by thickening its line or changing the line style|
+|`hilightwidth=4`| New width for columns named in `hilightcols`|
+|`hilightstyle="dashed"`| New line style for columns named in `hilightcols`|
+
+```{r}
+fgts_dygraph(eqtypx, title="Stock Prices, highlighted", roller=1,
+             dtwindow="-3y::",hidecols="TLT",hilightcols="IBM",hilightwidth=4, hilightstyle="dashed")
+```
+
+## Rebasing and adding vertical annotations.
+
+Many times, you may want to show relative changes of series with widely varying values.
+[Dygraphs](https://rstudio.github.io/dygraphs/index.html) has a nice function `dyRebase` for doing so, there are times
+you would like to rebase to given date.  For example to make all the series start at 120 as of the beginning of 2025,
+use the `rebase` parameter.
+
+There are also ways to add horizontal lines to highlight current (or last in the dataset) values or labels.
+These can be useful when you prefer more static graphs than interactive ones, especially when legends
+are turned off.
+
+| Parameter call | Feature |
+|:---------------|:---------------|
+|`rebase="2025-01-01,120"`|Divide all series by their values a of 1/1/2025 and scale to 120.|
+|`annotations=..`|Add annotations separated by semicolons|
+|`last,linelabel`| Put vertical lines highlighting last values in each series|
+|`range,100,120`| Put a highlighted range betwewen 100 and 120 percent of value on 1/1/2025|
+|`dylegend="never"`|Don't replicate information in the legend|
+|`bg_opts="grid,none"`|Hide the grid.|
+
+```{r}
+fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfrac=0.7,
+             rebase="2025-01-01,120",
+             annotations="last,linelabel;range,100,120",
+             dylegend = "never", bg_opts="grid,none")
+```
+
+* Note that column specifications are flexible, i.e. `hidecols="TLT;EEM"` or `hidecols=c("TLT","EEM")` can also be used.
+* Also, notice that focusing in the displayed date range reduces the roller smoothing parameter appropriately.  However, 
+until "1" is put in the lower left corner box, it will be smoothed and the last value won't agree with the `last,linelabel`
+annotation.
+* The data series have the colors same colors they would have if they were not hidden by `hidecols`.  To draw with the 
+colors typically used for the first two series (see Customization below), take the series out before sending to `fgts_dygraph()`
+by (e.g.) passing in `eqtypx |> dplyr::select(date,IBM,QQQ)` as `indta`.
+
+## Grouping series together
+
+
+
+## Events and Event handlers
+
+
+## FOrecasts
+
+
+## Customization

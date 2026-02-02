@@ -36,7 +36,7 @@ pak::pak("derekholmes0/FinanceGraphs")
 
 ## Input data and Constants
 
-The package is designed to be flexible with input data.  The data can either be in **long** format (e.g. `date`,`series`,`value`) or **wide** format (date,col1,col2,...).  
+The package is designed to be flexible with input data.  The data can either be in **long** format (e.g. `date`,`series`,`value`) or **wide** format (`date`,`col1`,`col2`,...).  
 The `date` column can be called anything or be anywhere in the input data.frame, but there must be at least one coercible column with dates and one
 numeric column.  Each column after the date column is treated as a separate series to be graphed, but if the column name (series name) ends in any of
 '`.lo`, `.hi`, `.f` (for forecast), '`.flo`, `.fhi` then those columns are treated specially as lower/upper bands or forecast series associated with 

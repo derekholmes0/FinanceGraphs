@@ -5,7 +5,7 @@
 \title{TIme series in Dygraph form}
 \usage{
 fgts_dygraph( indt,
- title = "",  ylab = "",  roller = "default",  pointers = "hair,both",
+ title = "",  ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
  hilightwidth = 2, hilightstyle = "solid",
  events = "", event_ds = NULL,
@@ -29,10 +29,16 @@ character column and one numeric column.  Ideal format is \verb{date,variable,va
 \item integer >= 0 : User specified moving average length.
 }}
 
-\item{pointers}{Pointer options to use with mouse movement. (See \code{\link[dygraphs:dyCrosshair]{dygraphs::dyCrosshair()}})}
+\item{bg_opts}{Semicomma separated options to change interactivity and background of charts.  These semicomma separated options
+change pointer option and grids options.
+\itemize{
+\item \verb{hair,<style>} passes \verb{<style>} to \code{\link[dygraphs:dyCrosshair]{dygraphs::dyCrosshair()}}.  Default is "both" x and y crosshairs.
+\item \verb{grid,<x,y,both>} specifies which gri lines to show.  Default is "both"
+\item \code{norange} turns off date range selector.
+}}
 
 \item{splitcols, stepcols, hidecols}{String or list of data series to show on a second y axis, to be shown as step plots, or to be hidden.
-Can also be \code{TRUE} in which case first series in the data is affected.}
+Can also be \code{TRUE} in which case first series in the data is affected. Can also be a semicolon separated single string with mutiple series.}
 
 \item{hilightcols}{String or list of data series to plot in different style than other series.}
 
@@ -88,7 +94,7 @@ as of the given date.  See examples.}
 
 \item{meltvar}{(Default: \code{variable}) Column name in \code{indt} with series names, if melted.}
 
-\item{dylegend}{(Default: TRUE) include legend in graph}
+\item{dylegend}{(Default: "auto") Passed to \code{\link[dygraphs:dyLegend]{dygraphs::dyLegend()}}, can be one of ("auto", "always", "onmouseover", "follow", "never")}
 
 \item{groupnm}{(Default: \code{common})  Group name used in \code{shiny} or \code{RMarkdown} to synchonize graphs}
 

@@ -2,7 +2,7 @@
 #'
 #' @name fgts_dygraph
 #' @usage  fgts_dygraph( indt,
-#'  title = "",  ylab = "",  roller = "default",  pointers = "hair,both",
+#'  title = "",  ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
 #'  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
 #'  hilightwidth = 2, hilightstyle = "solid",
 #'  events = "", event_ds = NULL,
@@ -19,9 +19,13 @@
 #'  * `default` (Default) chose a smoothing parameter consistent with the length of the input series
 #'  * `finest` No smoothing
 #'  * integer >= 0 : User specified moving average length.
-#' @param pointers  Pointer options to use with mouse movement. (See [dygraphs::dyCrosshair()])
+#' @param bg_opts Semicomma separated options to change interactivity and background of charts.  These semicomma separated options
+#' change pointer option and grids options.
+#' * `hair,<style>` passes `<style>` to [dygraphs::dyCrosshair()].  Default is "both" x and y crosshairs.
+#' * `grid,<x,y,both>` specifies which gri lines to show.  Default is "both"
+#' * `norange` turns off date range selector.
 #' @param splitcols,stepcols,hidecols  String or list of data series to show on a second y axis, to be shown as step plots, or to be hidden.
-#' Can also be `TRUE` in which case first series in the data is affected.
+#' Can also be `TRUE` in which case first series in the data is affected. Can also be a semicolon separated single string with mutiple series.
 #' @param hilightcols String or list of data series to plot in different style than other series.
 #' @param hilightwidth (Default: 2) relative width of series specified in `hilightcols`
 #' @param hilightstyle (Default: solid).  Line style of series specified in `hilightcols`.
@@ -58,7 +62,7 @@
 #' as of the given date.  See examples.
 #' @param exportevents String of name of `data.frame` to create in  `.GlobalEnv` with event dates displayed on graph.
 #' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
-#' @param dylegend (Default: TRUE) include legend in graph
+#' @param dylegend (Default: "auto") Passed to [dygraphs::dyLegend()], can be one of ("auto", "always", "onmouseover", "follow", "never")
 #' @param groupnm  (Default: `common`)  Group name used in `shiny` or `RMarkdown` to synchonize graphs
 #' @param fillGraph (Default: FALSE) Shade area underneath each series.
 #' @param verbose (Default: FALSE) Print extra details about what will be graphed.
@@ -160,7 +164,7 @@
 #'
 #' @import data.table
 #' @export
-fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,both",
+fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both;grid,both",
                         splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
                         hilightcols=FALSE,hilightwidth=2,hilightstyle="solid",
                         events="",event_ds=NULL,
@@ -258,23 +262,23 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     # Style setup
     if(!(hidecols[1]==FALSE)) {
-      t_colnos <- match(hidecols,series_dets$gpnm,nomatch=0) # Can match more than one
+      t_colnos <- match(s(hidecols),series_dets$gpnm,nomatch=0) # Can match more than one
       series_dets[t_colnos]$display <- FALSE
     }
 
     if(!(splitcols[1]==FALSE)) {
-      t_colnos <- match(splitcols,series_dets$gpnm,nomatch=1) # Can match more than one
+      t_colnos <- match(s(splitcols),series_dets$gpnm,nomatch=1) # Can match more than one
       series_dets[t_colnos]$axis <- "y2"
     }
 
     if(!(stepcols[1]==FALSE)) {
-      t_colnos <- match(stepcols,series_dets$gpnm,nomatch=0) # Can match more than one
+      t_colnos <- match(s(stepcols),series_dets$gpnm,nomatch=0) # Can match more than one
       if(t_colnos[1]==0) { t_colnos<- seq(1,nrow(series_dets)) }
       series_dets[t_colnos]$stepplot <- TRUE
     }
 
     if(!(hilightcols[1]==FALSE)) {
-      t_colnos <- match(hilightcols,series_dets$seriesnm,nomatch=0) # Can match more than one
+      t_colnos <- match(s(hilightcols),series_dets$seriesnm,nomatch=0) # Can match more than one
       series_dets[t_colnos]$width <- hilightwidth
       series_dets[t_colnos]$style <- hilightstyle
     }
@@ -346,7 +350,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
                         strokePattern=trw[1,]$style,fillGraph=FALSE)
     }
 
-    g1 <- g1 |> dygraphs::dyLegend(width=600, show="always",hideOnMouseOut = FALSE)
+    g1 <- g1 |> dygraphs::dyLegend(width=450, show=dylegend,hideOnMouseOut = FALSE)
     g1 <- g1 |> dygraphs::dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.4,
                                       highlightSeriesOpts = list(strokeWidth = 3))
     g1 <- g1 |> dygraphs::dyOptions(labelsKMB=TRUE,rightGap=2,fillAlpha=0.2,fillGraph=fillGraph,axisLabelFontSize=10)
@@ -522,8 +526,36 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
        }
     }
 
+    # Legends
+    if(nchar(dylegend)>0)  {
+      g1= g1 |>  dygraphs::dyLegend(width=600, show=dylegend,hideOnMouseOut = FALSE)  }
+
+    # Axes
+    gridopts <- optString_parse(bg_opts,"grid")
+    g1 <- g1 |> dygraphs::dyAxis('y',valueRange=yRange,label=paste0(titleadds[axis=="y"]$note,collapse="<br>"),
+                                      drawGrid=grepl("y|both",gridopts)	)
+    g1 <- g1 |> dygraphs::dyAxis("x",paste0(titleadds[axis=="x"]$note,collapse="<br>"),
+                                      drawGrid=grepl("x|both",gridopts))
+
+    if( nrow(y2dta <- series_dets[axis=="y2",])>0 ) {
+      g1 = g1 |> dygraphs::dyAxis('y2',independentTicks=TRUE, drawGrid = FALSE, label=paste(y2dta$seriesnm,collapse=","),
+                                  axisLineColor=y2dta[1,]$color, axisLabelColor = y2dta[1,]$color,
+                                  rawGrid=grepl("y|both",gridopts) )
+    }
+
+    # Errata
+    if(!is.logical(hairopts <- optString_parse(bg_opts,"cross|hair"))) {
+      g1 <- g1 |> dygraphs::dyCrosshair(direction = hairopts)
+    } # horizontal,both,vertical
+
+    if(!(optString_parse(bg_opts,"norange")=="TRUE")) {
+      g1 = g1 |> dygraphs::dyRangeSelector(height=20,dateWindow=dtsrange_todisplay)
+      if( dtstartfrac>0 | nchar(dtwindow)>1) {
+        g1 = g1 |> dygraphs::dyUnzoom()
+      }
+    }
     # Rollers
-    suggest_rollpd <- c(1L,5L,10L,20L)[findInterval(as.numeric(diff(range(indtnew[[1]]))),c(1,360,2520,3600,+Inf))]
+    suggest_rollpd <- c(1L,5L,10L,20L)[findInterval(as.numeric(dtsrange_todisplay[2]-dtsrange_todisplay[1]),c(1,720,2520,3600,+Inf))]
     rollpd <- suppressWarnings(fcase(
       roller=="default", suggest_rollpd,
       roller=="finest", 1L,
@@ -532,28 +564,6 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",pointers="hair,bot
 
     if(!is.na(rollpd)) {
       g1 = g1 |> dygraphs::dyRoller(rollPeriod=rollpd) }
-
-    # Legends
-    if(nchar(dylegend)>0)  {
-      g1= g1 |>  dygraphs::dyLegend(width=600, show=dylegend,hideOnMouseOut = FALSE)  }
-
-    # Axes
-    g1 <- g1 |> dygraphs::dyAxis('y',valueRange=yRange,label=paste0(titleadds[axis=="y"]$note,collapse="<br>"))
-    g1 <- g1 |> dygraphs::dyAxis("x",paste0(titleadds[axis=="x"]$note,collapse="<br>"))
-
-    if( nrow(y2dta <- series_dets[axis=="y2",])>0 ) {
-      g1 = g1 |> dygraphs::dyAxis('y2',independentTicks=TRUE, drawGrid = FALSE, label=paste(y2dta$seriesnm,collapse=","),
-                                  axisLineColor=y2dta[1,]$color, axisLabelColor = y2dta[1,]$color)
-    }
-
-    # Errata
-    if(!is.logical(hairopts <- optString_parse(pointers,"cross|hair"))) {
-      g1 <- g1 |> dygraphs::dyCrosshair(direction = hairopts)
-    } # horizontal,both,veretical
-
-    if(!(optString_parse(pointers,"norange")=="TRUE")) {
-      g1 = g1 |> dygraphs::dyRangeSelector(height=20,dateWindow=dtsrange_todisplay)
-    }
 
     return(g1)
 }

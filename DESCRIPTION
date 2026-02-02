@@ -43,3 +43,4 @@ LazyData: true
 VignetteBuilder: knitr
 URL: https://github.com/derekholmes0/FinanceGraphs
 BugReports: https://github.com/derekholmes0/FinanceGraphs/issues
+Config/Needs/website: rmarkdown
