@@ -10,7 +10,7 @@ fg_ratingsEvents(credit, ratings_db, agency = "S.P")
 
 fg_tq_divs(tickers, divs_ds = NULL, ticker_in_label = TRUE)
 
-fg_av_earnings(indt, field = "reportedEPS", ticker_in_label = TRUE)
+fg_av_earnings(indt, field = "reportedEPS", ticker_in_label = FALSE)
 }
 \arguments{
 \item{credit}{String with name of credit to look up in 'ratings_db'}

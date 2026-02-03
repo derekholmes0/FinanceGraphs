@@ -122,8 +122,9 @@ optString_parse <-function(x,item,default="TRUE") {
     }
 }
 
-# s(plit) converts string to list
+# s(plit) converts string to list, but passes logical
 s<-function(x,sep=";",fixed=TRUE,rtn=NULL) {
+    if(is.logical(x)) { return(x) }
     y=unlist(strsplit(x,sep,fixed=fixed))
     if(is.numeric(rtn)) { if(length(y)>=rtn) { y=y[rtn] } }
     return(y)
@@ -272,7 +273,7 @@ cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trac
           thistrace=ifelse(trace,try(traceback(max.lines=1),silent=T),"--notrace--")
           message("Assigning: ",ymessage, "(",paste(dim(cadtmp),collapse=";"),") ",
                     paste(class(cadtmp),collapse=";"), " from ",utils::tail(thistrace,1),">",title); }
-##>        assign(ynew,cadtmp,envir=.GlobalEnv)
+        assign(ynew,cadtmp,envir=.GlobalEnv)
         }
       else {
         if(!silent) { print(paste("cAssign: CANNOT FIND ",y)) } }

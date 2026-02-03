@@ -143,6 +143,7 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
     data.frame(NUMRAT12=12*11+seq(1,5*12,1),color=grDevices::colorRampPalette(c("#f56462","#ffffff"),alpha=0.4)(60))     ))
   trats <- trats |> dplyr::left_join(ratingscolors,by="NUMRAT12") |> dplyr::ungroup()
   tdates <- trats |> dplyr::transmute(category="ratings",text=RATING,DT_ENTRY,END_DT_ENTRY,color,loc="bottom")
+  tdates <- data.table(tdates,key=c("DT_ENTRY","END_DT_ENTRY"))
   return(tdates)
 }
 
@@ -280,9 +281,10 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' @import data.table
 #' @rdname Event_Helpers
 #' @export
-fg_av_earnings<-function(indt,field="reportedEPS",ticker_in_label=TRUE) {
+fg_av_earnings<-function(indt,field="reportedEPS",ticker_in_label=FALSE) {
   `.`=reportedDate=symbol=color=text=NULL
-  rtn <- data.table(indt)[,.(DT_ENTRY=reportedDate,color=symbol,category="series_color",text=format(get(field),digits=2))]
+  rtn <- data.table(indt)[,.(DT_ENTRY=reportedDate,text=paste0("E:",format(get(field),digits=2)),
+                              color=symbol,loc="top",category="series_color")]
   if(ticker_in_label==TRUE) {
     rtn <- rtn[,let(text=paste0(color,":",text))]
   }

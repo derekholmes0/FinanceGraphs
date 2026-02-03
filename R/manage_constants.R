@@ -84,8 +84,14 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
     stop("fg_create_dates_of_interest: Need to add column(s) ",mincolsmissing)
   }
   indta <- data.table(indta)
-  indta <- indta[order(category,DT_ENTRY)][,':='(END_DT_ENTRY=ifelse("END_DT_ENTRY" %in% names(indta),fcoalesce(END_DT_ENTRY,DT_ENTRY),as.Date(DT_ENTRY)))]
+  indta <- indta[order(category,DT_ENTRY)]
+  if("END_DT_ENTRY" %in% names(indta)) {
+    indta <- indta[,':='(END_DT_ENTRY=fcoalesce(END_DT_ENTRY,DT_ENTRY))]
+  } else {
+    indta <- indta[,':='(END_DT_ENTRY=DT_ENTRY)]
+  }
   indta <- indta[,.SD[1],by=.(category,DT_ENTRY,END_DT_ENTRY)]
+  indta <- indta[,.SD,.SDcols=intersect(colnames(indta),colnames(the$doi_dates))]
   if(replace==TRUE) {
     newdoi <- indta
   }
@@ -104,7 +110,8 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #'
 #' @name fg_update_colors
 #' @description
-#' `fg_get_colors()` gets default color sets for graphs
+#' `fg_get_colors()` gets default color `data.frame` for graphs
+#' `fg_display_colors()` SHows a plot with current colors.
 #' `fg_update_colors()` updates or replaces default colors
 #' `fg_update_line_colors()` replaces line colors only
 #' `fg_reset_to_default_state()` resets colors and/or dates of interest
@@ -127,6 +134,9 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #' |`category`| Coloring category, typically `"lines"` for line colors.
 #' |`variable`| Any string that can be sorted or grepped to map to data.
 #' |`color`| Color desired |
+#'
+#' `variable` is used to prioritize colors, so (e.g. `D01` will be the color of the first series in an input dataset)
+#'
 #' @seealso [fgts_dygraph()]
 #' @examples
 #' \dontrun{
@@ -200,14 +210,28 @@ fg_update_line_colors <- function(colorlist,replace=FALSE,persist=TRUE) {
 #' @export
 fg_reset_to_default_state <- function(reset="all") {
   if(reset %in% c("all","doi","dates")) {
-    file.remove(the$doifn)
+    suppressWarnings(file.remove(the$doifn))
     the$doi_dates <- copy(doi_default)
   }
   if(reset %in% c("all","color")) {
-    file.remove(the$colorfn)
+    suppressWarnings(file.remove(the$colorfn))
     the$default_colors <- copy(colors_default)
   }
   the$tevents_defaults <- copy(tevents_defaults)
+}
+
+#' @import ggplot2
+#' @import data.table
+#' @rdname fg_update_colors
+#' @export
+fg_display_colors <- function(item="") {
+  category=variable=color=x=y=ztext=i.DT_ENTRY=i.END_DT_ENTRY=NULL
+  tcolors <- fg_get_colors(item)
+  tcolors <- tcolors[,let(x=20-(.I %% 20), y=floor(.I/20)+1,ztext=paste0(category,",",variable,":",color))]
+  g1 <- ggplot(tcolors,aes(x,y,fill=color,label=ztext))+geom_tile()+geom_label(fill="white",size=3)
+  g1 <- g1 +coord_flip()+scale_fill_identity()+labs(title="Current colors used")+theme_bw()
+  return(g1)
+
 }
 
 
@@ -217,7 +241,7 @@ fg_reset_to_default_state <- function(reset="all") {
 #' @import data.table
 fg_create_defaults <- function() {
   category <- variable <- NULL
-  dtmap  <- make_dtmap()
+  dtmap  <- make_dtmap(yrs_ahead=10)
   datecols <- c("DT_ENTRY","END_DT_ENTRY")
   doi_default <- fread("./inst/extdata/doidates.csv",na.strings="")[,(datecols):=lapply(.SD,\(x) as.Date(x,"%m/%d/%Y")), .SDcols=datecols][]
   colors_default <- fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
@@ -286,3 +310,11 @@ make_dtmap <- function(yrs_ahead=5) {
                        'isqtr'=fcoalesce(isqtr,FALSE),'isyr'=fcoalesce(isyr,FALSE))][]
   return(dtmap)
 }
+
+
+# Original colors:
+# mktregimes	+	#FFE6E6
+# mktregimes	=	white
+# mktregimes	default	white
+
+

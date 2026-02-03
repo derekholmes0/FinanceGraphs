@@ -5,6 +5,7 @@
 \alias{fg_get_colors}
 \alias{fg_update_line_colors}
 \alias{fg_reset_to_default_state}
+\alias{fg_display_colors}
 \title{Maintain Colors}
 \usage{
 fg_get_colors(item = "", n_max = NA_integer_)
@@ -14,6 +15,8 @@ fg_update_colors(indta, replace = FALSE, persist = TRUE)
 fg_update_line_colors(colorlist, replace = FALSE, persist = TRUE)
 
 fg_reset_to_default_state(reset = "all")
+
+fg_display_colors(item = "")
 }
 \arguments{
 \item{item}{(Default: "") A grep string for categories desired.}
@@ -34,7 +37,8 @@ fg_reset_to_default_state(reset = "all")
 \code{data.frame} or message
 }
 \description{
-\code{fg_get_colors()} gets default color sets for graphs
+\code{fg_get_colors()} gets default color \code{data.frame} for graphs
+\code{fg_display_colors()} SHows a plot with current colors.
 \code{fg_update_colors()} updates or replaces default colors
 \code{fg_update_line_colors()} replaces line colors only
 \code{fg_reset_to_default_state()} resets colors and/or dates of interest
@@ -47,6 +51,9 @@ New color datasets must have at least three columns:\tabular{ll}{
    \code{variable} \tab Any string that can be sorted or grepped to map to data. \cr
    \code{color} \tab Color desired \cr
 }
+
+
+\code{variable} is used to prioritize colors, so (e.g. \code{D01} will be the color of the first series in an input dataset)
 }
 \examples{
 \dontrun{

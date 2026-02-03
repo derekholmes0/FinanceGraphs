@@ -32,7 +32,7 @@ pak::pak("derekholmes0/FinanceGraphs")
 
 The package is designed to be flexible with input data. The data can
 either be in **long** format (e.g. `date`,`series`,`value`) or **wide**
-format (date,col1,col2,…).  
+format (`date`,`col1`,`col2`,…).  
 The `date` column can be called anything or be anywhere in the input
 data.frame, but there must be at least one coercible column with dates
 and one numeric column. Each column after the date column is treated as
@@ -215,12 +215,12 @@ graduated set of colors for the first 3 series.
 
 ``` r
 fg_get_colors("lines",n_max=4)
-#>    category variable   color  const
-#>      <char>   <char>  <char> <lgcl>
-#> 1:    lines      D01   black     NA
-#> 2:    lines      D02     red     NA
-#> 3:    lines      D03 magenta     NA
-#> 4:    lines      D04   green     NA
+#>    category variable     color  const
+#>      <char>   <char>    <char> <lgcl>
+#> 1:    lines      D01     black     NA
+#> 2:    lines      D02       red     NA
+#> 3:    lines      D03 darkgreen     NA
+#> 4:    lines      D04      blue     NA
 fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3] )
 #> Saved Colors of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_colors.RD
 fg_get_colors("lines",n_max=4)
@@ -230,7 +230,7 @@ fg_get_colors("lines",n_max=4)
 #> 1:    lines      D01 #08589E     NA
 #> 2:    lines      D02 #2B8CBE     NA
 #> 3:    lines      D03 #4EB3D3     NA
-#> 4:    lines      D04   green     NA
+#> 4:    lines      D04    blue     NA
 ```
 
 New dates of interest used for the `events` parameter can also be added.

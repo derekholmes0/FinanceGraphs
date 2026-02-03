@@ -2,7 +2,7 @@
 #'
 #' @name fgts_dygraph
 #' @usage  fgts_dygraph( indt,
-#'  title = "",  ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
+#'  title = "",  xlab="", ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
 #'  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
 #'  hilightwidth = 2, hilightstyle = "solid",
 #'  events = "", event_ds = NULL,
@@ -14,7 +14,7 @@
 #' @param indt Input data in long or wide format.  THere must be at least one date column, one
 #' character column and one numeric column.  Ideal format is `date,variable,value`
 #' @param title Title to put on top of graph
-#' @param ylab Label for y axis
+#' @param xlab,ylab Labels for x and y axis
 #' @param roller Initial moving average value to smooth graphs.  (See [dygraphs::dyRoller()])  Options are
 #'  * `default` (Default) chose a smoothing parameter consistent with the length of the input series
 #'  * `finest` No smoothing
@@ -32,13 +32,13 @@
 #' Options are (`solid`,`dashed`,`dotted`,`dotdash`)
 #' @param events String with possible events to add to graph.  Options can be added together
 #' with `;` and include
-#' * `doi,eventsetname`  : Events in internal event list `eventsetname` from list maintained by [fg_update_dates_of_interest()].
-#' * `seasonal,type` : Regularly spaced intervals of `type`.  For options, see details.
+#' * `doi,<eventsetname>`  : Events in internal event list `eventsetname` from list maintained by [fg_update_dates_of_interest()].
+#' * `seasonal,<type>` : Regularly spaced intervals of dates. See details below.
 #' * `minmax` : Locations of highest and lowest observations per series.
 #' * `dt,text,d1,<d2>` : Text events starting at `d1` and possibly ending at `<d2>`,both
 #'      of the form `yyyy-mm-dd`.
 #' * `break,labelform` : Breakouts as determined by [fg_addbreakouts()] with `labelform` in ("singleasdate","singleavalue","breakno")
-#' * `tp,n` : Turning points as determined by [fg_findTurningPoints()]
+#' * `tp,n` : Turning points on the first series as determined by [fg_findTurningPoints()]
 #' @param event_ds `data.frame` of events to be added to graph.  See details and
 #' examples for specification.
 #' @param annotations string with annotations on individual series or along `y` axes.  Options can be added
@@ -76,8 +76,21 @@
 #' Colors can be managed using [fg_update_colors()] and will persist across R sessions, See vignette for details.
 #' Series are grouped together into bands around a series `series` if their names end as in 'series.lo' or 'series.hi'.  See examples and vignette for details.
 #'
-#' **Events** are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
-#' using [fg_update_dates_of_interest()] which will persist across R sessions.  See examples and vignette for further details.
+#' **Events** are dates and date ranges to be highlighted in the graph. Multiple types of events can be strung together in
+#'  semicolon delimited strings. Of the options outlined above, two additional details are
+#'
+#'  * `"doi,<category>"` gets events from [fg_get_dates_of_interest()] which can be added to or managed using [fg_update_dates_of_interest()].
+#'  Colors and label placement can be customized as necessary.
+#'
+#' * `seasonal,<type>` puts regularly occurring events on the graph.  `<type>` can be
+#'
+#' |`<type>`|description|
+#' |:---------------|:------------------|
+#' |`"optex,mo` \| `qtr"` |  Monthly and/or quarterly equity option expiration dates.|
+#' |`"roll"`|IMM CDS roll dates|
+#' |`"daysfromroll"`| Dates with same number of days to the next roll as last date plotted|
+#' |`"doq","doy","bdoy"`| Dates with same day in quarter, in year, or business day of year to the last day plotted|
+#'
 #' Events can also be added using a `data.frame` passed via `event_ds` with the following columns:
 #'
 #' | column | description | type |
@@ -94,13 +107,10 @@
 #'
 #' Many times, events depend on outside data or statistical analysis on the original data.  The `event_ds` to be passed
 #' in can come from event helpers in [fg_cut_to_events()], [fg_addbreakouts()], [fg_findTurningPoints()], or  [fg_ratingsEvents()].
-#' Event columns are processed as is, with one current exception
-#' * `category=="series_color"` then `color` is replaced by the color of the series currently in the `color` column.
-#'    Tis allows annotations to be same color as the series to which they apply.
+#' Event columns are processed as is, unless `category=="series_color"` which will replace `color` with that of its series.
 #'
 #' **Annotiations** include any notes or highlights added to the graph on the 'y' axis or on an individual series.  In addition to those passed
 #' via the `annotations` parameter, annotations can be added using a `data.frame` with the following columns:
-
 #' | column | description | type |
 #' |:---|:---|:---:|
 #' | `date` | (Required) Start date | `Date` |
@@ -108,6 +118,10 @@
 #' | `text` | (Required) Text to display | `character` |
 #' | `color` | Color for line and text | `character` |
 #' | `eventonly`| Only draw line for for start of event, no band | `logical` |
+#'
+#' Other notes:
+#' * Using `stepcols` most often happens with lower frequency data, so an `nafill` is automatically performed.
+#'
 #'
 #' @examples
 #' # See Vignette for more extensive examples.
@@ -133,9 +147,9 @@
 #' fgts_dygraph(smalldta,events="date,FOMO,2025-01-01,2025-06-01;date,xmas,2025-12-25")
 #'
 #' # Events passed in as data.frames
-#' myevents = data.frame(end_date=as.Date(c("2024-03-10","2024-01-10")),
-#'             date=as.Date(c("2024-01-10","2024-04-10")),
-#'             text=c("range","event"),color=c("green","red"))
+#' myevents = data.frame(end_date=as.Date(c("2024-03-10","2024-06-10")),
+#'              date=as.Date(c("2024-01-10","2024-04-10")),
+#'              text=c("range","event"),color=c("green","red"))
 #' fgts_dygraph(smalldta,events="doi,fedmoves",event_ds=myevents)
 #'
 #' # Annotations on y axis
@@ -164,7 +178,7 @@
 #'
 #' @import data.table
 #' @export
-fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both;grid,both",
+fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="hair,both;grid,both",
                         splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
                         hilightcols=FALSE,hilightwidth=2,hilightstyle="solid",
                         events="",event_ds=NULL,
@@ -177,7 +191,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
 
   # NSE crap.  There has to be a better way
   `.`=gpnm=suffix=seriesnm=display=color=axis=series_no=variable=eventid=direct=tcolor=optexp=DT_ENTRY=NULL
-  value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category = NULL
+  value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category=i.DT_ENTRY=i.END_DT_ENTRY = NULL
 
   # Preprocessing: get into data.table format
   if( xts::is.xts(indt) ) { indt <- xts2df(indt) }
@@ -219,6 +233,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
   if(nchar(dtwindow)>1) dtsrange_todisplay <- gendtstr(dtwindow,rtn="list")
 
   wasmelted <- meltvar %in% colnames(indt)
+  do_nafill <- FALSE
   # make indtnew is WIDE FORMAT, indt can be either
   if(wasmelted) {
     lastoset <- indt[,.SD[.N],by=meltvar]
@@ -275,6 +290,7 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
       t_colnos <- match(s(stepcols),series_dets$gpnm,nomatch=0) # Can match more than one
       if(t_colnos[1]==0) { t_colnos<- seq(1,nrow(series_dets)) }
       series_dets[t_colnos]$stepplot <- TRUE
+      do_nafill <- TRUE
     }
 
     if(!(hilightcols[1]==FALSE)) {
@@ -301,7 +317,10 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
        rebdate <- fcoal(lubridate::as_date(rebtmp[1]),dtlimits[1])
        rebval <- ifelse(length(rebtmp)==1 & lubridate::is.Date(rebdate),100,as.numeric(utils::tail(rebtmp,1)))
        rebloc <- max(which(indtnew[[1]]<=rebdate))
+       fnames <- grepv("\\.f",colnames(indtnew))  # To rebase foreasts
+       indtnew[rebloc,(fnames):=.SD,.SDcols=gsub("\\.f[a-z]*","",fnames)]
        indtnew <- indtnew[,names(.SD):=lapply(.SD,\(x) rebval*x/x[[rebloc]]),.SDcols=!c(1)]
+       indtnew[rebloc,(fnames):=NA_real_]
        add_titles("x","Rebased data to ",rebval," as of ",rebdate)
        tevents <- DTappend(tevents,data.table(DT_ENTRY=as.Date(rebdate),text="",color=fg_get_colorstring("rebase"),strokePattern="solid"))
        message_if(verbose,"fgts_dygraph: Rebased data to ",rebval," as of ",format(rebdate,"%m/%d/%Y"))
@@ -331,8 +350,11 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
     }
     # Only way to take a series out is to take the data out.
     indtnew <- indtnew[,.SD,.SDcols=!(series_dets[display==FALSE,]$seriesnm)]
-
+    if (do_nafill==TRUE) {
+      setnafill(indtnew,"locf")
+    }
     add_titles("y",ylab)
+    add_titles("x",xlab)
     alltitles = paste0(title,paste0(titleadds[axis=="title"]$note,collapse=","))
     #cAssign("indtnew;alltitles;series_dets;dt_colnames")
     g1 <- dygraphs::dygraph(indtnew,main=alltitles,group=groupnm)
@@ -389,16 +411,17 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
         eventtype <- tolower(trow[irow,]$a1)
         if(eventtype=="optexp") {
           opttype <- trow[irow,][["a2"]]
-          dt_oi <- dttmp[grepl(opttype,optexp),][,.(DT_ENTRY,text=opttype)]
+          dt_oi <- dttmp[grepl(opttype,optexp),][,.(DT_ENTRY,text=optexp)]
         }
         if(eventtype=="rolldates") {
           dt_oi <- dttmp[,.SD[1],by=.(rollpd),][,.(DT_ENTRY,text="cdsroll")]
         }
-        if(eventtype %in% c("doy","doq","bdoy","roll")) {
-            valoi <- dttmp[,.SD[.N]][[eventtype]]
+        if(eventtype %in% c("doy","doq","bdoy","daysfromroll")) {
+            valoi <- dttmp[,.SD[.N]][[eventtype]] # almost dtlimits[2], but safer
             dt_oi <- dttmp[get(eventtype)==valoi,][,.(DT_ENTRY,text=eventtype)]
         }
-        dt_oi <- dt_oi[,':='(color=fg_get_colorstring(eventtype),loc="top")]
+        thiscolor <-fg_get_colorstring(eventtype)
+        dt_oi <- dt_oi[,':='(color=thiscolor,loc="top")]
         tevents <- DTappend(tevents,dt_oi)
       }
     }
@@ -446,24 +469,32 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
     }
 
     # Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
-    ## cAssign("indt;series_dets")
+    #cAssign("indt;series_dets;indtnew")
     if(is.data.frame(event_ds)) {
+        event_ds <- data.table(event_ds)
         # Rename columns smartly, only first two date columns taken
-        event_ds <- data.table(event_ds)[between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
         dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.Date,firstonly=FALSE),2)
         dtcolnewnames <- sapply( dtcols, \(x) ifelse(grepl("end",x,ignore.case=TRUE),"END_DT_ENTRY","DT_ENTRY"))
         setnames(event_ds,dtcols,dtcolnewnames)
+        # Narrow dates either to strictly inbetween, or with overlaps:  Using new foverlaps function
+        if("END_DT_ENTRY" %in% colnames(event_ds)) {
+          if( nrow(event_ds[END_DT_ENTRY<DT_ENTRY,])>0 ) {
+            stop("fgts_dygraph: >>>>>>>>>>> ERROR: Event data set with end < start")
+          }
+          setkeyv(event_ds,c("DT_ENTRY","END_DT_ENTRY"))
+          event_ds <- foverlaps(indtnew[,.(DT_ENTRY=min(date),END_DT_ENTRY=max(date))],event_ds)
+          event_ds <- event_ds[,let(DT_ENTRY=pmax(DT_ENTRY,i.DT_ENTRY),END_DT_ENTRY=pmin(END_DT_ENTRY,i.END_DT_ENTRY))]
+          event_ds <- event_ds[,.SD,.SDcols=!patterns('^i.')]
+        }
+        else {
+          event_ds <- data.table(event_ds)[between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
+        }
         if("category" %in% colnames(event_ds)) {  # Need to document
             event_to_map <- event_ds[category=="series_color",let(gpnm=color)]
             event_to_map <- series_dets[,.(gpnm,tcolor=color)][event_to_map,on=.(gpnm)][,let(color=fcoal(tcolor,color))]
-            event_ds <- event_to_map[,let(tcolor=NULL)]
+            event_ds <- event_to_map[,let(tcolor=NULL)][]
         }
         tevents <- DTappend(tevents,event_ds)
-    }
-
-    if(is.character(exportevents)) {
-      assign(exportevents,tevents,envir=.GlobalEnv)
-      message_if(verbose,"Copied events as ",exportevents," to Global Namespace")
     }
 
     # last,<label> ; last,value ; last,line ; hline, no; range lo,hi
@@ -504,6 +535,11 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
       }
     }
 
+    if(is.character(exportevents)) {
+      assign(exportevents,tevents,envir=.GlobalEnv)
+      message_if(verbose,"Copied events as ",exportevents," to Global Namespace")
+    }
+
     if(nrow(tevents)>0) {
        tevents <- coalesce_DT_byentry(tevents,the$tevents_defaults)
        tevents <- tevents[, let(END_DT_ENTRY=as.Date(fcoal(as.integer(END_DT_ENTRY),as.integer(DT_ENTRY))))]  # What is NA?
@@ -538,9 +574,10 @@ fgts_dygraph<-function(indt,title="",ylab="",roller="default",bg_opts="hair,both
                                       drawGrid=grepl("x|both",gridopts))
 
     if( nrow(y2dta <- series_dets[axis=="y2",])>0 ) {
-      g1 = g1 |> dygraphs::dyAxis('y2',independentTicks=TRUE, drawGrid = FALSE, label=paste(y2dta$seriesnm,collapse=","),
+      g1 = g1 |> dygraphs::dyAxis('y2',independentTicks=TRUE, label=paste(y2dta$seriesnm,collapse=","),
                                   axisLineColor=y2dta[1,]$color, axisLabelColor = y2dta[1,]$color,
-                                  rawGrid=grepl("y|both",gridopts) )
+                                  drawGrid=FALSE, # grepl("y|both",gridopts) Too much noise
+                                  )
     }
 
     # Errata

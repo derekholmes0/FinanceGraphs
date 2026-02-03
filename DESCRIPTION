@@ -1,6 +1,6 @@
 Package: FinanceGraphs
 Title: Flexible Graphs for Analysis of Financial Data and Time Series
-Version: 0.1.2
+Version: 0.2.0
 Authors@R: 
     person("Derek", "Holmes", , "derek@derekholmes.com", role = c("aut", "cre", "cph"))
 Description: Flexible wrapper and helper functions for display of Time Series using [dygraphs].  Helpers for adding date-specific events and ranges are included, as well as for adding forecasts and other annotations.

@@ -5,7 +5,7 @@
 \title{TIme series in Dygraph form}
 \usage{
 fgts_dygraph( indt,
- title = "",  ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
+ title = "",  xlab="", ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
  hilightwidth = 2, hilightstyle = "solid",
  events = "", event_ds = NULL,
@@ -20,7 +20,7 @@ character column and one numeric column.  Ideal format is \verb{date,variable,va
 
 \item{title}{Title to put on top of graph}
 
-\item{ylab}{Label for y axis}
+\item{xlab, ylab}{Labels for x and y axis}
 
 \item{roller}{Initial moving average value to smooth graphs.  (See \code{\link[dygraphs:dyRoller]{dygraphs::dyRoller()}})  Options are
 \itemize{
@@ -50,13 +50,13 @@ Options are (\code{solid},\code{dashed},\code{dotted},\code{dotdash})}
 \item{events}{String with possible events to add to graph.  Options can be added together
 with \verb{;} and include
 \itemize{
-\item \verb{doi,eventsetname}  : Events in internal event list \code{eventsetname} from list maintained by \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}}.
-\item \verb{seasonal,type} : Regularly spaced intervals of \code{type}.  For options, see details.
+\item \verb{doi,<eventsetname>}  : Events in internal event list \code{eventsetname} from list maintained by \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}}.
+\item \verb{seasonal,<type>} : Regularly spaced intervals of dates. See details below.
 \item \code{minmax} : Locations of highest and lowest observations per series.
 \item \verb{dt,text,d1,<d2>} : Text events starting at \code{d1} and possibly ending at \verb{<d2>},both
 of the form \code{yyyy-mm-dd}.
 \item \verb{break,labelform} : Breakouts as determined by \code{\link[=fg_addbreakouts]{fg_addbreakouts()}} with \code{labelform} in ("singleasdate","singleavalue","breakno")
-\item \verb{tp,n} : Turning points as determined by \code{\link[=fg_findTurningPoints]{fg_findTurningPoints()}}
+\item \verb{tp,n} : Turning points on the first series as determined by \code{\link[=fg_findTurningPoints]{fg_findTurningPoints()}}
 }}
 
 \item{event_ds}{\code{data.frame} of events to be added to graph.  See details and
@@ -117,8 +117,21 @@ as possible as to column names.
 Colors can be managed using \code{\link[=fg_update_colors]{fg_update_colors()}} and will persist across R sessions, See vignette for details.
 Series are grouped together into bands around a series \code{series} if their names end as in 'series.lo' or 'series.hi'.  See examples and vignette for details.
 
-\strong{Events} are dates and date ranges to be highlighted in the graph.   Days of interest (doi) can be added
-using \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}} which will persist across R sessions.  See examples and vignette for further details.
+\strong{Events} are dates and date ranges to be highlighted in the graph. Multiple types of events can be strung together in
+semicolon delimited strings. Of the options outlined above, two additional details are
+\itemize{
+\item \code{"doi,<category>"} gets events from \code{\link[=fg_get_dates_of_interest]{fg_get_dates_of_interest()}} which can be added to or managed using \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}}.
+Colors and label placement can be customized as necessary.
+\item \verb{seasonal,<type>} puts regularly occurring events on the graph.  \verb{<type>} can be
+}\tabular{ll}{
+   \verb{<type>} \tab description \cr
+   \verb{"optex,mo} | \verb{qtr"} \tab Monthly and/or quarterly equity option expiration dates. \cr
+   \code{"roll"} \tab IMM CDS roll dates \cr
+   \code{"daysfromroll"} \tab Dates with same number of days to the next roll as last date plotted \cr
+   \verb{"doq","doy","bdoy"} \tab Dates with same day in quarter, in year, or business day of year to the last day plotted \cr
+}
+
+
 Events can also be added using a \code{data.frame} passed via \code{event_ds} with the following columns:\tabular{llc}{
    column \tab description \tab type \cr
    \code{date} \tab (Required) Start date \tab \code{Date} \cr
@@ -135,11 +148,7 @@ Events can also be added using a \code{data.frame} passed via \code{event_ds} wi
 
 Many times, events depend on outside data or statistical analysis on the original data.  The \code{event_ds} to be passed
 in can come from event helpers in \code{\link[=fg_cut_to_events]{fg_cut_to_events()}}, \code{\link[=fg_addbreakouts]{fg_addbreakouts()}}, \code{\link[=fg_findTurningPoints]{fg_findTurningPoints()}}, or  \code{\link[=fg_ratingsEvents]{fg_ratingsEvents()}}.
-Event columns are processed as is, with one current exception
-\itemize{
-\item \code{category=="series_color"} then \code{color} is replaced by the color of the series currently in the \code{color} column.
-Tis allows annotations to be same color as the series to which they apply.
-}
+Event columns are processed as is, unless \code{category=="series_color"} which will replace \code{color} with that of its series.
 
 \strong{Annotiations} include any notes or highlights added to the graph on the 'y' axis or on an individual series.  In addition to those passed
 via the \code{annotations} parameter, annotations can be added using a \code{data.frame} with the following columns:\tabular{llc}{
@@ -149,6 +158,12 @@ via the \code{annotations} parameter, annotations can be added using a \code{dat
    \code{text} \tab (Required) Text to display \tab \code{character} \cr
    \code{color} \tab Color for line and text \tab \code{character} \cr
    \code{eventonly} \tab Only draw line for for start of event, no band \tab \code{logical} \cr
+}
+
+
+Other notes:
+\itemize{
+\item Using \code{stepcols} most often happens with lower frequency data, so an \code{nafill} is automatically performed.
 }
 }
 \examples{
@@ -175,9 +190,9 @@ fgts_dygraph(smalldta,events="doi,regm;doi,fedmoves")
 fgts_dygraph(smalldta,events="date,FOMO,2025-01-01,2025-06-01;date,xmas,2025-12-25")
 
 # Events passed in as data.frames
-myevents = data.frame(end_date=as.Date(c("2024-03-10","2024-01-10")),
-            date=as.Date(c("2024-01-10","2024-04-10")),
-            text=c("range","event"),color=c("green","red"))
+myevents = data.frame(end_date=as.Date(c("2024-03-10","2024-06-10")),
+             date=as.Date(c("2024-01-10","2024-04-10")),
+             text=c("range","event"),color=c("green","red"))
 fgts_dygraph(smalldta,events="doi,fedmoves",event_ds=myevents)
 
 # Annotations on y axis
