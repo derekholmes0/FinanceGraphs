@@ -182,3 +182,14 @@ tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 fg_reset_to_default_state()
 ```
 
+## Integration into Markdown and Shiny
+
+Dygraphs have the very nice feature of allowing synchronized zoom in Markdown or Shiny applications.  Each graph with a common `group` identifier
+is synchronized.  There are times, however, when you want to turn these on or off.  The function [fg_sync_group()] either returns the current group name
+if called with no parameters, sets the group name with a string, or turns off synchronization with a call `fg_sync_group(NULL)`.
+
+
+
+
+
+

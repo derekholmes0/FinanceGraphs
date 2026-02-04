@@ -11,7 +11,7 @@ fgts_dygraph( indt,
  events = "", event_ds = NULL,
  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
- meltvar = "variable",  dylegend = "always",  groupnm = "common",  fillGraph = FALSE,
+ meltvar = "variable",  dylegend = "always",  groupnm = fg_sync_group(),  fillGraph = FALSE,
  verbose = FALSE,  extraoptions = list() )
 }
 \arguments{
@@ -96,7 +96,7 @@ as of the given date.  See examples.}
 
 \item{dylegend}{(Default: "auto") Passed to \code{\link[dygraphs:dyLegend]{dygraphs::dyLegend()}}, can be one of ("auto", "always", "onmouseover", "follow", "never")}
 
-\item{groupnm}{(Default: \code{common})  Group name used in \code{shiny} or \code{RMarkdown} to synchonize graphs}
+\item{groupnm}{(Default: NULL, unless set via \code{\link[=fg_sync_group]{fg_sync_group()}} )  Group name used in \code{shiny} or \code{RMarkdown} to synchronize graphs. See \code{\link[=fg_sync_group]{fg_sync_group()}} for details.}
 
 \item{fillGraph}{(Default: FALSE) Shade area underneath each series.}
 

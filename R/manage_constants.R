@@ -49,6 +49,7 @@ the$doifn <- paste0( the$cachedir, "/fg_doi.RD")
 the$colorfn <- paste0( the$cachedir, "/fg_colors.RD")
 the$doi_dates <-  the$doi_default
 the$default_colors <- the$colors_default
+the$gpname <- NULL
 
 if(file.exists(the$doifn)) {
   load(the$doifn)
@@ -231,11 +232,39 @@ fg_display_colors <- function(item="") {
   g1 <- ggplot(tcolors,aes(x,y,fill=color,label=ztext))+geom_tile()+geom_label(fill="white",size=3)
   g1 <- g1 +coord_flip()+scale_fill_identity()+labs(title="Current colors used")+theme_bw()
   return(g1)
-
 }
 
+#' Date Synchronization
+#'
+#' @name fg_sync_group
+#' @description  Sets, gets, or resets a common name to be passed into  [fgts_dygraph()] for synchronization.
+#' @param gpname A string or NULL
+#' * `gpname=NULL` turns of dygraphs synchronization.
+#' * `gpname=<string>` set the common group to `<string>`
+#' * `gpname=""` (Default), just returns the current common group name.
+#' @returns current groupname
+#' @details
+#' Use thie to set a common groupname for time scale synchronization (for Markdown or shiny apps),  Only set it in the beginning,
+#' or when needed, and call with NULL to turn synchronization off.
+#' @seealso [fgts_dygraph()]
+#' @examples
+#' fg_sync_group()
+#' fg_sync_group("common")
+#' fg_sync_group()
+#' fg_sync_group(NULL)
+#'
+#' @export
+fg_sync_group <- function(gpname="") {
+  if(!is.null(gpname) && gpname=="") { return(the$gpname) }
+  the$gpname <- gpname
+}
 
 # =========================================================================
+# =========================================================================
+# =========================================================================
+# =========================================================================
+# =========================================================================
+
 # Unexported functions, but still needed with the package
 #
 #' @import data.table

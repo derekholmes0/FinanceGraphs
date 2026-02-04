@@ -8,7 +8,7 @@
 #'  events = "", event_ds = NULL,
 #'  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
 #'  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
-#'  meltvar = "variable",  dylegend = "always",  groupnm = "common",  fillGraph = FALSE,
+#'  meltvar = "variable",  dylegend = "always",  groupnm = fg_sync_group(),  fillGraph = FALSE,
 #'  verbose = FALSE,  extraoptions = list() )
 #'
 #' @param indt Input data in long or wide format.  THere must be at least one date column, one
@@ -63,7 +63,7 @@
 #' @param exportevents String of name of `data.frame` to create in  `.GlobalEnv` with event dates displayed on graph.
 #' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
 #' @param dylegend (Default: "auto") Passed to [dygraphs::dyLegend()], can be one of ("auto", "always", "onmouseover", "follow", "never")
-#' @param groupnm  (Default: `common`)  Group name used in `shiny` or `RMarkdown` to synchonize graphs
+#' @param groupnm  (Default: NULL, unless set via [fg_sync_group()] )  Group name used in `shiny` or `RMarkdown` to synchronize graphs. See [fg_sync_group()] for details.
 #' @param fillGraph (Default: FALSE) Shade area underneath each series.
 #' @param verbose (Default: FALSE) Print extra details about what will be graphed.
 #' @param extraoptions Additional options passed to [dygraphs::dyOptions()]
@@ -185,7 +185,7 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
                         annotations="",annotation_ds=NULL,
                         forecast_ds=NULL,
                         ylimits=NULL,dtstartfrac=0,dtwindow="",rebase="",
-                        exportevents=NULL, meltvar="variable",dylegend="always",groupnm="common",
+                        exportevents=NULL, meltvar="variable",dylegend="always",groupnm=fg_sync_group(),
                         fillGraph=FALSE,verbose=FALSE,
                         extraoptions=list()) {
 
@@ -555,7 +555,8 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
           if("value_2" %in% colnames(trw) && !is.na(trw$value_2)) {
             g1 = g1 |> dygraphs::dyShading(from=trw$value, to=trw$value_2, color=trw$color, axis=trw$axis) }
           else if (trw$category %in% c("anno","last")) {
-            g1 = g1 |> dygraphs::dyAnnotation(x=trw$DT_ENTRY,text=trw$text,series=trw$seriesnm,width=6*nchar(trw$text)) }  # MOre options to explore
+            thistxt <- paste0(" ",trw$text," ")
+            g1 = g1 |> dygraphs::dyAnnotation(x=trw$DT_ENTRY,text=thistxt,series=trw$seriesnm,width=6*nchar(trw$text)) }  # MOre options to explore
           else {
             g1 = g1 |> dygraphs::dyLimit(limit=trw$value,label=trw$text,labelLoc="right",color=trw$color,strokePattern="dashed") }
         }

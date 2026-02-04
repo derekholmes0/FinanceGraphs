@@ -8,7 +8,7 @@
 \alias{fg_update_dates_of_interest}
 \title{Maintain Constants and Dates of Interest}
 \format{
-An object of class \code{environment} of length 10.
+An object of class \code{environment} of length 11.
 }
 \usage{
 the

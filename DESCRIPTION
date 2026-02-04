@@ -9,7 +9,6 @@ Encoding: UTF-8
 Depends: 
     R (>= 4.1.0)
 Imports:
-    zoo (>= 1.8.0),
     dplyr (>= 1.0.0),
     purrr (>= 1.2.0),
     tibble (>= 1.0.0),
