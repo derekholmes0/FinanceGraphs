@@ -35,8 +35,8 @@
 #' * `doi,<eventsetname>`  : Events in internal event list `eventsetname` from list maintained by [fg_update_dates_of_interest()].
 #' * `seasonal,<type>` : Regularly spaced intervals of dates. See details below.
 #' * `minmax` : Locations of highest and lowest observations per series.
-#' * `dt,text,d1,<d2>` : Text events starting at `d1` and possibly ending at `<d2>`,both
-#'      of the form `yyyy-mm-dd`.
+#' * `dt,text,d1,<d2>` : Text events starting at `d1` and possibly ending at `<d2>`,both of the form `yyyy-mm-dd`. See details for adjustments.
+#' * `pt,d1,series,text` : Text annotation for `series` at date `d1` See details for adjustments.
 #' * `break,labelform` : Breakouts as determined by [fg_addbreakouts()] with `labelform` in ("singleasdate","singleavalue","breakno")
 #' * `tp,n` : Turning points on the first series as determined by [fg_findTurningPoints()]
 #' @param event_ds `data.frame` of events to be added to graph.  See details and
@@ -121,7 +121,7 @@
 #'
 #' Other notes:
 #' * Using `stepcols` most often happens with lower frequency data, so an `nafill` is automatically performed.
-#'
+#' * Dates in event types `pt` and `dt` are adjusted to next day in series if they do not already exist.
 #'
 #' @examples
 #' # See Vignette for more extensive examples.
@@ -348,9 +348,7 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
       yRange <- c(yrangetmp[1]*0.8,yrangetmp[2]*1.05)
     }
 
-    if(verbose) {
-      print(series_dets)
-    }
+    if(verbose) { print(series_dets) }
     # Only way to take a series out is to take the data out.
     indtnew <- indtnew[,.SD,.SDcols=!(series_dets[display==FALSE,]$seriesnm)]
     if (do_nafill==TRUE) {
@@ -444,15 +442,25 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
       trow <- trow |> dplyr::mutate(a2=lubridate::as_date(a2),a3=lubridate::as_date(a3))
       for(irow in seq(1,nrow(trow))) {
         this_nm <- fcoal(trow[[irow,"a1"]],"event")
-        start_dt <- trow[[irow,"a2"]]
+        start_dt <- end_dt <- alldts[which(alldts>=trow[[irow,"a2"]])][1]
         if( lubridate::is.instant(start_dt) ) {
-            end_dt <- fcoal(trow[[irow,"a3"]],start_dt)
+            if( !is.na(trow[[irow,"a3"]]) ) {
+                end_dt <- alldts[which(alldts>=trow[[irow,"a2"]])][1]
+            }
             colornm <- fg_get_colorstring(fifelse(end_dt>start_dt,"date_range","date"))
             newevent <- data.table(DT_ENTRY=start_dt,END_DT_ENTRY=end_dt,text=this_nm,loc="bottom",color=colornm)
             tevents <- DTappend(tevents,newevent)
          }
       }
     }
+
+    if(nrow( trow<-get_fromlist(elist,"^(point|pt)")  )>0) { # pt,dt,series,text
+      trow <- data.table(trow)[,let(dtrolled=alldts[which(alldts>=lubridate::as_date(a1))][1]),by=.I]
+      h_annos <- trow[,.(category="anno",DT_ENTRY=dtrolled,axis="y",text=a3,seriesnm=a2)]
+      h_annos <- series_dets[gpnm==seriesnm,.(seriesnm,color)][h_annos,on=.(seriesnm)]
+      tevents <- DTappend(tevents,h_annos)
+    }
+
     # "sig,<variable>,<level> colors variable according to whether <variable> is between (-inf,-sig,+sig,Inf) : taken out: Needs runs_from_value
 
     # Statistical things ==================================
@@ -472,8 +480,8 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
     }
 
     # Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
-    #cAssign("indt;series_dets;indtnew")
-    if(is.data.frame(event_ds)) {
+
+        if(is.data.frame(event_ds)) {
         event_ds <- data.table(event_ds)
         # Rename columns smartly, only first two date columns taken
         dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.instant,firstonly=FALSE),2)
@@ -558,8 +566,8 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
           if("value_2" %in% colnames(trw) && !is.na(trw$value_2)) {
             g1 = g1 |> dygraphs::dyShading(from=trw$value, to=trw$value_2, color=trw$color, axis=trw$axis) }
           else if (trw$category %in% c("anno","last")) {
-            thistxt <- paste0(" ",trw$text," ")
-            g1 = g1 |> dygraphs::dyAnnotation(x=trw$DT_ENTRY,text=thistxt,series=trw$seriesnm,width=6*nchar(trw$text)) }  # MOre options to explore
+            g1 = g1 |> dygraphs::dyAnnotation(trw$DT_ENTRY,trw$text,width=6*nchar(trw$text),series=trw$seriesnm)
+            }  # MOre options to explore
           else {
             g1 = g1 |> dygraphs::dyLimit(limit=trw$value,label=trw$text,labelLoc="right",color=trw$color,strokePattern="dashed") }
         }

@@ -8,7 +8,9 @@ editor_options:
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7, 
+  fig.asp = 0.618
 )
 ```
 
@@ -91,7 +93,7 @@ Let's enhance the graph with a few more parameters that can be added to
 the `fgts_dygraph` function call:
 
 ```{r}
-fgts_dygraph(eqtypx, title="Stock Prices, focused", roller=3,dtstartfrac=0.6,splitcols=TRUE)
+fgts_dygraph(eqtypx, title="Stock Prices, Date focused", roller=3,dtstartfrac=0.6,splitcols=TRUE)
 ```
 
 | Parameter call | Feature |
@@ -102,20 +104,21 @@ fgts_dygraph(eqtypx, title="Stock Prices, focused", roller=3,dtstartfrac=0.6,spl
 
 
 To highlight or hide series and focus in on a particular date range, use:
-|Parameter|Feature|
+
 ```{r}
 fgts_dygraph(eqtypx, title="Stock Prices, highlighted", roller=1,
              dtwindow="-3y::",hidecols="TLT",hilightcols="IBM",hilightwidth=4, hilightstyle="dashed")
 ```
+
 |Parameter call|Feature|
 |:-------|:-------|
 |`dtwindow="-3y::"`|focus the date range selector to 1 year prior to `Sys.Date()`|
-|`hidecols="TLT"`|Hide a series|
+|`hidecols="TLT"`|Hide one or more series.  Can either separate by `;` or give a list.|
 |`hilightcols="IBM`|Highlight a series by thickening its line or changing the line style|
 |`hilightwidth=4`|New width for columns named in`hilightcols`|
 |`hilightstyle="dashed"`|New line style for columns named in`hilightcols`|
 
-## Rebasing and adding vertical annotations.
+## Horizontal annotations and rebasing
 
 Many times, you may want to show relative changes of series with widely
 varying values.
@@ -134,12 +137,14 @@ are turned off.
 |`rebase="2025-01-01,120"`|Divide all series by their values a of 1/1/2025 and scale to 120.|
 |`annotations="last,linelabel"`|Put vertical lines highlighting last values in each series |
 |`annotations="range,100,120"`|Put a highlighted range betwewen 100 and 120 percent of value on 1/1/2025|
+|`events="pt,2025-02-01,QQQ,Feb1"`|Add a note a particular date and series|
 |`dylegend="never"` |Don't replicate information in the legend|
-|`bg_opts="grid,none"`|Hide the grid|
+|`bg_opts="grid,none;norange"`|Hide the grid and the date range selector|
 
 ```{r}
 fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfrac=0.7,
              rebase="2025-01-01,120",
+             events="pt,2025-02-01,QQQ,Feb3",
              annotations="last,linelabel;range,100,120",
              dylegend = "never", bg_opts="grid,none")
 ```
@@ -195,8 +200,8 @@ fgts_dygraph(toplot,title="COP REER vs Latam peers",ylab="Price",
 
 Another example is showing periods where a series is significantly
 correleted to another (e.g. the broader market). The series `eqtyrtn` in
-the package has the rolling 66 dayp-value of regressing returns of `TLT`
-agasint `QQQ`:
+the package has the rolling 66 day `p.value` of regressing returns of `TLT`
+against `QQQ`:
 
 ```{r}
 suppressMessages(require(dplyr))
@@ -298,8 +303,29 @@ created by the user, but the package includes several "helpers" to take
 Event helpers are small functions which convert any time based data into
 the correct annotations. The currently implemented helpers are
 
+```{r}
+library(knitr)
+
+# create a data frame
+df <- data.frame(
+  name = c("John", "Jane", "Bob"),
+  age = c(30, 25, 35),
+  city = c("New York", "San Francisco", "Chicago")
+)
+
+# create a pipe-delimited table with custom column widths
+kable(df, format = "pipe", col.names = c("Name", "Age", "City"), col.widths = c(0.2, 0.2, 0.6))
+```
+
+```{r}
+library(knitr)
+
+# create a pipe-delimited table with custom column widths
+kable("pipe", data = read.table(text = "Name   | Age | City         \nJohn   | 30 | New York     \nJane   | 25 | San Francisco\nBob    | 35 | Chicago     "), col.names = c("Name", "Age", "City"), row.names = FALSE, escape = FALSE, booktabs = TRUE, caption = "My Table", caption.placement = "bottom", col.widths = c(0.2, 0.2, 0.6))
+```
+
 |Function|Description|
-|:-------------|:--------|
+|:---|:--------|
 |`fg_addbreakouts()`|Statistically identify breakout points (also available via `events`) |
 |`fg_findTurningPoints()`|Statistically identify turning points (also available via `events`) |
 |`fg_cut_to_events()`|"Cut" a univariate series into colored bands, with two different colors for positive and negative values |
@@ -380,7 +406,7 @@ of the event annotations matches that of the original series.
 
 ```{r}
 head(ratings_db,3)
-fgts_dygraph(nomfxdta |> filter(variable=="COP"),title="COP with Ratings",dtstartfrac=0.3,
+fgts_dygraph(nomfxdta |> filter(variable=="COP"),title="COP with Ratings",
          event_ds=fg_ratingsEvents("COLOM",ratings_db,agency="S.P"))
 ```
 

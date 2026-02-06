@@ -53,8 +53,8 @@ with \verb{;} and include
 \item \verb{doi,<eventsetname>}  : Events in internal event list \code{eventsetname} from list maintained by \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}}.
 \item \verb{seasonal,<type>} : Regularly spaced intervals of dates. See details below.
 \item \code{minmax} : Locations of highest and lowest observations per series.
-\item \verb{dt,text,d1,<d2>} : Text events starting at \code{d1} and possibly ending at \verb{<d2>},both
-of the form \code{yyyy-mm-dd}.
+\item \verb{dt,text,d1,<d2>} : Text events starting at \code{d1} and possibly ending at \verb{<d2>},both of the form \code{yyyy-mm-dd}. See details for adjustments.
+\item \verb{pt,d1,series,text} : Text annotation for \code{series} at date \code{d1} See details for adjustments.
 \item \verb{break,labelform} : Breakouts as determined by \code{\link[=fg_addbreakouts]{fg_addbreakouts()}} with \code{labelform} in ("singleasdate","singleavalue","breakno")
 \item \verb{tp,n} : Turning points on the first series as determined by \code{\link[=fg_findTurningPoints]{fg_findTurningPoints()}}
 }}
@@ -164,6 +164,7 @@ via the \code{annotations} parameter, annotations can be added using a \code{dat
 Other notes:
 \itemize{
 \item Using \code{stepcols} most often happens with lower frequency data, so an \code{nafill} is automatically performed.
+\item Dates in event types \code{pt} and \code{dt} are adjusted to next day in series if they do not already exist.
 }
 }
 \examples{
