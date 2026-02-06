@@ -197,13 +197,13 @@ fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=exampl
 <img src="man/figures/README-Forecasts1-1.png" alt="Adding forecasts to original data" width="100%" />
 
 Like events, forecasts can be generated from many packages with
-different output formats. There are also “forecast helpers” to get their
+different output formats. There is also a “forecast helper” to get their
 outputs into the appropriate `foreast_ds` forms
 
 | Function | Description |
 |:---|:---|
 | `fg_sweep()` | Converts [tidy forecast objects](https://business-science.github.io/sweep/) to `forecast_ds` form. |
-| `fg_forecast()` | Converts [forecasts](https://pkg.robjhyndman.com/forecast/) to `forecast_ds` form. |
+| `fg_prophet()` | Converts [Prophet](https://business-science.github.io/sweep/) to `forecast_ds` form. |
 
 ## Changing colors and adding dates of interest
 

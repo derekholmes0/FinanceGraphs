@@ -12,6 +12,7 @@ Imports:
     dplyr (>= 1.0.0),
     purrr (>= 1.2.0),
     tibble (>= 1.0.0),
+    tidyquant (>= 1.0.0),
     xts (>= 0.14.1),
     stringr (>= 1.2.0),
     timeDate (>= 4000.0),
@@ -25,11 +26,11 @@ Imports:
     knitr (>= 1.0.0),
     stats (>= 4.5.0),
     utils (>= 4.5.0),
-    tidyquant (>= 1.0.0),
     data.table (>= 1.9.8),
     dygraphs (>= 1.1.0)
 Suggests:
     RColorBrewer (>= 1.0.0),
+    prophet (>= 1.1.0),
     forecast (>= 9.0.0),
     timetk (>= 2.9.0),
     sweep (>= 0.2.0),

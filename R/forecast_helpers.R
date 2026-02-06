@@ -15,7 +15,6 @@
 #' require(timetk)
 #' require(forecast)
 #' require(sweep)
-#' dta <-
 #' fcst_eqtypx <- tk_ts(eqtypx[,.(date,QQQ)]) |> ets() |>
 #'       forecast::forecast(h=30) |> sweep::sw_sweep(timetk_idx=TRUE)
 #' fcst_in <- fg_sweep(fcst_eqtypx)
@@ -35,37 +34,34 @@ fg_sweep <- function(swept_data,confidence=80)  {
   return(swept_data[,.SD,.SDcols=new_colname])
 }
 
+# TO do: fable.  Left Field
+# library("fable","tsibble","tsibbledata")
+# fc1 = tsibble(eqtypx[,.(date,QQQ)],"date") |> model(ets=ETS(QQQ)) |> forecast(h='3 months')
+# fc2 = data.table(fc1)[,.(date,QQQ.f=.mean,QQQ.flo=hilo(QQQ, 95)$lower, QQQ.flo=hilo(QQQ, 95)$upper)]
+# dplr: mtcars |> mutate("{vnm}_f":=.data[[vnm]]*100000)
+
 #' @title Forecast_Helpers
-#' @name fg_predict
+#' @name fg_prophet
 #' @description
-#' `fg_predict` Converts a [forecast::forecast()] output into [fgts_dygraph()] `forecastdataset` format.
-#' @param p Output from [forecast::forecast()]
-#' @param confidence (Default: 80) Confidence interval (in percent) to display
-#' @param seriesnm Series name which has been forecast.  Note that [forecast::forecast()] loses the name
-#' of what's been forecast, necessitating this.
-#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `forecastdataset` parameter
+#' `fg_prophet` Augments a [prophet::predict.prophet()]  output into [fgts_dygraph()] `forecastdataset` format.
 #'
+#' @param prophet_data Data resulting from a [prophet::predict.prophet()]  call
+#' @param seriesname (Default: `"y"`) Series name to attach forecast to
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `forecastdataset` parameter
+#' @details Note that  [prophet::predict.prophet()] loses the name of the series, the
 #' @examples
-#' require(forecast)
-#' require(zoo)
-#' px_small <- narrowbydtstr(eqtypx,"-2y::")
-#' fcst_one <- function(ticker) {
-#'   t1_ts <- zoo::zoo(px_small[[ticker]],px_small[["date"]])
-#'   forecast::ets(t1_ts) |> forecast::forecast(h=36) |>  fg_predict(seriesnm=ticker)
-#'   }
-#' fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
-#' fgts_dygraph(px_small,title="With Forecasts", roller=1,dtstartfrac=0.7,
-#'               forecast_ds=fpred,verbose=TRUE)
+#' require(prophet)
+#' p_model <- eqtypx[,.(ds=date,y=QQQ)] |> prophet::prophet()
+#' p_fcst <- predict(p_model,prophet::make_future_dataframe(p_model,periods=60))
+#' fgts_dygraph(eqtypx[,.(date,QQQ)],title="With Prophet Forecasts", roller=1,dtstartfrac=0.6,
+#'       event_ds = fg_findTurningPoints(p_model),
+#'       forecast_ds=fg_prophet(p_fcst,seriesname="QQQ"))
 #'
 #' @import data.table
 #' @export
-fg_predict <- function(p,confidence=80,seriesnm="") {
-  predf <- ts2df(p$mean,prefix=seriesnm)
-  predu <- ts2df(p$upper,paste0(seriesnm,".hi"),adddate=FALSE)
-  predl <- ts2df(p$lower,paste0(seriesnm,".lo"),adddate=FALSE)
-  predall <- cbindlist(list(predf,predl,predu))
-  rtn <- predall[,.SD,.SDcols=c("DT_ENTRY",grep(paste0("x|",confidence),names(predall),value=TRUE))][]
-  newnames <- c("date",paste0(seriesnm,c(".f",".flo",".fhi")))
-  setnames(rtn,newnames)
-  return(rtn)
+fg_prophet <- function(prophet_data,seriesname="y")  {
+  `.`=yhat=yhat_lower=yhat_upper=ds=NULL
+  tortn <- data.table(prophet_data)[,.(date=as.Date(ds),yhat,yhat_lower,yhat_upper)]
+  setnames(tortn,colnames(tortn),c("date",paste0(seriesname, c(".f",".flo",".fhi"))))
+  return(tortn)
 }

@@ -152,13 +152,13 @@ head(example_fcst_set,2)
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 ```
 
-Like events, forecasts can be generated from many packages with different output formats.  There are also "forecast helpers" to
+Like events, forecasts can be generated from many packages with different output formats.  There is also a "forecast helper" to
 get their outputs into the appropriate `foreast_ds` forms
 
 |Function|Description|
 |:-------|:-----------|
 |`fg_sweep()`|Converts [tidy forecast objects](https://business-science.github.io/sweep/) to `forecast_ds` form.|
-|`fg_forecast()`|Converts [forecasts](https://pkg.robjhyndman.com/forecast/) to `forecast_ds` form.|
+|`fg_prophet()`|Converts [Prophet](https://business-science.github.io/sweep/) to `forecast_ds` form.|
 
 ## Changing colors and adding dates of interest
 

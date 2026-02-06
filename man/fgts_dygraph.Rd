@@ -11,8 +11,8 @@ fgts_dygraph( indt,
  events = "", event_ds = NULL,
  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
- meltvar = "variable",  dylegend = "always",  groupnm = fg_sync_group(),  fillGraph = FALSE,
- verbose = FALSE,  extraoptions = list() )
+ meltvar = "variable", dylegend = "always", fillGraph = FALSE,
+ groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 }
 \arguments{
 \item{indt}{Input data in long or wide format.  THere must be at least one date column, one
@@ -96,9 +96,9 @@ as of the given date.  See examples.}
 
 \item{dylegend}{(Default: "auto") Passed to \code{\link[dygraphs:dyLegend]{dygraphs::dyLegend()}}, can be one of ("auto", "always", "onmouseover", "follow", "never")}
 
-\item{groupnm}{(Default: NULL, unless set via \code{\link[=fg_sync_group]{fg_sync_group()}} )  Group name used in \code{shiny} or \code{RMarkdown} to synchronize graphs. See \code{\link[=fg_sync_group]{fg_sync_group()}} for details.}
-
 \item{fillGraph}{(Default: FALSE) Shade area underneath each series.}
+
+\item{groupnm}{(Default: NULL, unless set via \code{\link[=fg_sync_group]{fg_sync_group()}} )  Group name used in \code{shiny} or \code{RMarkdown} to synchronize graphs. See \code{\link[=fg_sync_group]{fg_sync_group()}} for details.}
 
 \item{verbose}{(Default: FALSE) Print extra details about what will be graphed.}
 
@@ -200,7 +200,7 @@ fgts_dygraph(eqtypx,annotations="last,linevalue")
 fgts_dygraph(eqtypx,annotations="hline,100,at100,red;hline,200,at200;range,300,400")
 
 # use with helpers
-require(data.table)
+
 smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
 fgts_dygraph(smalldta,title="W TurnPts",event_ds=fg_findTurningPoints(smalldta[,.(date,QQQ)]))
 fgts_dygraph(smalldta,title="W Sentiment",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
@@ -211,12 +211,14 @@ fgts_dygraph(smalldta,title="W dividends",event_ds=fg_tq_divs(c("IBM","QQQ")))
 # use with forecasts
 
 require(forecast)
+require(timetk)
+require(sweep)
 smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
 fcst_one <- function(ticker) {
-  t1_ts <- zoo::zoo(smalldta[[ticker]],smalldta[["date"]])
-  forecast::ets(t1_ts) |> forecast::forecast(h=36) |>  fg_predict(seriesnm=ticker)
+   fcst <-tk_ts(smalldta[,.SD,.SDcol=c("date",ticker)]) |> ets() |> forecast::forecast(h=30)
+   fcst |> sweep::sw_sweep(timetk_idx=TRUE) |> fg_sweep()
   }
 fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
-fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=fpred)
+fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,rebase=",100",forecast_ds=fpred)
 
 }

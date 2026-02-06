@@ -25,7 +25,6 @@ Forecast Helpers
 require(timetk)
 require(forecast)
 require(sweep)
-dta <-
 fcst_eqtypx <- tk_ts(eqtypx[,.(date,QQQ)]) |> ets() |>
       forecast::forecast(h=30) |> sweep::sw_sweep(timetk_idx=TRUE)
 fcst_in <- fg_sweep(fcst_eqtypx)

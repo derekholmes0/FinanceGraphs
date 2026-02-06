@@ -18,11 +18,16 @@ fg_findTurningPoints(
 )
 }
 \arguments{
-\item{indta}{Time series \code{data.table} with a date as the first column and a value series as the second column.}
+\item{indta}{Time series \code{data.table} with a date as the first column and a value series as the second column,
+or a \code{\link[prophet:prophet]{prophet::prophet()}} object}
 
 \item{rtn}{string with what to return ('dates','data','all')}
 
-\item{method}{string in 'pctchg' (default) or 'cpm' \link[cpm:cpmPackage]{cpm::cpm-package}.  'pctchg' looks for up to 'npts' dates with the largest positive and negative changes over threshold 'pctabovemin'}
+\item{method}{string describing method of finding Turning Points
+\itemize{
+\item \code{"pctchg"} : (Default) Find \code{npts} largest percentage changes with a miniumum window between them
+\item \code{"cpm"} : Uaw \link[cpm:cpmPackage]{cpm::cpm-package} to find change points
+}}
 
 \item{npts}{Number of change points to find}
 
@@ -47,5 +52,7 @@ Event Helpers : fg_findTurningPoints
 \examples{
 dta <-eqtypx[,.(date,QQQ,TLT)]
 fgts_dygraph(dta,event_ds=fg_findTurningPoints(dta),title="With turningPoints")
-
+require(prophet)
+fc_prophet = eqtypx[,.(ds=date,y=QQQ)] |> prophet::prophet()
+fgts_dygraph(dta,event_ds=fg_findTurningPoints(fc_prophet),title="With Prophet turningPoints")
 }

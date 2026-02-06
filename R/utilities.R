@@ -46,7 +46,7 @@ gendtstr<-function(x,today=Sys.Date(),rtn="dtstr") {
 #'
 #' @export
 narrowbydtstr<-function(xin,dtstr="",includetoday=TRUE, windowdays=0, invert=FALSE, addindicator=FALSE) {
-  dtname <- find_col_bytype(xin,lubridate::is.Date)
+  dtname <- find_col_bytype(xin,lubridate::is.instant)
   if(dtstr=="") { return(xin) }
   this_dtstr <- ifelse(windowdays>0, extenddtstr(dtstr,begchg=-windowdays), dtstr)
   dtlist <- gendtstr(this_dtstr,today=as.Date(ifelse(includetoday,Sys.Date(),Sys.Date()-1)),rtn="list")
@@ -81,15 +81,17 @@ narrowbydtstr<-function(xin,dtstr="",includetoday=TRUE, windowdays=0, invert=FAL
 #'
 #' @export
 extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtnstyle="string") {
+  index=NULL
   if(xts::is.xts(instr)) {
-    instr <- paste0(min(zoo::index(instr),na.rm=T),"::",max(zoo::index(instr),na.rm=T)) }
+    dtindex <- lubridate::as_datetime(xts::.index(instr),origin = lubridate::origin)
+    instr <- paste(range(lubridate::as_date(dtindex),na.rm=T),collapse="::") }
   if(is.data.frame(instr)) {
-    instr <- paste0(min(instr$DT_ENTRY,na.rm=T),"::",max(instr$DT_ENTRY,na.rm=T)) }
+    instr <- paste0(range(instr$DT_ENTRY,na.rm=T),collapse="::") }
   spl <- gendtstr(instr,rtn="list")
   if(is.na(spl[1])) { spl[1] <- as.character(Sys.Date())}
   if(is.na(spl[2])) { spl[2] <- as.character(Sys.Date())}
-  if(lubridate::is.Date(as.Date(spl[1]))) { spl[1] <- as.character(as.Date(spl[1])+begchg) }
-  if(lubridate::is.Date(as.Date(spl[2]))) { spl[2] <- as.character(as.Date(spl[2])+endchg) }
+  if(lubridate::is.instant(as.Date(spl[1]))) { spl[1] <- as.character(as.Date(spl[1])+begchg) }
+  if(lubridate::is.instant(as.Date(spl[2]))) { spl[2] <- as.character(as.Date(spl[2])+endchg) }
   if(rtn=="list") {
     rtnstyle <- "list"
   }
@@ -102,8 +104,8 @@ extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtn
     rtnstyle <- "list"
   }
   if(rtn=="totoday") { spl[2] <- NA_real_ }
-  if(lubridate::is.Date(mindt)) { spl[1] <- max(spl[1],mindt) }
-  if(lubridate::is.Date(maxdt)) { spl[2] <- min(spl[2],maxdt) }
+  if(lubridate::is.instant(mindt)) { spl[1] <- max(spl[1],mindt) }
+  if(lubridate::is.instant(maxdt)) { spl[2] <- min(spl[2],maxdt) }
   if(rtnstyle=="list") { return(spl) }
   return(paste0(as.character(spl[1]),'::',data.table::fcoalesce(as.character(spl[2]),"")))
 }
@@ -144,16 +146,6 @@ find_col_bytype <- function(indt,typeoffn,firstonly=TRUE) {
     rtn <- names(indt)[sapply(indt, typeoffn)]
     if(firstonly) return (rtn[1])
     else return(rtn)
-}
-
-ts2df <- function(x,prefix="",adddate=TRUE) {
-  rtn <- data.table::as.data.table(x)
-  data.table::setnames(rtn,paste0(prefix,names(rtn)))
-  if(adddate) {
-    rtn$DT_ENTRY = as.Date(zoo::index(x))
-    data.table::setcolorder(rtn,"DT_ENTRY")
-  }
-  return(rtn)
 }
 
 xts2df <- function(x) {

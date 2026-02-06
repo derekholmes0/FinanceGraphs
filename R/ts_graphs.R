@@ -8,8 +8,8 @@
 #'  events = "", event_ds = NULL,
 #'  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
 #'  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
-#'  meltvar = "variable",  dylegend = "always",  groupnm = fg_sync_group(),  fillGraph = FALSE,
-#'  verbose = FALSE,  extraoptions = list() )
+#'  meltvar = "variable", dylegend = "always", fillGraph = FALSE,
+#'  groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 #'
 #' @param indt Input data in long or wide format.  THere must be at least one date column, one
 #' character column and one numeric column.  Ideal format is `date,variable,value`
@@ -63,8 +63,8 @@
 #' @param exportevents String of name of `data.frame` to create in  `.GlobalEnv` with event dates displayed on graph.
 #' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
 #' @param dylegend (Default: "auto") Passed to [dygraphs::dyLegend()], can be one of ("auto", "always", "onmouseover", "follow", "never")
-#' @param groupnm  (Default: NULL, unless set via [fg_sync_group()] )  Group name used in `shiny` or `RMarkdown` to synchronize graphs. See [fg_sync_group()] for details.
 #' @param fillGraph (Default: FALSE) Shade area underneath each series.
+#' @param groupnm  (Default: NULL, unless set via [fg_sync_group()] )  Group name used in `shiny` or `RMarkdown` to synchronize graphs. See [fg_sync_group()] for details.
 #' @param verbose (Default: FALSE) Print extra details about what will be graphed.
 #' @param extraoptions Additional options passed to [dygraphs::dyOptions()]
 #' @returns Dygraph [dygraphs](https://rstudio.github.io/dygraphs/) of input data, with annotations and other customizations.
@@ -157,7 +157,7 @@
 #' fgts_dygraph(eqtypx,annotations="hline,100,at100,red;hline,200,at200;range,300,400")
 #'
 #' # use with helpers
-#' require(data.table)
+#'
 #' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
 #' fgts_dygraph(smalldta,title="W TurnPts",event_ds=fg_findTurningPoints(smalldta[,.(date,QQQ)]))
 #' fgts_dygraph(smalldta,title="W Sentiment",event_ds=fg_cut_to_events(consumer_sent,center="zscore"))
@@ -168,13 +168,15 @@
 #' # use with forecasts
 #'
 #' require(forecast)
+#' require(timetk)
+#' require(sweep)
 #' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
 #' fcst_one <- function(ticker) {
-#'   t1_ts <- zoo::zoo(smalldta[[ticker]],smalldta[["date"]])
-#'   forecast::ets(t1_ts) |> forecast::forecast(h=36) |>  fg_predict(seriesnm=ticker)
+#'    fcst <-tk_ts(smalldta[,.SD,.SDcol=c("date",ticker)]) |> ets() |> forecast::forecast(h=30)
+#'    fcst |> sweep::sw_sweep(timetk_idx=TRUE) |> fg_sweep()
 #'   }
 #' fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
-#' fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=fpred)
+#' fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,rebase=",100",forecast_ds=fpred)
 #'
 #' @import data.table
 #' @export
@@ -185,9 +187,8 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
                         annotations="",annotation_ds=NULL,
                         forecast_ds=NULL,
                         ylimits=NULL,dtstartfrac=0,dtwindow="",rebase="",
-                        exportevents=NULL, meltvar="variable",dylegend="always",groupnm=fg_sync_group(),
-                        fillGraph=FALSE,verbose=FALSE,
-                        extraoptions=list()) {
+                        exportevents=NULL, meltvar="variable",dylegend="always",fillGraph=FALSE,
+                       groupnm=fg_sync_group(),verbose=FALSE,extraoptions=list()) {
 
   # NSE crap.  There has to be a better way
   `.`=gpnm=suffix=seriesnm=display=color=axis=series_no=variable=eventid=direct=tcolor=optexp=DT_ENTRY=NULL
@@ -216,7 +217,7 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
   # Wrangle original input
   # Figure out date name and place first
   dt_colnames <- list()
-  dt_colnames['date'] <- find_col_bytype(indt,lubridate::is.Date)
+  dt_colnames['date'] <- find_col_bytype(indt,lubridate::is.instant)
   dt_colnames['value'] <- find_col_bytype(indt,is.numeric)
   dt_colnames['meltvar'] <- meltvar
   if(is.na(dt_colnames['date'])) {
@@ -301,13 +302,15 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
 
     # Now forecasts
     if(is.data.frame(forecast_ds)) {
-        dt_colnames['fdate'] <- find_col_bytype(forecast_ds,lubridate::is.Date)
+        dt_colnames['fdate'] <- find_col_bytype(forecast_ds,lubridate::is.instant)
+        setcolorder(forecast_ds, dt_colnames[['fdate']])
         fcst_series <- rbindlist(lapply(colnames(forecast_ds),
                                           \(x) { y=s(x,sep="."); data.frame(gpnm=y[1],seriesnm=x)}))
         sdets_base <- series_dets[gpnm==seriesnm, .SD,.SDcols=!c("seriesnm")]
         fcst_dets <- sdets_base[fcst_series,on=.(gpnm)][,let(style="dashed")][!is.na(color)] # No date
         fcst_dets <- fcst_dets[,let(gpnm=gsub("(lo|hi)$","",seriesnm))]
         series_dets <- DTappend(series_dets,fcst_dets)
+        forecast_ds <- forecast_ds[ forecast_ds[[1]]>dtlimits[2], ] # Only use forward dates, prophet returns full set
         indtnew = merge(indtnew,forecast_ds,by.x=dt_colnames[['date']], by.y=dt_colnames[['fdate']],all=TRUE)
         alldts <- indtnew[[1]]
         dtsrange_todisplay <- c(alldts[length(alldts)*dtstartfrac+1], max(alldts))
@@ -315,7 +318,7 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
     # Rebase if desired
     if( nchar(rebase)>0 && length( rebtmp <- s(rebase,sep=",") ) <=2 ) { # Overengineering
        rebdate <- fcoal(lubridate::as_date(rebtmp[1]),dtlimits[1])
-       rebval <- ifelse(length(rebtmp)==1 & lubridate::is.Date(rebdate),100,as.numeric(utils::tail(rebtmp,1)))
+       rebval <- ifelse(length(rebtmp)==1 & lubridate::is.instant(rebdate),100,as.numeric(utils::tail(rebtmp,1)))
        rebloc <- max(which(indtnew[[1]]<=rebdate))
        fnames <- grepv("\\.f",colnames(indtnew))  # To rebase foreasts
        indtnew[rebloc,(fnames):=.SD,.SDcols=gsub("\\.f[a-z]*","",fnames)]
@@ -442,7 +445,7 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
       for(irow in seq(1,nrow(trow))) {
         this_nm <- fcoal(trow[[irow,"a1"]],"event")
         start_dt <- trow[[irow,"a2"]]
-        if( lubridate::is.Date(start_dt) ) {
+        if( lubridate::is.instant(start_dt) ) {
             end_dt <- fcoal(trow[[irow,"a3"]],start_dt)
             colornm <- fg_get_colorstring(fifelse(end_dt>start_dt,"date_range","date"))
             newevent <- data.table(DT_ENTRY=start_dt,END_DT_ENTRY=end_dt,text=this_nm,loc="bottom",color=colornm)
@@ -473,7 +476,7 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
     if(is.data.frame(event_ds)) {
         event_ds <- data.table(event_ds)
         # Rename columns smartly, only first two date columns taken
-        dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.Date,firstonly=FALSE),2)
+        dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.instant,firstonly=FALSE),2)
         dtcolnewnames <- sapply( dtcols, \(x) ifelse(grepl("end",x,ignore.case=TRUE),"END_DT_ENTRY","DT_ENTRY"))
         setnames(event_ds,dtcols,dtcolnewnames)
         # Narrow dates either to strictly inbetween, or with overlaps:  Using new foverlaps function

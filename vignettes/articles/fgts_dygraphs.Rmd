@@ -16,10 +16,14 @@ knitr::opts_chunk$set(
 library(FinanceGraphs)
 ```
 
+```{r,echo=FALSE}
+options(datatable.print.keys=FALSE, datatable.print.class=FALSE)
+```
+
 # Financial Time Series visualization
 
 Visualizing financial time series is critical to communicating ideas and
-deciding how to trade or invest.\
+deciding how to trade or invest.
 While [ggplot2](https://ggplot2.tidyverse.org/) is the gold standard for
 static graphs, [Dygraphs](https://rstudio.github.io/dygraphs/index.html)
 is an excellent package to mix interactivity with flexibility and visual
@@ -40,8 +44,7 @@ which may add useful information to the graph.
 `fgts_dygraph()` is a flexible wrapper around
 [dygraphs](https://rstudio.github.io/dygraphs/index.html) building
 blocks. Internally, it makes extensive use of `data.table`
-functionality, both for flexibility and speed.\
-Key concepts useful to use this function are
+functionality, both for flexibility and speed. Key concepts useful to use this function are
 
 -   **Input data** is always a `data.frame` or `data.table` with a
     `Date` coercible column. It can either be narrow/long, with a
@@ -72,7 +75,7 @@ the examples will use a simple prepared data set of prices. Simply
 plotting these prices can be done with just a few parameters.
 
 ```{r}
-head(eqtypx,3)
+head(eqtypx,1)
 fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
 ```
 
@@ -87,32 +90,30 @@ resets the view to the broadest possible one.
 Let's enhance the graph with a few more parameters that can be added to
 the `fgts_dygraph` function call:
 
-| Parameter call | Feature |
-|:-------|:-------|
-| `roller=3` | Lessen the smoothing by only averaging every 3 prices |
-| `dtstartfrac=0.6` | Start the graph 60 percent of the way from input series beginning to the end |
-| `splitcols=TRUE` | Split the first series found (leftmost if wide, first if narrow) onto a second axis |
-|  | A list of series names can also be given |
-
 ```{r}
 fgts_dygraph(eqtypx, title="Stock Prices, focused", roller=3,dtstartfrac=0.6,splitcols=TRUE)
 ```
 
-To highlight or hide series and focus in on a particular date range, use
-these:
-
-|Parameter|Feature|
+| Parameter call | Feature |
 |:-------|:-------|
-|`dtwindow="-3y::"`| focus the date range selector to 1 year prior to 'Sys.Date()`|
-|`hidecols="TLT"`|Hide a series|
-|`hilightcols="IBM`|Highlight a series by thickening its line or changing the line style|
-|`hilightwidth=4`|New width for columns named in`hilightcols`|
-|`hilightstyle="dashed"`|New line style for columns named in`hilightcols`|
+|`roller=3`|Lessen the smoothing by only averaging every 3 prices |
+|`dtstartfrac=0.6`|Start the graph 60 percent of the way from input series beginning to the end |
+|`splitcols=TRUE`|Split the first series found (leftmost if wide, first if narrow) onto a second axis.  A list of series names can also be given|"
 
+
+To highlight or hide series and focus in on a particular date range, use:
+|Parameter|Feature|
 ```{r}
 fgts_dygraph(eqtypx, title="Stock Prices, highlighted", roller=1,
              dtwindow="-3y::",hidecols="TLT",hilightcols="IBM",hilightwidth=4, hilightstyle="dashed")
 ```
+|Parameter call|Feature|
+|:-------|:-------|
+|`dtwindow="-3y::"`|focus the date range selector to 1 year prior to `Sys.Date()`|
+|`hidecols="TLT"`|Hide a series|
+|`hilightcols="IBM`|Highlight a series by thickening its line or changing the line style|
+|`hilightwidth=4`|New width for columns named in`hilightcols`|
+|`hilightstyle="dashed"`|New line style for columns named in`hilightcols`|
 
 ## Rebasing and adding vertical annotations.
 
@@ -128,14 +129,13 @@ last in the dataset) values or labels. These can be useful when you
 prefer more static graphs than interactive ones, especially when legends
 are turned off.
 
-|Parameter call|Subparameter|Feature|
-|:-------|:-------|:--------|
-|`rebase="2025-01-01,120"`||Divide all series by their values a of 1/1/2025 and scale to 120.|
-|`annotations=`||Add annotations separated by semicolons|
-||`last,linelabel`|Put vertical lines highlighting last values in each series |
-||`range,100,120`|Put a highlighted range betwewen 100 and 120 percent of value on 1/1/2025|
-|`dylegend="never"` ||Don't replicate information in the legend|
-|`bg_opts="grid,none"`||Hide the grid|
+|Parameter call|Feature|
+|:-------|:--------|
+|`rebase="2025-01-01,120"`|Divide all series by their values a of 1/1/2025 and scale to 120.|
+|`annotations="last,linelabel"`|Put vertical lines highlighting last values in each series |
+|`annotations="range,100,120"`|Put a highlighted range betwewen 100 and 120 percent of value on 1/1/2025|
+|`dylegend="never"` |Don't replicate information in the legend|
+|`bg_opts="grid,none"`|Hide the grid|
 
 ```{r}
 fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfrac=0.7,
@@ -144,8 +144,9 @@ fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfr
              dylegend = "never", bg_opts="grid,none")
 ```
 
--   Note that column specifications are flexible, i.e.
-    `hidecols="TLT;EEM"` or `hidecols=c("TLT","EEM")` can also be used.
+-   Note that column specifications and annottions are flexible, i.e.
+    `hidecols="TLT;EEM"` or `hidecols=c("TLT","EEM")` can also be used, or annotations
+    strung together with semicolons.
 -   Also, notice that focusing in the displayed date range reduces the
     roller smoothing parameter appropriately. However, until "1" is put
     in the lower left corner box, the series will still be smoothed and the last value
@@ -154,7 +155,8 @@ fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfr
     were not hidden by `hidecols`. To draw with the colors typically
     used for the first two series (see Customization below), take the
     series out before sending to `fgts_dygraph()` by (e.g.) using instead
-    `fgts_dygraph(eqtypx |> dplyr::select(date,IBM,QQQ),...)`
+    `fgts_dygraph(eqtypx |> dplyr::select(date,IBM,QQQ),...)` to put those two
+    series first.
 
 ## Grouping series together
 
@@ -163,11 +165,13 @@ a forecast or ranges for a given time periods.
 [Dygraphs](https://rstudio.github.io/dygraphs/index.html) allows you to
 plot series with areas shaded between lower and upper bounds. The
 ability to do so can be used to enhance graphs in many ways. Some I've
-used in addition to adding confidence bounds include \* Showing
-positioning, momentum, or sentiment as (proportional) shaded areas
-underneath or over a series. \* SHowing VAR bounds for unit investments.
-\* Showing statistical significance to exogenous time series. \* Showing
-evolution of peer comparisons through time.
+used in addition to adding confidence bounds include 
+
+* Positioning, momentum, or sentiment as (proportional) shaded areas
+underneath or over a series. 
+* VAR bounds for unit investments.
+* Statistical significance to exogenous time series. 
+* Evolution of peer comparisons through time.
 
 `fgts_dygraph()` plots together series which have suffixes in
 (`.lo`,`.hi`) with their undecorated counterparts, keeping their
@@ -177,7 +181,7 @@ to peers is:
 ```{r}
 toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
                peers=mean(value),peers.lo=min(value),peers.hi=max(value)),by=.(date)]
-head(as.data.frame(toplot),2)
+head(toplot,2)
 ```
 
 Those series (`peers`, `peers.lo`, and `peers.hi`) are combined to get a
@@ -221,19 +225,20 @@ be displayed. Events are show in two ways:
 Events can be determined from several sources, and can be combined
 together.
 
--   **Internal dataset**: The package maintains contains a prepackaged
+-   **Internal data**: The package maintains contains a prepackaged
     data set of historical *market regimes* or other events of interest
     (called "dates of interest" or just "doi"). Those can be added to
     (with new categories) or amended as needed, and then added to the
     graph using (e.g.) `events="doi,fedmoves"`. Two categories included
-    with the package are `fedmoves` and `regm`. An example of both is
-    shown below:
+    with the package are `fedmoves` with individual dates and `regm`, which
+    has both beginning and end dates.
 
 ```{r}
-smalldta <- eqtypx |> filter(date>=as.Date("2023-01-01")) |> select(date,TLT,EEM)
+smalldta <- eqtypx |> filter(date>=as.Date("2023-01-01")) |> select(date,EEM,TLT)
 fgts_dygraph(smalldta,title="With Precanned Events",ylab="Price",rebase=",100",roller=1,
                     events="doi,regm;doi,fedmoves")
 ```
+
 
 
 
@@ -256,13 +261,13 @@ fg_get_dates_of_interest("fedmoves") |> slice_tail(n=2) |> as.data.frame()
 ```
 
 -   **Seasonal factors** : Regularly recurring dates can also be added.
-    They can either be absolute, (e.g. equity option expirations) or
-    relative (e.g. dates with same day of the quarter as the end date of
-    the series).
+    They can either be absolute, (e.g. equity option expirations or IMM CDS roll dates)
+    or relative to the end of the series, (e.g. dates with same day of the quarter
+    or business day of the year.)  See documentation for details.
 
 -   **Single dates**: Coercible dates can also be added with a simple
-    string of the form `"dt,<text>,yyyy-mm-dd"`
-
+    string of the form `"dt,<text>,yyyy-mm-dd"`. 
+    
 For example, to add monthly option expiration dates and a note for
 Christmas, add
 
@@ -274,11 +279,14 @@ fgts_dygraph(smalldta,title="With Seasonals",rebase=",100",roller=1,dylegend="ne
 -   **Statistically determined dates** can be added. There are few
     available with one-line specification, but most can be added with
     "helpers" discussed in the next section. Breakouts, extrema, and
-    turning points are currently implemented, as in
+    turning points are currently implemented.  When called through the `events`
+    line, they operate on the first series found.  For example, 7 turning points on `QQQ` are plotted with
 
 ```{r}
-fgts_dygraph(smalldta,title="With Turning Points",rebase=",100",roller=1,events="tp,5")
+fgts_dygraph(smalldta,title="With Turning Points",rebase=",100",roller=1,events="tp,7")
 ```
+
+### Events, Annotations, and forecasts can all be added with separate data frames.
 
 Events can also be added with `data.frames` that include all the details
 of the annotation, such as the text, dates, and colors. Those can be
@@ -290,15 +298,15 @@ created by the user, but the package includes several "helpers" to take
 Event helpers are small functions which convert any time based data into
 the correct annotations. The currently implemented helpers are
 
-| Function | Description |
+|Function|Description|
 |:-------------|:--------|
-| `fg_addbreakouts()` | Statistically identify breakout points (also available via `events`) |
-| `fg_findTurningPoints()` | Statistically identify turning points (also available via `events`) |
-| `fg_cut_to_events()` | "Cut" a univariate series into colored bands, with two different colors for positive and negative values |
-| `fg_signal_to_events()` | Map a long/short signal to events |
-| `fg_tq_divs()` | Add dividend events from [tidyquant](https://business-science.github.io/tidyquant/) dividend data |
-| `fg_av_earnings()` | Add earnings events from [AlphaVantage](https://alphavantage.co) earnings data |
-| `fg_ratingsEvents()` | Add colored ranges based on analyst credit ratings |
+|`fg_addbreakouts()`|Statistically identify breakout points (also available via `events`) |
+|`fg_findTurningPoints()`|Statistically identify turning points (also available via `events`) |
+|`fg_cut_to_events()`|"Cut" a univariate series into colored bands, with two different colors for positive and negative values |
+|`fg_signal_to_events()`|Map a long/short signal to events |
+|`fg_tq_divs()`|Add dividend events from [tidyquant](https://business-science.github.io/tidyquant/) dividend data |
+|`fg_av_earnings()`|Add earnings events from [AlphaVantage](https://alphavantage.co) earnings data |
+|`fg_ratingsEvents()`|Add colored ranges based on analyst credit ratings |
 
 The first two are described in the function documentation. The next two
 are designed to map exogenous univariate series to colored regions.
@@ -313,7 +321,8 @@ are designed to map exogenous univariate series to colored regions.
 
 ```{r}
 suppressPackageStartupMessages(require(dplyr))
-toplot <- rbind(eqtypx_melt |> filter(variable=="QQQ"), consumer_sent |> transmute(date,variable=symbol,value=price))
+toplot <- rbind(eqtypx_melt |> filter(variable=="QQQ"), 
+                consumer_sent |> transmute(date,variable=symbol,value=price))
 fgts_dygraph(toplot,title="With consumer sentiment",splitcols="UMCSENT",stepcols="UMCSENT",roller=5,
              event_ds = fg_cut_to_events(consumer_sent,center="zscore"))
 ```
@@ -331,12 +340,12 @@ fgts_dygraph(toplot,title="With consumer sentiment",splitcols="UMCSENT",stepcols
 suppressPackageStartupMessages(require(data.table))
 ma_signal<-eqtypx[,.(date,sig=cut(frollmean(EEM,5)-frollmean(EEM,20),
                      c(-10,-0.5,0.5,10),labels=c("long","flat","short")),EEM)]
-tail(ma_signal,3) |> as.data.table()
+tail(ma_signal,3)
 ```
 
 ```{r}
 colormap <- fg_get_colors("tradesignal")[,.(sig=variable,color)]
-colormap |> as.data.frame()
+colormap
 ```
 
 ```{r}
@@ -360,7 +369,7 @@ all_events <- rbindlist(list(fg_tq_divs(c("IBM")),earnings_ibm |> fg_av_earnings
 fgts_dygraph(eqtypx[,.(date,QQQ,IBM)],title="With earnings and divs",dtstartfrac=0.8,event_ds=all_events)
 ```
 
-Note that mutiple event sets can be `rbind`-ed togehter, and the color
+Note that mutiple event sets can be used with `rbind`, and the color
 of the event annotations matches that of the original series.
 
 -   `fg_ratingsEvents()` maps a `data.frame` of ratings changes to
@@ -370,32 +379,26 @@ of the event annotations matches that of the original series.
     overlaid with a currency (or spread), gives
 
 ```{r}
-head(ratings_db,3) |> as.data.table()
-copdta <- nomfxdta |> filter(variable=="COP")
-fgts_dygraph(copdta,title="COP with Ratings",dtstartfrac=0.3,
+head(ratings_db,3)
+fgts_dygraph(nomfxdta |> filter(variable=="COP"),title="COP with Ratings",dtstartfrac=0.3,
          event_ds=fg_ratingsEvents("COLOM",ratings_db,agency="S.P"))
 ```
 
 ## Forecasts
 
-Time series plotted in `fgts_dygraph`s can also be extended beyond the
+Time series plotted in `fgts_dygraph` can also be extended beyond the
 current day. Forecasts come in many output forms, but fortunately, there
 are `broom` like objects now which can standardize the outputs of many
 forecasting models. [forecast](https://pkg.robjhyndman.com/forecast/) in
 particular can produce standardized forecasts from multiple models,
 including `ets()`, `auto.arima()`, `tbats` and a host of others.
 
-Getting those foreasts into the dygraph requires an included `broom`
-like function called `fg_predict()` which takes a somewhat complicated
-data structure and creates new series whch are then added to the
-original data.
-
-Alternatively, if you would like a `data.frame` with the actual
-forecasts, use `sw_sweep()` from
-[Sweep](https://business-science.github.io/sweep/articles/SW00_Introduction_to_sweep.html),
-and then forward on to another included helper `fg_sweep()`. An example
-to predict QQQ with `ets()` is shown below. First, we show the format we
-expect the forecasts to be in.
+The forecasts from `forecast` require quite a bit of post-processing
+to recover dates, but fortunately the function `sw_sweep()` from 
+[Sweep](https://business-science.github.io/sweep/articles/SW00_Introduction_to_sweep.html)
+produced an actual `data.frame`.  This can be forwaded to another (included)
+helper `fg_sweep()`. An example to predict QQQ with `ets()` is shown 
+below. First, we show the format we expect the forecasts to be in.
 
 ```{r}
 suppressPackageStartupMessages(require(timetk))
@@ -406,8 +409,7 @@ head( fcst_in <- fg_sweep(fcst_eqtypx) ,3)
 ```
 
 ```{r}
-toplot <- eqtypx[,.(date,IBM,QQQ)]
-fgts_dygraph(toplot,title="Rebased With Forecasts",roller=1,dtstartfrac=0.6,rebase="2024-01-01,100",forecast_ds=fcst_in)
+fgts_dygraph(eqtypx[,.(date,IBM,QQQ)],title="Rebased With Forecasts",roller=1,dtstartfrac=0.6,rebase="2024-01-01,100",forecast_ds=fcst_in)
 ```
 
 Note that
@@ -428,7 +430,7 @@ colors have `variables` associated with them, which are arbitrary
 ordering values or (in some cases) values mapped to greps on the text
 labels. [\^1]
 
-[\^1:] In particular, the included events in the set `regm` have text
+[\^1]: In particular, the included events in the set `regm` have text
 labels that look like (e.g) `"TariffT-"`. The "-" at the end of the text
 is mapped to the `marketregines,-` color.
 
@@ -446,7 +448,7 @@ the defaults chosen by the package:
 suppressPackageStartupMessages(require(RColorBrewer))
 newcolors <- mycolors |> mutate(color = rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:4])
 fg_update_colors(newcolors, persist=TRUE )
-fg_get_colors("lines",n_max=4) |> as.data.frame()
+fg_get_colors("lines",n_max=4)
 ```
 
 which gives, with annotations
@@ -467,7 +469,7 @@ fgts_dygraph(eqtypx, title="Stock Prices, line colors", annotations="last,label"
 To reset the colors back to their defaults, run
 ```{r}
 fg_reset_to_default_state("color")
-fg_get_colors("lines",n_max=2) |> as.data.frame()
+fg_get_colors("lines",n_max=2)
 ```
 
 ## Customization: Adding Dates of Interest
@@ -485,7 +487,9 @@ tail(fg_get_dates_of_interest("fedmoves"),2)  |> as.data.frame()
 ```
 Entire new categories can be added. Here are a few examples:
 
-* Adding recession indicators from [FRED](https://fred.stlouisfed.org/series/RECPROUSM156N).   FRED
+### Recession Indicators
+
+Adding recession indicators from [FRED](https://fred.stlouisfed.org/series/RECPROUSM156N).   FRED
 has a monthly probability of recession indicator. Mapping that indicator to a yes/no series using
 a 7pct threhold, we can add recession events using the event helper `fg_signal_to_events()`:
 
@@ -499,15 +503,17 @@ fg_update_dates_of_interest(newevents)
 fgts_dygraph(eqtypx, title="Stock Prices, w/ Recession Events", events="doi,FREDPREC",rebase=",100",bg_opts="grid,none")
 ```
 
-* Adding other central bank moves, e.g. Brazil's COPOM decisions.  Downloading historical data 
-from [BCB](https://www.bcb.gov.br/en/monetarypolicy/historicaldata), we can do
+### Central Bank events
+
+We can add other central bank moves, e.g. Brazil's COPOM decisions  [BCB](https://www.bcb.gov.br/en/monetarypolicy/historicaldata), 
+by downloaded the data and using
 
 ```{r}
 selic<-data.table::fread("c:/d/src/R/FinanceGraphs/inst/extdata/selic_historical_rates.csv",skip=1,select=c(2,5),col.names=c("date","tgt"))
 selic<-selic[,let(DT_ENTRY=as.Date(date,format="%m/%d/%Y"))][order(DT_ENTRY)][,move:=c(0,diff(tgt,1))]
 newevents <- selic[,.(category="COPOM",eventid=format(tgt,digits=2), DT_ENTRY,color=c("blue","grey","red")[sign(move)+2])]
 fg_update_dates_of_interest(newevents[!color=="grey"]) # Only add real moves
-tail(newevents,2) |> as.data.frame()
+tail(newevents,2)
 ```
 
 and use it easily with 

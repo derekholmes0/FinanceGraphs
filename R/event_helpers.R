@@ -32,9 +32,12 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
 #' Event Helpers : fg_findTurningPoints
 #'
 #' @name fg_findTurningPoints
-#' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
+#' @param indta Time series `data.table` with a date as the first column and a value series as the second column,
+#' or a [prophet::prophet()] object
 #' @param rtn string with what to return ('dates','data','all')
-#' @param method string in 'pctchg' (default) or 'cpm' [cpm-package].  'pctchg' looks for up to 'npts' dates with the largest positive and negative changes over threshold 'pctabovemin'
+#' @param method string describing method of finding Turning Points
+#' * `"pctchg"` : (Default) Find `npts` largest percentage changes with a miniumum window between them
+#' * `"cpm"` : Uaw [cpm-package] to find change points
 #' @param npts Number of change points to find
 #' @param pts_of_interest string in 'change' (default) or 'value'
 #' @param pctabovemin Minimum percentage change to look for.
@@ -42,24 +45,30 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
 #' @param cpmmethod String (default: "GLM") passed to [cpm::processStream()]
 #' @param addlast Logical (default: FALSE) to add an event with final observation.
 #' @param ... Additional parameters passed to [cpm-package]
-#'
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
-#'
 #' @examples
 #' dta <-eqtypx[,.(date,QQQ,TLT)]
 #' fgts_dygraph(dta,event_ds=fg_findTurningPoints(dta),title="With turningPoints")
-#'
+#' require(prophet)
+#' fc_prophet = eqtypx[,.(ds=date,y=QQQ)] |> prophet::prophet()
+#' fgts_dygraph(dta,event_ds=fg_findTurningPoints(fc_prophet),title="With Prophet turningPoints")
 #' @import data.table
 #' @export
 fg_findTurningPoints<-function(indta,rtn="dates",
                             method="pctchg",npts=10,pts_of_interest="change",pctabovemin=0.05,maxwindow=-1,addlast=FALSE,cpmmethod="GLR",...) {
   `.`<-DT_ENTRY<-value<-daysfrommin<-goodpt<-ino<-text<-color<-loc<-pctchg_func<-NULL
   pts <- data.table()
-  v1a <- copy(indta)[,c(1,2)]
-  setnames(v1a,c("DT_ENTRY","value"))
-  v1a  <- v1a[,let(DT_ENTRY=as.numeric(DT_ENTRY),goodpt=1,daysfrommin=0,origvalue=value,value=value-min(value,na.rm=T))]
   tcolors <- fg_get_colorstring("turningpoints")
+  if("prophet" %in% class(indta)) {
+      ydta <- data.table(DT_ENTRY=as.Date(indta$history$ds),value=indta$history$y)
+      pts <-ydta[data.table(DT_ENTRY=as.Date(indta$changepoints)),on=.(DT_ENTRY)]
+      pts <- pts[,.(DT_ENTRY,text="TP",color=tcolors[[2]],loc="bottom")]
+      method <- "prophet"
+  }
   if(method=="pctchg") { # Not perfect, on values
+    v1a <- copy(indta)[,c(1,2)]
+    setnames(v1a,c("DT_ENTRY","value"))
+    v1a  <- v1a[,let(DT_ENTRY=as.numeric(DT_ENTRY),goodpt=1,daysfrommin=0,origvalue=value,value=value-min(value,na.rm=T))]
     pctchg_func <- function(pts,v1a,dir,npts,maxwindow,pctabovemin) {
       u1a <- copy(v1a);
       for( i in 1:ceiling(npts/2)) {
@@ -86,7 +95,7 @@ fg_findTurningPoints<-function(indta,rtn="dates",
     pts_toget <- ifelse(pts_of_interest=="detect","detectionTimes","changePoints")
     pts <- indta[cpts[[pts_toget]]][,1]
     setnames(pts,c("DT_ENTRY"))
-    pts <- pts[.(DT_ENTRY,text="CP",color=tcolors[[2]],loc="bottom")]
+    pts <- pts[.(DT_ENTRY,text="TP",color=tcolors[[2]],loc="bottom")]
   }
   if(addlast & !any(grepl("CURR",pts$text))) { 0
     pts <- rbindlist(list(pts,indta[DT_ENTRY==max(DT_ENTRY),][,.(DT_ENTRY,text="CURR",color="black",loc="bottom")]),fill=TRUE)
@@ -171,7 +180,7 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #' @export
 fg_cut_to_events<-function(indta,ncutsperside=4,center=0,extend=TRUE,invert=FALSE) {
   `.` <- value <- tmpcat <- DT_ENTRY <- END_DT_ENTRY <- NULL
-  dt_colname <- find_col_bytype(indta,lubridate::is.Date)
+  dt_colname <- find_col_bytype(indta,lubridate::is.instant)
   val_colname <- find_col_bytype(indta,is.numeric)
   tmpdta <- data.table(indta)[,.(DT_ENTRY=get(dt_colname), value=get(val_colname))]
   if(extend==TRUE) {
@@ -237,15 +246,19 @@ fg_signal_to_events<-function(signal_df,colormap) {
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #'
 #' @examples
+#' \dontrun{
 #' require(tidyquant)
 #' fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
-#'
+#' }
 #' @import data.table
 #' @import tidyquant
 #' @rdname Event_Helpers
 #' @export
 fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
   `.`=value=symbol=color=text=NULL
+  if(!requireNamespace("tidyquant",quietly=TRUE)) {
+    stop("Tidyquant not installed, cannot use fg_tq_divs")
+  }
   if(is.data.frame(divs_ds)) {
     rtn <- data.table(divs_ds)
   }
@@ -271,13 +284,14 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #'
 #' @examples
+#' \dontrun{
 #' require(alphavantagepf)
 #' earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
 #'         alphavantagepf::av_extract_df("quarterlyEarnings") |>
 #'         fg_av_earnings()
 #' toplot = dplyr::select(eqtypx,date,IBM)
 #' fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=earnings)
-#'
+#' }
 #' @import data.table
 #' @rdname Event_Helpers
 #' @export
@@ -290,5 +304,4 @@ fg_av_earnings<-function(indt,field="reportedEPS",ticker_in_label=FALSE) {
   }
   return(rtn[])
 }
-
 
