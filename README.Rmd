@@ -31,7 +31,6 @@ pak::pak("derekholmes0/FinanceGraphs")
 # install.packages("FinanceGraphs")  # If from CRAN
 ```
 
-
 # Dygraphs for time series
 
 ## Input data and Constants
@@ -187,6 +186,43 @@ fg_reset_to_default_state()
 Dygraphs have the very nice feature of allowing synchronized zoom in Markdown or Shiny applications.  Each graph with a common `group` identifier
 is synchronized.  There are times, however, when you want to turn these on or off.  The function [fg_sync_group()] either returns the current group name
 if called with no parameters, sets the group name with a string, or turns off synchronization with a call `fg_sync_group(NULL)`.
+
+# Static Plots for Time Series
+
+## Time-categorized box plots
+
+One way to visualize multiple time series comparatively with a boxplot or a violin plot.  The function [fg_tsboxplot()] provides a flexible way
+to split several time series into time categories.  Usually, those categories are time periods with increasing horizons, but this function
+allows for arbitrary periods managed by [fg_update_dates_of_interest()].  Data can be normalized across historical categories and time series
+categories.
+
+As an example, suppose we would like to see normalized equity prices over the past two years, split into categories of the last week, month (less the 
+last week) and the last quarter.   
+
+```{r}
+#| label: Boxplot1
+#| fig.alt: "Boxplot of relative equity prices"
+fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks=c(7,90),normalize="byvar",title="Normalized Equity prices by Date category")
+```
+
+Like [fgts_dygraph()], the function can take data in both wide and long formats.  Longer formats have the advantage of adding more categorical levels 
+to our graphs.  For example, we can plotting recent ranges of the monthly FX Real Exchange Rate dataset in the following way.
+Here, we split the data into buckets of last 20pct of the months, the first half the months and the last. We will also show the last 
+observation, hide the boxplot whiskers, and reorder the currencies by their relative weakness.
+
+```{r}
+#| label: Boxplot2
+#| fig.alt: "Boxplot of Real Effective Exchange Rates"
+fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
+```
+
+
+
+
+
+
+
+
 
 
 

@@ -108,7 +108,7 @@ as of the given date.  See examples.}
 Dygraph \href{https://rstudio.github.io/dygraphs/}{dygraphs} of input data, with annotations and other customizations.
 }
 \description{
-TIme series in Dygraph form
+Plots interactive time series graphs with many options for highlighting key events, regions and customizations.
 }
 \details{
 Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format

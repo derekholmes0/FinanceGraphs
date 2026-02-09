@@ -6,7 +6,8 @@
 #' `fg_update_dates_of_interest()` updates a set of time events for future use in time series graphs
 #' @param search_categories Grep string of categories to return.
 #' @param use_default (Default TRUE) use dedault dates if none else found.
-#' @param startdt MInimum date for events to be returned.
+#' @param startdt Minimum date for events to be returned.
+#' @param totoday (Default: FALSE) Ends last date set returned (if applicable) with `totoday` if a date, `Sys.Date()`
 #' @param indta `data.table` with columns as shown in details.
 #' @param replace (Default: FALSE) If TRUE, replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.
 #' @returns Filtered datasets
@@ -65,13 +66,19 @@ if(file.exists(the$colorfn)) {
 #' @import data.table
 #' @rdname fg_dates_of_interest
 #' @export
-fg_get_dates_of_interest <- function(search_categories="",use_default=TRUE,startdt=NULL) {
+fg_get_dates_of_interest <- function(search_categories="",use_default=TRUE,startdt=NULL,totoday=FALSE) {
   DT_ENTRY<-NULL
   rtn <- the$doi_dates[grepl(search_categories,the$doi_dates$category,ignore.case=TRUE),][order(DT_ENTRY)]
   if(!is.null(startdt)) {
     rtn <- rtn[DT_ENTRY>=as.Date(startdt),]
   }
-  return(rtn)
+  if(nrow(rtn)>0 & !(totoday==FALSE)) {
+    if(!is.na(rtn[.N][["END_DT_ENTRY"]])) {
+      newdate <- ifelse(totoday==TRUE, Sys.Date(),lubridate::as_date(totoday))
+      rtn[.N,let(END_DT_ENTRY=newdate)]
+    }
+  }
+  return(rtn[])
 }
 
 #' @import data.table
@@ -138,6 +145,9 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #'
 #' `variable` is used to prioritize colors, so (e.g. `D01` will be the color of the first series in an input dataset)
 #'
+#' If `color=="brewer"` then a sequential scale of size `n_max` will be returned using details saved from  [fg_update_colors()]. See [scales::brewer_pal]
+#' and [colorbrewer](https://colorbrewer2.org/#type=sequential&scheme=Greens&n=7)
+#'
 #' @seealso [fgts_dygraph()]
 #' @examples
 #' \dontrun{
@@ -148,23 +158,33 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #' fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
 #' fg_get_colors("lines",n_max=3)
 #' fg_update_line_colors(c("black","green","red","blue"),persist=FALSE)
-#' fg_get_colors("lines",n_max=4)
+#' show_col(fg_get_colorstring("lines",n_max=4))
 #' fg_reset_to_default_state("color")
 #'}
 #'
 
 #' @import data.table
+#' @import scales
 #' @rdname fg_update_colors
 #' @export
 fg_get_colors <- function(item="",n_max=NA_integer_) {
   rtn <- the$default_colors[which(the$default_colors$category==item),]
-  if(!is.na(n_max)) { rtn <- rtn[1:n_max,] }
-  if(item=="") { rtn <- the$default_colors }
+  if(rtn[[1,"color"]]=="brewer") {
+    stopifnot("fg_get_colors(brewer) needs n_max" = !is.na(n_max))
+    brewer_dets <- s(rtn[[1,"variable"]],sep=",")
+    cols <- scales::pal_brewer(brewer_dets[[1]],palette=brewer_dets[[2]],direction=-1)(as.numeric(rtn[[1,"const"]]))
+    colors <- pal_gradient_n(cols)(seq(0, 1, length.out = n_max))
+    rtn <- data.table(variable=paste0("C",1:n_max),color=colors)[,let(category=item)][]
+  }
+  else {
+    if(!is.na(n_max)) { rtn <- rtn[1:n_max,] }
+    if(item=="") { rtn <- the$default_colors }
+  }
   return(rtn)
 }
 
-fg_get_colorstring <- function(item="") {
-  return( fg_get_colors(item)[["color"]] )
+fg_get_colorstring <- function(item="",n_max=NA_integer_) {
+  return( fg_get_colors(item,n_max=n_max)[["color"]] )
 }
 
 #' @import data.table
@@ -219,6 +239,7 @@ fg_reset_to_default_state <- function(reset="all") {
     the$default_colors <- copy(colors_default)
   }
   the$tevents_defaults <- copy(tevents_defaults)
+  message("fg_reset_to_default_state(",reset,") completed")
 }
 
 #' @import ggplot2

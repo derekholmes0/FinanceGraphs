@@ -16,7 +16,8 @@ the
 fg_get_dates_of_interest(
   search_categories = "",
   use_default = TRUE,
-  startdt = NULL
+  startdt = NULL,
+  totoday = FALSE
 )
 
 fg_update_dates_of_interest(indta, replace = FALSE)
@@ -26,7 +27,9 @@ fg_update_dates_of_interest(indta, replace = FALSE)
 
 \item{use_default}{(Default TRUE) use dedault dates if none else found.}
 
-\item{startdt}{MInimum date for events to be returned.}
+\item{startdt}{Minimum date for events to be returned.}
+
+\item{totoday}{(Default: FALSE) Ends last date set returned (if applicable) with \code{totoday} if a date, \code{Sys.Date()}}
 
 \item{indta}{\code{data.table} with columns as shown in details.}
 

@@ -124,6 +124,7 @@ optString_parse <-function(x,item,default="TRUE") {
     }
 }
 
+
 # s(plit) converts string to list, but passes logical
 s<-function(x,sep=";",fixed=TRUE,rtn=NULL) {
     if(is.logical(x)) { return(x) }
@@ -136,14 +137,30 @@ message_if <- function(reallydothis,...) {
   if(reallydothis) { message(list(...)) }
 }
 
+form_xlist <- function(instring) {
+  todo <- NULL
+  if(is.data.frame(instring)) return(instring)
+  suppressWarnings(tibble::tibble(todo=s(tolower(instring))) |>
+                   tidyr::separate_wider_delim(todo,",",names= c("todo","a1","a2","a3","a4","a5"),
+                                               too_many="drop",too_few="align_start"))
+}
+
+get_fromlist <- function(indta,grepstr) {
+    todo<-NULL
+    dplyr::filter(indta,grepl(grepstr,todo))
+  }
+
+
 lineAssign<-function(xline) {
   if(nrow(xline)>1) message("lineAssign cannot assigm more than oneline")
   aaa1 <- purrr::map2(
     names(as.list(xline[1,])),as.list(xline[1,]), function(x,y){assign(x,y,pos=sys.frame(1))})
 }
 
-find_col_bytype <- function(indt,typeoffn,firstonly=TRUE) {
+find_col_bytype <- function(indt,typeoffn,firstonly=TRUE,takeout=NA_character_) {
     rtn <- names(indt)[sapply(indt, typeoffn)]
+    if(length(rtn)==0) { return(NULL)}
+    rtn=setdiff(rtn,takeout)
     if(firstonly) return (rtn[1])
     else return(rtn)
 }
@@ -240,6 +257,24 @@ runs_from_value <- function(indta, addrunlength=FALSE) {
   return(runs1[])
 }
 
+# Merges a set of days back with specific dates
+generalbreaks<-function(dtset,dtds,rtnasoffset=TRUE) {  # Kind of ugly, but I need this.
+  if(is.data.frame(dtds)) { u2dt=sort(unique(dtds$DT_ENTRY)) } else { u2dt = dtds}
+  if(is.character(dtset)) { dtset=lapply(dtset,function(x){if(grepl("-",x)){x=as.Date(x)}else{x=as.numeric(x)};x}) }
+  dtset2=as.Date(unlist(lapply(dtset,function(x){dtmxx=ifelse(x<min(u2dt),max(u2dt)-x,x); u2dt1=u2dt[u2dt<=dtmxx]; ifelse(length(u2dt1)<=0,min(u2dt),max(u2dt1))})))
+  if(rtnasoffset) { dtset2=max(u2dt)-dtset2 }
+  dtset2
+}
+
+
+
+dtsetnm<-function(ain,fromcol,tocol,nullcol=NA_real_,existordie=FALSE) {
+  if(is.na(fromcol)) { fromcol="___nevergonnaguessthis__" }
+  if(existordie & !(fromcol %in% names(ain))) { stop(paste0("mscatplot error ",fromcol," not in dataset"))}
+  setnames(ain,fromcol,tocol,skip_absent=TRUE)
+  if( !(tocol %in% names(ain)) ) { ain[[tocol]]<-nullcol }
+  return(ain)
+}
 
 ## -- For Debusgging only
 cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trace=FALSE,dpath=tempdir(),dbgkey="zz",suffix="",

@@ -9,8 +9,7 @@ editor_options:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7, 
-  fig.asp = 0.618
+  fig.width = 10 
 )
 ```
 
@@ -97,7 +96,7 @@ fgts_dygraph(eqtypx, title="Stock Prices, Date focused", roller=3,dtstartfrac=0.
 ```
 
 | Parameter call | Feature |
-|:-------|:-------|
+|:------|:-----------------------------|
 |`roller=3`|Lessen the smoothing by only averaging every 3 prices |
 |`dtstartfrac=0.6`|Start the graph 60 percent of the way from input series beginning to the end |
 |`splitcols=TRUE`|Split the first series found (leftmost if wide, first if narrow) onto a second axis.  A list of series names can also be given|"
@@ -111,7 +110,7 @@ fgts_dygraph(eqtypx, title="Stock Prices, highlighted", roller=1,
 ```
 
 |Parameter call|Feature|
-|:-------|:-------|
+|:------|:--------------------|
 |`dtwindow="-3y::"`|focus the date range selector to 1 year prior to `Sys.Date()`|
 |`hidecols="TLT"`|Hide one or more series.  Can either separate by `;` or give a list.|
 |`hilightcols="IBM`|Highlight a series by thickening its line or changing the line style|
@@ -133,7 +132,7 @@ prefer more static graphs than interactive ones, especially when legends
 are turned off.
 
 |Parameter call|Feature|
-|:-------|:--------|
+|:------|:--------------------|
 |`rebase="2025-01-01,120"`|Divide all series by their values a of 1/1/2025 and scale to 120.|
 |`annotations="last,linelabel"`|Put vertical lines highlighting last values in each series |
 |`annotations="range,100,120"`|Put a highlighted range betwewen 100 and 120 percent of value on 1/1/2025|
@@ -149,7 +148,7 @@ fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfr
              dylegend = "never", bg_opts="grid,none")
 ```
 
--   Note that column specifications and annottions are flexible, i.e.
+-   Note that column specifications and annotations are flexible, i.e.
     `hidecols="TLT;EEM"` or `hidecols=c("TLT","EEM")` can also be used, or annotations
     strung together with semicolons.
 -   Also, notice that focusing in the displayed date range reduces the
@@ -162,6 +161,8 @@ fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfr
     series out before sending to `fgts_dygraph()` by (e.g.) using instead
     `fgts_dygraph(eqtypx |> dplyr::select(date,IBM,QQQ),...)` to put those two
     series first.
+-   Dates used for events `"pt"` (and `"dt"`) are rolled to next dates if not in the underlying
+    data.
 
 ## Grouping series together
 
@@ -303,29 +304,8 @@ created by the user, but the package includes several "helpers" to take
 Event helpers are small functions which convert any time based data into
 the correct annotations. The currently implemented helpers are
 
-```{r}
-library(knitr)
-
-# create a data frame
-df <- data.frame(
-  name = c("John", "Jane", "Bob"),
-  age = c(30, 25, 35),
-  city = c("New York", "San Francisco", "Chicago")
-)
-
-# create a pipe-delimited table with custom column widths
-kable(df, format = "pipe", col.names = c("Name", "Age", "City"), col.widths = c(0.2, 0.2, 0.6))
-```
-
-```{r}
-library(knitr)
-
-# create a pipe-delimited table with custom column widths
-kable("pipe", data = read.table(text = "Name   | Age | City         \nJohn   | 30 | New York     \nJane   | 25 | San Francisco\nBob    | 35 | Chicago     "), col.names = c("Name", "Age", "City"), row.names = FALSE, escape = FALSE, booktabs = TRUE, caption = "My Table", caption.placement = "bottom", col.widths = c(0.2, 0.2, 0.6))
-```
-
 |Function|Description|
-|:---|:--------|
+|:---|:------------|
 |`fg_addbreakouts()`|Statistically identify breakout points (also available via `events`) |
 |`fg_findTurningPoints()`|Statistically identify turning points (also available via `events`) |
 |`fg_cut_to_events()`|"Cut" a univariate series into colored bands, with two different colors for positive and negative values |

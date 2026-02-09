@@ -1,6 +1,8 @@
 #' TIme series in Dygraph form
 #'
 #' @name fgts_dygraph
+#' @description
+#' Plots interactive time series graphs with many options for highlighting key events, regions and customizations.
 #' @usage  fgts_dygraph( indt,
 #'  title = "",  xlab="", ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
 #'  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
@@ -192,7 +194,7 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
 
   # NSE crap.  There has to be a better way
   `.`=gpnm=suffix=seriesnm=display=color=axis=series_no=variable=eventid=direct=tcolor=optexp=DT_ENTRY=NULL
-  value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category=i.DT_ENTRY=i.END_DT_ENTRY = NULL
+  value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category=i.DT_ENTRY=i.END_DT_ENTRY=dtrolled= NULL
 
   # Preprocessing: get into data.table format
   if( xts::is.xts(indt) ) { indt <- xts2df(indt) }
@@ -201,14 +203,6 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
 
   # Local helpers
   fcoal <- function(indta,...) { fcoalesce(indta,...) }
-  form_xlist <- function(instring) { todo <- NULL
-    if(is.data.frame(instring)) return(instring)
-    suppressWarnings(tibble::tibble(todo=s(instring)) |>
-                                tidyr::separate_wider_delim(todo,",",names= c("todo","a1","a2","a3","a4","a5"),
-                                too_many="drop",too_few="align_start"))
-  }
-  get_fromlist <- function(indta,grepstr) { todo<-NULL;
-    dplyr::filter(indta,grepl(grepstr,todo)) }
   add_titles <- function(what,...) {
     style="small";
     stylednote = paste0("<",style,">",paste(...),"</",style,">")

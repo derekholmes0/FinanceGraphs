@@ -54,6 +54,9 @@ New color datasets must have at least three columns:\tabular{ll}{
 
 
 \code{variable} is used to prioritize colors, so (e.g. \code{D01} will be the color of the first series in an input dataset)
+
+If \code{color=="brewer"} then a sequential scale of size \code{n_max} will be returned using details saved from  \code{\link[=fg_update_colors]{fg_update_colors()}}. See \link[scales:pal_brewer]{scales::brewer_pal}
+and \href{https://colorbrewer2.org/#type=sequential&scheme=Greens&n=7}{colorbrewer}
 }
 \examples{
 \dontrun{
@@ -64,7 +67,7 @@ fg_get_colors("lines",n_max=3) -> oldcolors
 fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
 fg_get_colors("lines",n_max=3)
 fg_update_line_colors(c("black","green","red","blue"),persist=FALSE)
-fg_get_colors("lines",n_max=4)
+show_col(fg_get_colorstring("lines",n_max=4))
 fg_reset_to_default_state("color")
 }
 

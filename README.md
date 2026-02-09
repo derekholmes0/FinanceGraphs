@@ -216,21 +216,21 @@ graduated set of colors for the first 3 series.
 ``` r
 fg_get_colors("lines",n_max=4)
 #>    category variable     color  const
-#>      <char>   <char>    <char> <lgcl>
-#> 1:    lines      D01     black     NA
-#> 2:    lines      D02       red     NA
-#> 3:    lines      D03 darkgreen     NA
-#> 4:    lines      D04      blue     NA
+#>      <char>   <char>    <char> <char>
+#> 1:    lines      D01     black       
+#> 2:    lines      D02       red       
+#> 3:    lines      D03 darkgreen       
+#> 4:    lines      D04      blue
 fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3] )
 #> Saved Colors of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_colors.RD
 fg_get_colors("lines",n_max=4)
 #> Key: <category, variable>
 #>    category variable   color  const
-#>      <char>   <char>  <char> <lgcl>
-#> 1:    lines      D01 #08589E     NA
-#> 2:    lines      D02 #2B8CBE     NA
-#> 3:    lines      D03 #4EB3D3     NA
-#> 4:    lines      D04    blue     NA
+#>      <char>   <char>  <char> <char>
+#> 1:    lines      D01 #08589E       
+#> 2:    lines      D02 #2B8CBE       
+#> 3:    lines      D03 #4EB3D3       
+#> 4:    lines      D04    blue
 ```
 
 New dates of interest used for the `events` parameter can also be added.
@@ -247,6 +247,7 @@ tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 #> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
 #> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
 fg_reset_to_default_state()
+#> fg_reset_to_default_state(all) completed
 ```
 
 ## Integration into Markdown and Shiny
@@ -258,3 +259,40 @@ turn these on or off. The function \[fg_sync_group()\] either returns
 the current group name if called with no parameters, sets the group name
 with a string, or turns off synchronization with a call
 `fg_sync_group(NULL)`.
+
+# Static Plots for Time Series
+
+## Time-categorized box plots
+
+One way to visualize multiple time series comparatively with a boxplot
+or a violin plot. The function \[fg_tsboxplot()\] provides a flexible
+way to split several time series into time categories. Usually, those
+categories are time periods with increasing horizons, but this function
+allows for arbitrary periods managed by
+\[fg_update_dates_of_interest()\]. Data can be normalized across
+historical categories and time series categories.
+
+As an example, suppose we would like to see normalized equity prices
+over the past two years, split into categories of the last week, month
+(less the last week) and the last quarter.
+
+``` r
+fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks=c(7,90),normalize="byvar",title="Normalized Equity prices by Date category")
+```
+
+<img src="man/figures/README-Boxplot1-1.png" alt="Boxplot of relative equity prices" width="100%" />
+
+Like \[fgts_dygraph()\], the function can take data in both wide and
+long formats. Longer formats have the advantage of adding more
+categorical levels to our graphs. For example, we can plotting recent
+ranges of the monthly FX Real Exchange Rate dataset in the following
+way. Here, we split the data into buckets of last 20pct of the months,
+the first half the months and the last. We will also show the last
+observation, hide the boxplot whiskers, and reorder the currencies by
+their relative weakness.
+
+``` r
+fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
+```
+
+<img src="man/figures/README-Boxplot2-1.png" alt="Boxplot of Real Effective Exchange Rates" width="100%" />
