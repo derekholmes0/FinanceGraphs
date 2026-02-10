@@ -1,0 +1,512 @@
+data.frame(value=seq(-ncutsperside,-1),color=grDevices::colorRampPalette(c(tcolors[[1]],"#ffffff"),alpha=TRUE)(ncutsperside)))
+tcolors <- fg_get_colorstring("eventset")
+colorset <- rbind( data.frame(value=seq(1,ncutsperside),color=grDevices::colorRampPalette(c("#ffffff",tcolors[[2]]),alpha=TRUE)(ncutsperside)),
+data.frame(value=seq(-ncutsperside,-1),color=grDevices::colorRampPalette(c(tcolors[[1]],"#ffffff"),alpha=TRUE)(ncutsperside)))
+colorset
+load_all()
+colorset <- rbind( data.frame(value=seq(1,ncutsperside),color=grDevices::colorRampPalette(c("#ffffff",tcolors[[2]]),alpha=TRUE)(ncutsperside)),
+data.frame(value=seq(-ncutsperside,-1),color=grDevices::colorRampPalette(c(tcolors[[1]],"#ffffff"),alpha=TRUE)(ncutsperside)))
+colorset
+colorset <- rbind( data.frame(value=seq(1,ncutsperside),color=grDevices::colorRampPalette(c("#ffffff",tcolors[[2]]),alpha=FALSE)(ncutsperside)),
+data.frame(value=seq(-ncutsperside,-1),color=grDevices::colorRampPalette(c(tcolors[[1]],"#ffffff"),alpha=FALSE)(ncutsperside)))
+colorset
+load_all()
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=overlay_eventset(consumer_sent,center="zscore"))
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=overlay_eventset(consumer_sent,center="zscore"))
+load_all()
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=overlay_eventset(consumer_sent,center="zscore"))
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=overlay_eventset(consumer_sent,center="zscore",invert=TRUE))
+tmpall
+load_all()
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=overlay_eventset(consumer_sent,center="zscore",invert=TRUE))
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=overlay_eventset(consumer_sent,center="zscore"))
+fg_findTurningPoints(eqtydta_wide[,.(date,QQQ)])
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=fg_findTurningPoints(eqtydta_wide[,.(date,QQQ)]))
+fg_findTurningPoints(eqtydta_wide[,.(date,QQQ)],method="cpm")
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=fg_findTurningPoints(eqtydta_wide[,.(date,QQQ)],method="cpm"))
+fg_get_colors()
+tcolors <- fg_get_colorstring("eventset")
+tcolors
+fg_get_colors("eventset")
+fg_findTurningPoints(eqtydta_wide[,.(date,QQQ)],method="cpm")
+pts
+eptydata_wide
+eqtydta_wide
+eqtydta_wide[,':='(rQQQ:=c(NA_real_,diff(log(QQQ),1)))]
+eqtydta_wide[,':='(rQQQ=c(NA_real_,diff(log(QQQ),1)))]
+eqtydta_wide
+fg_findTurningPoints(eqtydta_wide[,.(date,rQQQ)],method="cpm")
+eqtydta_wide[,.(date,QQQ)]
+eqtydta_wide[,.(date,rQQQ)]
+complete.cases(eqtydta_wide[,.(date,rQQQ)])
+na.omit(eqtydta_wide[,.(date,rQQQ)])
+load_all()
+fg_findTurningPoints(eqtydta_wide[,.(date,rQQQ)],method="cpm")
+eqtydta_wide[,':='(rQQQ=c(NA_real_,diff(log(QQQ),1)))]
+fg_findTurningPoints(eqtydta_wide[,.(date,rQQQ)],method="cpm")
+eqtydta_wide
+fg_findTurningPoints(eqtydta_wide[,.(date,rQQQ)],method="cpm")
+fgts_dygraph(eqtydta, verbose=TRUE, eventdataset=fg_findTurningPoints(eqtydta_wide[,.(date,rQQQ)],method="cpm"))
+load_all()
+rm(list=l;s())
+rm(list=ls())
+gc()
+library(devtools); load_all()
+require(imfapi)
+require(tidyquant)
+eqtydta = tidyquant::tq_get(c("QQQ","IBM","TLT","EEM"),from="2016-01-01") |> dplyr::select(date, variable=symbol,value=adjusted)
+save(eqtydta,file="./data/eqtydta.rda")
+nomfxdta = tidyquant::tq_get(c("COP=X","BRL=X","CNY=X","MXN=X","EUR=X"),from="2016-01-01") |> dplyr::transmute(date, variable=gsub("=X","",symbol),value=adjusted)
+save(nomfxdta,file="./data/nomfxdta.rda")
+reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
+reerdta <- reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,value=OBS_VALUE)]
+save(reerdta,file="./data/reerfxdta.rda")
+consumer_sent <- tq_get("UMCSENT",get="economic.data")
+#save(consumer_sent,file="c:/d/src/R/FinanceGraphs/data/cons_sent.rda")
+save(consumer_sent,file="./data/cons_sent.rda")
+eqtypx <- tidyquant::tq_get(c("QQQ","IBM","TLT","EEM"),from="2016-01-01") |> dplyr::select(date, variable=symbol,value=adjusted)
+rtndta  <- data.table::data.table(eqtydta)[,let(rtn=c(NA_real_,diff(log(value),1))), by=.(variable)]
+eqtypx_wide <- data.table::dcast(rtndta,date ~ variable, value.var="value")
+save(eqtypx,file="./data/eqtypx.rda")
+save(eqtypx_wide,file="./data/eqtypx.rda")
+rtndta_tr <- data.table::dcast(rtndta,date ~ variable, value.var="rtn")
+regfn <- function(x) { broom::glance(lm(TLT ~ QQQ, data=x))[[1,"p.value"]]}
+regpvalue <- data.table::data.table(rtndta_tr)[,.(date,p_TLT_QQQ= data.table::frollapply(.SD, 66,  regfn , by.column=FALSE))]
+eqtyrtn_wide <- rtndta_tr[regpvalue,on=.(date)]
+save(eqtyrtn_wide,file="./data/eqtypx.rda")
+nomfxdta = tidyquant::tq_get(c("COP=X","BRL=X","CNY=X","MXN=X","EUR=X"),from="2016-01-01") |> dplyr::transmute(date, variable=gsub("=X","",symbol),value=adjusted)
+save(nomfxdta,file="./data/nomfxdta.rda")
+reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
+reerdta <- reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,value=OBS_VALUE)]
+save(reerdta,file="./data/reerfxdta.rda")
+consumer_sent <- tq_get("UMCSENT",get="economic.data")
+save(consumer_sent,file="./data/cons_sent.rda")
+eqtypx <- tidyquant::tq_get(c("QQQ","IBM","TLT","EEM"),from="2016-01-01") |> dplyr::select(date, variable=symbol,value=adjusted)
+rtndta  <- data.table::data.table(eqtydta)[,let(rtn=c(NA_real_,diff(log(value),1))), by=.(variable)]
+eqtypx_wide <- data.table::dcast(rtndta,date ~ variable, value.var="value")
+save(eqtypx,file="./data/eqtypx.rda")
+save(eqtypx_wide,file="./data/eqtypx.rda")
+rtndta_tr <- data.table::dcast(rtndta,date ~ variable, value.var="rtn")
+regfn <- function(x) { broom::glance(lm(TLT ~ QQQ, data=x))[[1,"p.value"]]}
+regpvalue <- data.table::data.table(rtndta_tr)[,.(date,p_TLT_QQQ= data.table::frollapply(.SD, 66,  regfn , by.column=FALSE))]
+eqtyrtn_wide <- rtndta_tr[regpvalue,on=.(date)]
+save(eqtyrtn_wide,file="./data/eqtyrtn_wide.rda")
+save(eqtypx,file="./data/eqtypx.rda")
+save(eqtypx_wide,file="./data/eqtypx_wide.rda")
+save(eqtypx,file="./data/eqtypx_melt.rda")
+save(eqtypx_wide,file="./data/eqtypx.rda")
+save(eqtyrtn_wide,file="./data/eqtyrtn_wide.rda")
+nomfxdta = tidyquant::tq_get(c("COP=X","BRL=X","CNY=X","MXN=X","EUR=X"),from="2016-01-01") |> dplyr::transmute(date, variable=gsub("=X","",symbol),value=adjusted)
+save(nomfxdta,file="./data/nomfxdta.rda")
+reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
+reerdta <- reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,value=OBS_VALUE)]
+save(reerdta,file="./data/reerfxdta.rda")
+consumer_sent <- tq_get("UMCSENT",get="economic.data")
+save(consumer_sent,file="./data/cons_sent.rda")
+dtmap  <- make_dtmap()
+datecols <- c("DT_ENTRY","END_DT_ENTRY")
+fg_doi_default <- data.table::fread("./inst/extdata/doidates.csv",na.strings="")[,(datecols):=lapply(.SD,\(x) as.Date(x,"%m/%d/%Y")), .SDcols=datecols][]
+colors_default <- data.table::fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
+tevents_defaults <- data.table::data.table(END_DT_ENTRY=as.Date(NA_real_),eventonly=FALSE,
+axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
+ratingsmapmelt <- data.table::fread("./inst/extdata/ratingsmapmelt.csv")
+usethis::use_data(fg_doi_default,colors_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
+file.remove(the$doifn)
+file.remove(the$colorfn)
+the$doi_dates <- data.table::copy(fg_doi_default)
+the$default_colors <- data.table::copy(colors_default)
+the$tevents_defaults <- data.table::copy(tevents_defaults)
+load_all()
+fg_get_colors()
+ls()
+eqtydta
+rm(eqtydta)
+rm(list=ls())
+gc()
+load_all()
+library(devtools); load_all()
+ls()
+ls(envir=FinanceGraphs)
+ls(pos=0L)
+ls(pos=-1L)
+ls(pos=-2L)
+?ls
+ls(FinanceGraphs)
+ls()
+ls(envir=as.environment(FinanceGraphs))
+eqtypx
+eqtypx_melt
+rm(list=ls())
+gc()
+library(devtools); load_all()
+eqtypx
+eqtypx_melt
+ls()
+?`environment-class`
+ls(envir=FinanceGraphs)
+search()
+ls(envir=package:FinanceGraphs)
+serach("eq")
+search("eq")
+?search
+ls(envir=package:FinanceGraphs)
+ls()
+eqtypx
+eqtypx_melt
+nomfxdta
+eqtypx_melt
+eqtypx
+eqtypx
+eqtypx_wide
+load_all()
+eqtypx
+eqtypx_wide
+check()
+eqty_rtn
+eqtypx
+dtmap  <- make_dtmap()
+datecols <- c("DT_ENTRY","END_DT_ENTRY")
+fg_doi_default <- data.table::fread("./inst/extdata/doidates.csv",na.strings="")[,(datecols):=lapply(.SD,\(x) as.Date(x,"%m/%d/%Y")), .SDcols=datecols][]
+colors_default <- data.table::fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
+tevents_defaults <- data.table::data.table(END_DT_ENTRY=as.Date(NA_real_),eventonly=FALSE,
+axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
+ratingsmapmelt <- data.table::fread("./inst/extdata/ratingsmapmelt.csv")
+fg_doi_default
+usethis::use_data(fg_doi_default,colors_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
+colors_default
+ls(the)
+the$soi_dates
+the$doi_dates
+eqtypx
+load_all()
+require(imfapi)
+require(tidyquant)
+eqtypx <- tidyquant::tq_get(c("QQQ","IBM","TLT","EEM"),from="2016-01-01") |> dplyr::select(date, variable=symbol,value=adjusted)
+rtndta  <- data.table::data.table(eqtydta)[,let(rtn=c(NA_real_,diff(log(value),1))), by=.(variable)]
+rtndta  <- data.table::data.table(eqtypx)[,let(rtn=c(NA_real_,diff(log(value),1))), by=.(variable)]
+eqtypx_wide <- data.table::dcast(rtndta,date ~ variable, value.var="value")
+eqtypx
+save(eqtypx_wide,file="./data/eqtypx.rda")
+eqtypx_melt <- tidyquant::tq_get(c("QQQ","IBM","TLT","EEM"),from="2016-01-01") |> dplyr::select(date, variable=symbol,value=adjusted)
+rtndta  <- data.table::data.table(eqtypx_melt)[,let(rtn=c(NA_real_,diff(log(value),1))), by=.(variable)]
+eqtypx <- data.table::dcast(rtndta,date ~ variable, value.var="value")
+save(eqtypx,file="./data/eqtypx.rda")
+save(eqtypx_melt,file="./data/eqtypx_melt.rda")
+rtndta_tr <- data.table::dcast(rtndta,date ~ variable, value.var="rtn")
+regfn <- function(x) { broom::glance(lm(TLT ~ QQQ, data=x))[[1,"p.value"]]}
+regpvalue <- data.table::data.table(rtndta_tr)[,.(date,p_TLT_QQQ= data.table::frollapply(.SD, 66,  regfn , by.column=FALSE))]
+eqtyrtn <- rtndta_tr[regpvalue,on=.(date)]
+save(eqtyrtn,file="./data/eqtyrtn.rda")
+nomfxdta = tidyquant::tq_get(c("COP=X","BRL=X","CNY=X","MXN=X","EUR=X"),from="2016-01-01") |> dplyr::transmute(date, variable=gsub("=X","",symbol),value=adjusted)
+save(nomfxdta,file="./data/nomfxdta.rda")
+reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
+reerdta <- reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,value=OBS_VALUE)]
+save(reerdta,file="./data/reerfxdta.rda")
+consumer_sent <- tq_get("UMCSENT",get="economic.data")
+save(consumer_sent,file="./data/cons_sent.rda")
+consumer_sent
+eqtypx
+eqtypx_melt
+dtmap  <- make_dtmap()
+datecols <- c("DT_ENTRY","END_DT_ENTRY")
+fg_doi_default <- data.table::fread("./inst/extdata/doidates.csv",na.strings="")[,(datecols):=lapply(.SD,\(x) as.Date(x,"%m/%d/%Y")), .SDcols=datecols][]
+colors_default <- data.table::fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
+tevents_defaults <- data.table::data.table(END_DT_ENTRY=as.Date(NA_real_),eventonly=FALSE,
+axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
+ratingsmapmelt <- data.table::fread("./inst/extdata/ratingsmapmelt.csv")
+usethis::use_data(fg_doi_default,colors_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
+file.remove(the$doifn)
+file.remove(the$colorfn)
+the$doi_dates <- data.table::copy(fg_doi_default)
+the$default_colors <- data.table::copy(colors_default)
+the$tevents_defaults <- data.table::copy(tevents_defaults)
+the#doi_dates
+the$doi_dates
+rm(list=ls())
+gc()
+library(devtools); load_all()
+eqtypx
+eqtypx_melt
+check()
+fg_doi_default
+?load
+check()
+doi_default
+fg_create_defaults()
+dtmap  <- make_dtmap()
+load_all()
+load_all()
+dtmap  <- make_dtmap()
+datecols <- c("DT_ENTRY","END_DT_ENTRY")
+doi_default <- data.table::fread("./inst/extdata/doidates.csv",na.strings="")[,(datecols):=lapply(.SD,\(x) as.Date(x,"%m/%d/%Y")), .SDcols=datecols][]
+colors_default <- data.table::fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
+tevents_defaults <- data.table::data.table(END_DT_ENTRY=as.Date(NA_real_),eventonly=FALSE,
+axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
+ratingsmapmelt <- data.table::fread("./inst/extdata/ratingsmapmelt.csv")
+usethis::use_data(doi_default,colors_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
+file.remove(the$doifn)
+file.remove(the$colorfn)
+the$doi_dates <- data.table::copy(doi_default)
+the$default_colors <- data.table::copy(colors_default)
+the$tevents_defaults <- data.table::copy(tevents_defaults)
+load_all()
+check()
+doi_default
+rm(doi_default)
+ls()
+?use_data
+load_all()
+doi_default
+check()
+doi_default
+the$default_colors <- colors_de
+colors_default
+tevents_defaults
+ls()
+search()
+ls(envir = the)
+the$doi_dates
+load_all()
+the
+search()
+?search
+searchpaths()
+load_all()
+rm(list=ls())
+gc()
+ls()
+search()
+library(devtools)
+check()
+check()
+colors_default
+search()
+load_all()
+?use_data
+?new.env
+colors_default
+dtmap
+library(devtools);
+load_all()
+rlang::last_trace()
+load_all()
+check()
+colors_default()
+colors_default
+ls()
+ls(envir=the)
+load_all()
+ls(envir=the)
+ls()
+use_data
+?use_data
+load_all()
+usethis::use_data_raw()
+?use_data
+system.file("extdata",package="FinanceGraphs")
+system.file("extdata",package="FinanceGraphs") |> list.files()
+fs::path_package("extdata",package="FinanceGraphs")
+letters
+doi_dates
+the$chacedir
+the$cachedir
+load_all()
+the <- new.env(parent = emptyenv())
+the$cachedir <- tools::R_user_dir("FinanceGraphs", which = "cache")
+the$cachedir
+doi_dates
+?load
+ls(envir=the)
+the$cachedir
+?r_user_dir
+?R_user_dir
+doi_defauly
+doi_default
+load("./R/sysdata.rda",envir=the)
+ls(the)
+load_all()
+check()
+load_all()
+check()
+library(mFilter)
+?use_data
+reerdta
+ccliststr
+imf_ctrylist.csv <- data.table::fread("./inst/extdata/imf_ctrylist.csv")
+require(imfapi)
+reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
+imf_ctrylist.csv <- data.table::fread("./inst/extdata/imf_ctrylist.csv")
+imf_ctrylist <- data.table::fread("./inst/extdata/imf_ctrylist.csv")
+imf_ctrylist
+nrow(reerdta)
+reerdta
+reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][imf_ctrylist,on=.(CIYBTRY=IMFCC)]
+reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][imf_ctrylist,on=.(COUNTRY=IMFCC)]
+reerdta <- reerdta[!is.na(OBS_VALUE),][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,value=OBS_VALUE)]
+save(reerdta,file="./data/reerdta.rda")
+reerdta
+reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
+imf_ctrylist <- data.table::fread("./inst/extdata/imf_ctrylist.csv")
+reerdta <- reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][imf_ctrylist,on=.(COUNTRY=IMFCC)]
+reerdta <- reerdta[!is.na(OBS_VALUE),][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,value=OBS_VALUE)]
+reerdta
+imf_ctrylist
+imf_ctrylist <- data.table::fread("./inst/extdata/imf_ctrylist.csv")
+imf_ctrylist <- data.table::fread("./inst/extdata/imf_ctrylist.csv")
+reerdta <-imfapi::imf_get(dataflow_id="EER",dimensions=list(FREQUENCY=c("M"))) |> data.table::data.table(keyby=c("INDICATOR","COUNTRY"))
+reerdta <- reerdta[INDICATOR=="REER_IX_RY2010_ACW_RCPI",][imf_ctrylist,on=.(COUNTRY=IMFCC)]
+reerdta <- reerdta[!is.na(OBS_VALUE),][,.(date=lubridate::as_date(TIME_PERIOD,format="%Y-M%m"),variable=COUNTRY,REGION,value=OBS_VALUE)]
+reerdta
+save(reerdta,file="./data/reerdta.rda")
+load_all()
+libraray(dygraph)
+library(dygraph)
+library(dygraphs)
+?dygraphs
+??dygraphs
+load_all()
+check()
+InitCD*()
+InitCD()
+LIFN("markitRF")
+dtbeg<-ifelse(is.null(dtstr), as.character(min(inv.grep("USRATES|SOFR_10Y")$MAXDT)), datesfromString(dtstr)[[1]])
+dtstr="-1w::"
+LIFN("markitRF")
+dtbeg<-ifelse(is.null(dtstr), as.character(min(inv.grep("USRATES|SOFR_10Y")$MAXDT)), datesfromString(dtstr)[[1]])
+datesfromString
+dtstr="2026-01-01::"
+LIFN("markitRF")
+dtbeg<-ifelse(is.null(dtstr), as.character(min(inv.grep("USRATES|SOFR_10Y")$MAXDT)), datesfromString(dtstr)[[1]])
+dtbeg
+thisccmap=data.table(ccy=s("JPY",SHORTIDGROUP=s("JNRATES"))
+oout = lapply(thisccmap$ccy,\(x) markit_crv("download",ccy=x,dtstr=paste0(dtbeg,"::"),keepzip=TRUE))
+thisccmap=data.table(ccy=s("JPY"),SHORTIDGROUP=s("JNRATES"))
+oout = lapply(thisccmap$ccy,\(x) markit_crv("download",ccy=x,dtstr=paste0(dtbeg,"::"),keepzip=TRUE))
+dtbeg
+as.character(min(inv.grep("USRATES|SOFR_10Y")$MAXDT))
+dtstr="2026-01-01"
+LIFN("markitRF")
+dtbeg<-ifelse(is.null(dtstr), as.character(min(inv.grep("USRATES|SOFR_10Y")$MAXDT)), datesfromString(dtstr)[[1]])
+datesfromString(dtstr)
+dtstr="2026-01-01::"
+dtbeg<-ifelse(is.null(dtstr), as.character(min(inv.grep("USRATES|SOFR_10Y")$MAXDT)), datesfromString(dtstr)[[1]])
+dtbeg
+dtstr=NULL
+dtstr="2026-01-01::"
+datesfromString(dtstr)[[1]]
+dtbeg=datesfromString(dtstr)[[1]]
+thisccmap=data.table(ccy=s("JPY"),SHORTIDGROUP=s("JNRATES"))
+oout = lapply(thisccmap$ccy,\(x) markit_crv("download",ccy=x,dtstr=paste0(dtbeg,"::"),keepzip=TRUE))
+tmprates = markitRF[DT_ENTRY>=dtbeg,][thisccmap,on=.(ccy)]
+tmprates = tmprates[,.(SHORTID=paste0(SHORTIDGROUP,"|SOFR_",tenor),GP=SHORTIDGROUP,SUBGP=tenor,OSHORTID=paste0("SOFR_",tenor),DT_ENTRY,VALUE=as.numeric(parrate)*100)]
+tmprates
+dte$dteco <- DTUpsert(dte$dteco,tmprates,dtecokeys)
+dtecokeys = s("DT_ENTRY;SHORTID;GP;SUBGP")
+dte$dteco <- DTUpsert(dte$dteco,tmprates,dtecokeys)
+dte$inveco <-inv.makeinventory("eco", newdta=dte$dteco)
+inv.grep("JN")
+dtbeg
+dtget="2000-01-01"
+dtbeg="2000-01-01"
+dtbeg="2010-01-01"
+oout = lapply(thisccmap$ccy,\(x) markit_crv("download",ccy=x,dtstr=paste0(dtbeg,"::"),keepzip=TRUE))
+dtbeg="2015-01-02"
+oout = lapply(thisccmap$ccy,\(x) markit_crv("download",ccy=x,dtstr=paste0(dtbeg,"::"),keepzip=TRUE))
+rm(list=ls())
+gc()
+source("c:\\d\\src\\R\\initd.R"); initd("c")
+document()
+check()
+#'
+library(devtools); load_all()
+document()
+?cpm
+??cpm
+?processStream
+ratings_db
+document()
+?score
+??score
+?scale
+?dySeries
+document9)
+document())
+document()
+document()
+eqtypx
+?fgts_dygraph
+document()
+document()
+?document
+browseVignettes("roxygen2")
+document()
+document()
+document()
+document()
+document()
+document()
+document()
+document()
+document()
+document()
+document()
+document()
+document()
+document9)
+document())
+document()
+document()
+?fgts_dygraph
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)],events="seasonal,optexp,qtr;seasonal,rolldates")
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)],events="seasonal,optexp,qtr;seasonal,rolldates")
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)])
+trq
+trw
+seriesset
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)])
+g1
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)])
+g1
+g1__afterop
+?dyOptions
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)])
+g1__afterop
+rm(g1)
+rm(g1__afterop)
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)])
+?ifelse
+load_all()
+fgts_dygraph(eqtypx[,.(date,TLT,QQQ)])
+indtnew
+indtfct=copy(indtnew)
+indtfct=data.table::copy(indtnew)
+indtfct = df2xts(indtfct[complete.cases(indtfct),])
+source("c:\\d\\src\\R\\initd.R"); initd("c")
+indtfct=data.table::copy(indtnew)
+indtfct = df2xts(indtfct[complete.cases(indtfct),])
+varfct=vars::VAR(indtfct,p=3,type="trend")
+carfct
+varfct
+fcst = predict(varfct,n.ahead=forecast_periods)
+fcst
+fcst = predict(varfct,n.ahead=10)
+fcst
+?vars
+??VAR
+?VAR
+?broom
+??broom
+?augment
+??augment
+remotes::install_github("business-science/sweep")
+install.packages(c("alphavantagepf", "blob", "broom", "bslib", "clock", "collections", "cpp11", "data.table", "distributional", "doFuture", "extraDistr", "future", "greybox", "gt", "gtExtras", "hash", "miscTools", "plotly", "prophet", "QuickJSR", "rappdirs", "rbibutils", "Rdpack", "rstudioapi", "sparsevctrs", "stringdist", "uuid", "vctrs", "vroom", "warp", "xfun", "xml2"))
+install.packages("survival")
+rm(list=ls())
+gc()

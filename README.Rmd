@@ -105,7 +105,7 @@ Event strings can be added together with semicolons, as in the following example
 ```{r}
 #| label: Events1
 #| fig.alt: "Graph of Equity Prices showing Event styles"
-smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,TLT,EEM)]
+smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,IBM,QQQ)]
 fgts_dygraph(smalldta,title="With Events",ylab="Price",events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
 ```
 Several types of events are predefined in [fgts_dygraph()] including equity option expirations, IMM CDS roll dates, seasonal events (e.g. "same day in quarter as last observation") and series extremes.
@@ -146,7 +146,6 @@ series, but dashed to show the transition.
 ```{r}
 #| label: Forecasts1
 #| fig.alt: "Adding forecasts to original data"
-smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,IBM,QQQ)]
 head(example_fcst_set,2)
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 ```

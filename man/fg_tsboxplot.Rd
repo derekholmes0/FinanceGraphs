@@ -75,3 +75,14 @@ A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 \description{
 Plots static summaries of time series in boxplot form.
 }
+\examples{
+fg_tsboxplot(eqtypx,breaks=c(7,30,360),normalize="byvar",hilightcats="QQQ",
+       title="Equity prices, within ranges")
+fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks="regm",normalize="byvar",
+        hilightcats="QQQ",title="Equity prices, in regimes")
+fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",
+        boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
+fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",
+        addline="last",boxtype="violin",title="Real Eff. Exch Rates (Violin)")
+
+}

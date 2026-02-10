@@ -129,7 +129,7 @@ can be listed using \[fg_list_dates_of_interest()\]. Event strings can
 be added together with semicolons, as in the following example:
 
 ``` r
-smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,TLT,EEM)]
+smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,IBM,QQQ)]
 fgts_dygraph(smalldta,title="With Events",ylab="Price",events="doi,regm;doi,fedmoves;date,xmas,2025-12-25")
 ```
 
@@ -184,7 +184,6 @@ forecast is shown as the same color as the original series, but dashed
 to show the transition.
 
 ``` r
-smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,IBM,QQQ)]
 head(example_fcst_set,2)
 #> Key: <date>
 #>          date    QQQ.f  QQQ.flo  QQQ.fhi    IBM.f  IBM.flo  IBM.fhi
@@ -278,6 +277,9 @@ over the past two years, split into categories of the last week, month
 
 ``` r
 fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks=c(7,90),normalize="byvar",title="Normalized Equity prices by Date category")
+#> Warning in `[.data.table`(break_set, dtm, on = .(BEG_DT_ENTRY <= DT_ENTRY, :
+#> Both 'tcollist' and '..tcollist' exist in calling scope. Please remove the
+#> '..tcollist' variable in calling scope for clarity.
 ```
 
 <img src="man/figures/README-Boxplot1-1.png" alt="Boxplot of relative equity prices" width="100%" />
@@ -293,6 +295,9 @@ their relative weakness.
 
 ``` r
 fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
+#> Warning in `[.data.table`(break_set, dtm, on = .(BEG_DT_ENTRY <= DT_ENTRY, :
+#> Both 'tcollist' and '..tcollist' exist in calling scope. Please remove the
+#> '..tcollist' variable in calling scope for clarity.
 ```
 
 <img src="man/figures/README-Boxplot2-1.png" alt="Boxplot of Real Effective Exchange Rates" width="100%" />

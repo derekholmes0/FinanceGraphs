@@ -51,7 +51,7 @@
 #'        title="Equity prices, within ranges")
 #' fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks="regm",normalize="byvar",
 #'         hilightcats="QQQ",title="Equity prices, in regimes")
-#' fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value","
+#' fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",
 #'         boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
 #' fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",
 #'         addline="last",boxtype="violin",title="Real Eff. Exch Rates (Violin)")
@@ -72,7 +72,6 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
     # Rename if necessary, premelt is if already in melted form, otherwise melt whatever we get
   `.`=DT_ENTRY=END_DT_ENTRY=BEG_DT_ENTRY=eventid=daysback=histcat=dtlag=histcolor=value=variable=vmin=vmax=NULL
   vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=rno=R1=R2=vmn=dtrolled=`..tcollist`=NULL
-
 
   # Preprocessing: get into data.table format
   if( xts::is.xts(indt) ) { dtm <- xts2df(indt) }

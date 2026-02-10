@@ -182,7 +182,7 @@
 #'
 #' @import data.table
 #' @export
-fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="hair,both;grid,both",
+fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts="hair,both;grid,both",
                         splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
                         hilightcols=FALSE,hilightwidth=2,hilightstyle="solid",
                         events="",event_ds=NULL,
@@ -197,12 +197,15 @@ fgts_dygraph<-function(indt,title="",xlab="",ylab="",roller="default",bg_opts="h
   value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category=i.DT_ENTRY=i.END_DT_ENTRY=dtrolled= NULL
 
   # Preprocessing: get into data.table format
-  if( xts::is.xts(indt) ) { indt <- xts2df(indt) }
-  if(dplyr::is.tbl(indt)) { indt <- dplyr::ungroup(indt) }
-  if(!is.data.table(indt)) { indt <- data.table(indt) }  # Try setDT ?
+  if( xts::is.xts(indata) ) { indt <- xts2df(indata) }
+  if(dplyr::is.tbl(indata)) { indt <- dplyr::ungroup(indata) }
+  if(!is.data.table(indata)) { indt <- data.table(indata) }  # Try setDT ?
+  else {
+    indt <- copy(indata)
+  }
 
   # Local helpers
-  fcoal <- function(indta,...) { fcoalesce(indta,...) }
+  fcoal <- function(xdta,...) { fcoalesce(xdta,...) }
   add_titles <- function(what,...) {
     style="small";
     stylednote = paste0("<",style,">",paste(...),"</",style,">")
