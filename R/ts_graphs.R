@@ -3,7 +3,7 @@
 #' @name fgts_dygraph
 #' @description
 #' Plots interactive time series graphs with many options for highlighting key events, regions and customizations.
-#' @usage  fgts_dygraph( indt,
+#' @usage  fgts_dygraph( indata,
 #'  title = "",  xlab="", ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
 #'  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
 #'  hilightwidth = 2, hilightstyle = "solid",
@@ -13,7 +13,7 @@
 #'  meltvar = "variable", dylegend = "always", fillGraph = FALSE,
 #'  groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 #'
-#' @param indt Input data in long or wide format.  THere must be at least one date column, one
+#' @param indata Input data in long or wide format.  THere must be at least one date column, one
 #' character column and one numeric column.  Ideal format is `date,variable,value`
 #' @param title Title to put on top of graph
 #' @param xlab,ylab Labels for x and y axis

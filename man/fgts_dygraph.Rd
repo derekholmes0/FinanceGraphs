@@ -4,7 +4,7 @@
 \alias{fgts_dygraph}
 \title{TIme series in Dygraph form}
 \usage{
-fgts_dygraph( indt,
+fgts_dygraph( indata,
  title = "",  xlab="", ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
  splitcols = FALSE, stepcols = FALSE, hidecols = FALSE, hilightcols = FALSE,
  hilightwidth = 2, hilightstyle = "solid",
@@ -15,7 +15,7 @@ fgts_dygraph( indt,
  groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 }
 \arguments{
-\item{indt}{Input data in long or wide format.  THere must be at least one date column, one
+\item{indata}{Input data in long or wide format.  THere must be at least one date column, one
 character column and one numeric column.  Ideal format is \verb{date,variable,value}}
 
 \item{title}{Title to put on top of graph}
