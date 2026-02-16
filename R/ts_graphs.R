@@ -194,7 +194,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
 
   # NSE crap.  There has to be a better way
   `.`=gpnm=suffix=seriesnm=display=color=axis=series_no=variable=eventid=direct=tcolor=optexp=DT_ENTRY=NULL
-  value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category=i.DT_ENTRY=i.END_DT_ENTRY=dtrolled= NULL
+  value=a2=a3=labelloc=a1=text=END_DT_ENTRY=category=i.DT_ENTRY=i.END_DT_ENTRY=dtrolled=NULL
 
   # Preprocessing: get into data.table format
   if( xts::is.xts(indata) ) { indt <- xts2df(indata) }
@@ -404,7 +404,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
 
     # Dates; from dtmap (roll,optexp,doy,doq) e.g. "seasonal,optexp,mo"
     if(nrow( trow<-get_fromlist(elist,"seasonal") )>0) {
-      dttmp <- dtmap[between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
+      dttmp <- dtmap[data.table::between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
       for(irow in seq(1,nrow(trow))) {
         eventtype <- tolower(trow[irow,]$a1)
         if(eventtype=="optexp") {
@@ -495,7 +495,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
           event_ds <- event_ds[,.SD,.SDcols=!patterns('^i.')]
         }
         else {
-          event_ds <- data.table(event_ds)[between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
+          event_ds <- data.table(event_ds)[data.table::between(get("DT_ENTRY"),dtlimits[1],dtlimits[2]),]
         }
         if("category" %in% colnames(event_ds)) {  # Need to document
             event_to_map <- event_ds[category=="series_color",let(gpnm=color)]
@@ -544,7 +544,8 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     }
 
     if(is.character(exportevents)) {
-      assign(exportevents,tevents,envir=.GlobalEnv)
+      exportevents <- tevents
+      cAssign("exportevents")
       message_if(verbose,"Copied events as ",exportevents," to Global Namespace")
     }
 

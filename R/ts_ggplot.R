@@ -71,35 +71,19 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
                       legend="insidetop",meltvar="variable",flip=FALSE,ptsize=3) {
     # Rename if necessary, premelt is if already in melted form, otherwise melt whatever we get
   `.`=DT_ENTRY=END_DT_ENTRY=BEG_DT_ENTRY=eventid=daysback=histcat=dtlag=histcolor=value=variable=vmin=vmax=NULL
-  vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=rno=R1=R2=vmn=dtrolled=`..tcollist`=NULL
+  vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=rno=R1=R2=vmn=dtrolled=tcollist=`..tcollist`=xo=dt_colnames=lastval=NULL
 
   # Preprocessing: get into data.table format
-  if( xts::is.xts(indt) ) { dtm <- xts2df(indt) }
-  if(dplyr::is.tbl(indt)) { dtm <- dplyr::ungroup(indt) }
-  dtm <- data.table(indt)  # Make a copy
-
-  # Wrangle original input
-  # Figure out date name and place first
-  dt_colnames <- list()
-  dt_colnames['date'] <- find_col_bytype(dtm,lubridate::is.instant)
+  # Create dt and dt_colnames
+  list2env(generic_to_melt(indt,"dtm;dt_colnames",meltvar=meltvar),envir=environment(NULL))
   if(is.na(dt_colnames['date'])) {
     stop("fg_tsboxplot must have a date column")
   }
-  if(!(meltvar %in% colnames(dtm))) {
-    dtm <- data.table::melt(dtm,id.var=dt_colnames[['date']])
-  }
 
-  dt_colnames['value'] <- find_col_bytype(dtm,is.numeric)
-  dt_colnames['meltvar'] <- meltvar
-  dt_colnames['textcols'] <- find_col_bytype(dtm,is.character,firstonly=FALSE,takeout=meltvar)
-  setnames(dtm,dt_colnames[['date']],"DT_ENTRY")
-  setcolorder(dtm,"DT_ENTRY")
   # Misc date stuff
   alldts <- sort(unique(dtm[[1]]))
   dtlimits <- range(alldts)
   titadd <- list()
-
-  # make indtnew is WIDE FORMAT, indt can be either
 
   # Find Breakpoints
   if (is.character(breaks) && nrow( bktmp <- fg_get_dates_of_interest(breaks,totoday=dtlimits[2]) )>0 ) {
@@ -125,7 +109,8 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
     break_set <- break_set[!data.table(histcat=s(dropset)),on=.(histcat)]
   }
   break_set <- break_set[,histcolor:= fg_get_colorstring("boxplot",.N)][]
-  tcollist = c("DT_ENTRY",dt_colnames[["meltvar"]],dt_colnames[["value"]],"histcat",dt_colnames[["textcols"]])
+  tcollist <- dt_colnames[setdiff(names(dt_colnames),"date")]
+  tcollist <- c("DT_ENTRY","histcat",unname(unlist(tcollist[!is.na(tcollist)])))
   dtm <- break_set[dtm,on=.(BEG_DT_ENTRY<=DT_ENTRY,END_DT_ENTRY>DT_ENTRY),j=..tcollist][!is.na(histcat) & is.finite(value)]
   dtm <- dtm[,let(variable=fctr(variable),histcat=fctr(histcat))]
   if(grepl("byhistcat|byvar|zbyvar",normalize)) {
@@ -155,7 +140,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
     # orderby: last;  value,dt: alpha: DEfault order it ins
     orderbyargs <- c(s(tolower(orderby),sep=","),0,0)
     direc <- ifelse(substr(orderbyargs[[1]],1,1)=="-",-1,1)
-    orderds = dtm[,.SD[.N],by=.(variable)][,ii:=.I]
+    orderds <- dtm[,.SD[.N],by=.(variable)][,ii:=.I]
     if(grepl("value",orderbyargs[[1]])) {
       orderds <- orderds[order(direc*value)][,ii:=.I]  # Default: Last
       titadd['order']<-"sorted on last"
@@ -171,7 +156,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
     # Reduce outliers if desired
     if(trimpctile>0) {
       dtaq = dtm[,.(qlo=stats::quantile(value,trimpctile,na.rm=T),qhi=stats::quantile(value,1-trimpctile,na.rm=T)),by=.(variable)]
-      dtm  = dtaq[dtm,on=.(variable)][between(value,qlo,qhi)]
+      dtm  = dtaq[dtm,on=.(variable)][data.table::between(value,qlo,qhi)]
     }
     dtm <- orderds[,.(variable,ii)][dtm,on=.(variable)]
     tlabels<-break_set$histcat
@@ -191,41 +176,40 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
     }
 
     # Labels if needed
-    boxlist=s(tolower(boxtype))
+    boxlist <- s(tolower(boxtype))
     whisker_color=staple_color=box_color=NULL
-    median_color="gray50"
+    median_color <- "gray50"
     outlier_shape <- ifelse("outlier" %in% boxlist, 16,NA_integer_) # default off
-    if( "nowhisker" %in% boxlist) { whisker_color=NA_character_ }
-    if( "nostaple" %in% boxlist) { staple_color=NA_character_ }
-    if( "nomedian" %in% boxlist) { median_color=NA_character_ }
-    if( "nobox" %in% boxlist) { box_color=NA_character_ }
+    if( "nowhisker" %in% boxlist) { whisker_color  <- NA_character_ }
+    if( "nostaple" %in% boxlist) { staple_color <- NA_character_ }
+    if( "nomedian" %in% boxlist) { median_color <- NA_character_ }
+    if( "nobox" %in% boxlist) { box_color <- NA_character_ }
 
     # g1 <- ggplot(dtm,aes(x=forcats::fct_relevel(!!sym(labelcol),as.character(orderds$variable)),y=value,fill=histcat))
-    g1 <- ggplot(dtm,aes(x=forcats::fct_reorder(!!sym(labelcol),ii),y=value,fill=histcat))
+    dtm <- dtm[,xo:=forcats::fct_reorder(get(labelcol),ii)]
+    g1 <- ggplot(dtm,aes(x=xo,y=value,fill=histcat))
     if( any(grepl("violinbycat",boxlist)) ) {
       g1 <- g1 + geom_violin(trim=TRUE)
     }
     else if (any(grepl("vio",boxlist))) {
-      g1 <- g1 + geom_violin(aes(x=forcats::fct_reorder(!!sym(labelcol),ii),y=value),inherit.aes=FALSE,trim=TRUE)
+      g1 <- g1 + geom_violin(aes(x=xo,y=value),inherit.aes=FALSE,trim=TRUE)
     }
     else {
       g1 <- g1+geom_boxplot(outlier.shape=outlier_shape,whisker.color=whisker_color,median.color=median_color,
                             staple.color=staple_color,aes(fill=histcat))
     }
-    g1 <- g1+scale_fill_manual(values=with(break_set,setNames(histcolor,histcat)))
+    g1 <- g1+scale_fill_manual(values=with(break_set,stats::setNames(histcolor,histcat)))
     if(nrow(dtoi)>0) {
       last_color <- fg_get_colorstring("boxplotlast")
       ptscast <- dcast(dtoi[,let(rno=paste0("R",rno))], ...  ~ rno)
-      dotvar <- ifelse("R2" %in% names(ptscast),"R2","R1")
-      g1<-g1+geom_point(aes(x=forcats::fct_reorder(!!sym(labelcol),ii),y=!!sym(dotvar)),
-                          color=last_color,size=ptsize,data=ptscast)
+      ptscast <- ptscast[,xo:=forcats::fct_reorder(get(labelcol),ii)]
+      dotvar  <- ifelse("R2" %in% names(ptscast),"R2","R1")
+      g1<-g1+geom_point(aes(x=xo,y=!!sym(dotvar)),color=last_color,size=ptsize,data=ptscast)
       if(dotvar=="R2") {   # Line from date
-        g1<-g1+geom_segment(aes(x=forcats::fct_reorder(!!sym(labelcol),ii),
-                                xend=forcats::fct_reorder(!!sym(labelcol),ii),
-                                y=R2,yend=R1),data=ptscast,color=last_color,linewidth=1)
+        g1<-g1+geom_segment(aes(x=xo,xend=xo,y=R2,yend=R1),data=ptscast,color=last_color,linewidth=1)
       }
       if(addline=="last") {  # Line through last
-        g1<-g1+geom_smooth(aes(x=as.numeric(variable),y=!!sym(dotvar)),color=last_color,data=ptscast,alpha=0.2)
+        g1<-g1+geom_smooth(aes(x=as.numeric(xo),y=!!sym(dotvar)),color=last_color,data=ptscast,alpha=0.2)
       }
     }
     # Legends
@@ -238,7 +222,8 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
         }
     if(addline=="mean") {
         dmn <- dtm[,.(vmn=mean(value,na.rm=T)),by=.(histcat)]
-        g1 <- g1+geom_hline(aes(yintercept=vmn),data=dtm[,.(vmn=mean(value,na.rm=T))],color=fg_get_colorstring("boxplotlast"), linewidth=1.5)
+        g1 <- g1+geom_hline(aes(yintercept=vmn),data=dtm[,.(vmn=mean(value,na.rm=T))],
+                            color=fg_get_colorstring("boxplotlast"), linewidth=1.5)
     }
     if( labelcol=="xlabel") {
       g1 <- g1 +  theme(axis.text.x = element_markdown(hjust = 1))

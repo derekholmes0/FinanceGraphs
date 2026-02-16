@@ -132,16 +132,33 @@
 #' IBM Stock price forecasts from ets baseline ets model
 #'
 #' @format ## `example_fcst_set`
-#' A named list of two outputs from forecasts on equity stock prices.
+#' A data table with forecasts for two equities
 #' \describe{
-#'  \item{Point Forecast}{Forecast}
-#'  \item{Lo 80}{80th percentile lower confidence bound}
-#'  \item{Lo 95}{95th percentile lower confidence bound}
-#'  \item{Hi 80}{80th percentile upper confidence bound}
-#'  \item{Hi 95}{95th percentile upper confidence bound}
+#'  \item{date}{Date}
+#'  \item{QQQ.f}{Forecast price for QQQ}
+#'  \item{QQQ.flo}{80th percentile in Forecast CI for QQQ}
+#'  \item{QQQ.fhi}{20th percentile in Forecast CI for QQQ}
+#'  \item{IBM.f}{Forecast price for IBM}
+#'  \item{IBM.flo}{80th percentile in Forecast CI for IBM}
+#'  \item{IBM.fhi}{20th percentile in Forecast CI for IBM}
 #' }
 #'
 #' @source <https://finance.yahoo.com>
 "example_fcst_set"
 
+
+#' Constant Maturity UST rates
+#'
+#' FRED calculated constant maturity interest rates
+#'
+#' @format ## `yc_CMSUST`
+#' A long format `data.table` with constant maturity UST with tenors 2yr, 10yr and 30yr.
+#' \describe{
+#'  \item{variable}{Identifier with "CMS_<yr>"}
+#'  \item{date}{Date of observation}
+#'  \item{value}{Annualized Percent interest rae}
+#' }
+#'
+#' @source <https://fred.stlouisfed.org/>
+"yc_CMSUST"
 

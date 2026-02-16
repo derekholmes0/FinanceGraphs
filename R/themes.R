@@ -22,21 +22,58 @@ gga
 }
 
 #' @import ggplot2
-legendPosition <- function(legend,title="",background= element_rect(fill=alpha('blue', 0.1)),pctin=0.9) {
-  p<-NULL
+legendPosition <- function(legendstr,title="",background= element_rect(fill=alpha('blue', 0.1)),pctin=0.9) {
+  p<-legend<-NULL
   if(nchar(title)>1) { mytit=element_text(title) } else { mytit=element_blank() }
-  if(legend=="inside") { p<-theme(legend.position="inside",legend.position.inside=c(pctin,pctin),legend.justification=c(1,1), legend.title=mytit,legend.background = background) }
-  else if(legend=="topleft") { p<-theme(legend.position="inside",legend.position.inside=c(1-pctin,pctin),legend.justification=c(0,1), legend.title=mytit,legend.background = background) }
-  else if(legend=="bottomleft") { p<-theme(legend.position="inside",legend.position.inside=c(1-pctin,1-pctin),legend.justification=c(0,0), legend.title=mytit,legend.background = background) }
-  else if(legend=="insidebottom" | legend=="bottomright") { p<-theme(legend.position="inside",legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0), legend.title=mytit,legend.background = background) }
-  else if(legend=="insidetop" || legend=="topright") { p<-theme(legend.position="inside",legend.position.inside=c(pctin,pctin),legend.justification=c(0,1), legend.title=mytit,legend.background = background) }
-  else if (grepl("loc:",legend)) {
-    ll=as.numeric(s(gsub("loc:","",legend)));
+  if(legendstr=="inside") {
+    p<-theme(legend.position="inside",legend.position.inside=c(pctin,pctin),legend.justification=c(1,1), legend.title=mytit,legend.background = background) }
+  else if(legendstr=="topleft") {
+    p<-theme(legend.position="inside",legend.position.inside=c(1-pctin,pctin),legend.justification=c(0,1), legend.title=mytit,legend.background = background) }
+  else if(legendstr=="bottomleft") {
+    p<-theme(legend.position="inside",legend.position.inside=c(1-pctin,1-pctin),legend.justification=c(0,0), legend.title=mytit,legend.background = background) }
+  else if(legendstr %in% c("insidebottom","bottomright")) {
+    p<-theme(legend.position="inside",legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0), legend.title=mytit,legend.background = background) }
+  else if(legendstr %in% c("insidetop","topright")) {
+    p<-theme(legend.position="inside",legend.position.inside=c(pctin,pctin),legend.justification=c(0,1), legend.title=mytit,legend.background = background) }
+  else if (grepl("loc:",legendstr)) {
+    ll=as.numeric(s(gsub("loc:","",legendstr)));
     p<-theme(legend.position.inside=c(ll[1],ll[2]),legend.justification=c(ll[3],ll[4]), legend.title=mytit,legend.background = background) }
-  else if (nchar(legend)>0) { p<-theme(legend.position=legend, legend.title=mytit,legend.background = background) }
-  else if (legend=="none") { p<-theme(legend.position="none", legend.title=mytit,legend.background = background) }
+  else if (nchar(legendstr)>0) {
+    p<-theme(legend.position=legend, legend.title=mytit,legend.background = background) }
+  else if (legendstr=="none") {
+    p<-theme(legend.position="none", legend.title=mytit,legend.background = background) }
   return(p)
 }
+
+#' @import ggplot2
+legd_guide <- function(legendstr,title=waiver(),pctin=0.9,ncats=0,
+                           background= element_rect(fill=alpha('blue', 0.1))) {
+  pbase<-guide_legend(position="inside")
+  ppos <- ifelse(legendstr %in% c("top", "right", "bottom", "left"),legendstr,"inside")
+  ncols <- floor((ncats-1)/5)+1
+  if (grepl("loc:",legendstr)) {
+    ll=as.numeric(s(gsub("loc:","",legendstr)));
+    p<-theme(legend.position.inside=c(ll[1],ll[2]),legend.justification=c(ll[3],ll[4])) }
+  else {
+    p<-switch(legendstr,
+        inside = theme(legend.position.inside=c(pctin,pctin),legend.justification=c(1,1)),
+        topleft= theme(legend.position.inside=c(1-pctin,pctin),legend.justification=c(0,1)),
+        bottomleft = theme(legend.position.inside=c(1-pctin,1-pctin),legend.justification=c(0,0)),
+        insidebottom = theme(legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0)),
+        bottomright = theme(legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0)), # Same
+        insidetop = theme(legend.position.inside=c(pctin,pctin),legend.justification=c(0,1)),
+        topright = theme(legend.position.inside=c(pctin,pctin),legend.justification=c(0,1)),
+        top = theme(legend.position="top"),
+        right = theme(legend.position="right"),
+        none = theme(legend.position="none")
+    )
+    }
+  if(ncats<=1) { return("none") }
+  else {
+    return(guide_legend(title=title,position=ppos,nrow=min(ncats,5),ncol=ncols,theme=p))
+  }
+}
+
 
 #' @import ggplot2
 fgts_BaseTheme <- function(base_size = 8,xangle=90,yangle=90, tit_mult=1.3, axiscolor="grey20", gridstyle="dotted",
@@ -62,9 +99,7 @@ fgts_BaseTheme <- function(base_size = 8,xangle=90,yangle=90, tit_mult=1.3, axis
             #legend.key.size =   unit(1.2, "lines"),
             legend.text =       element_text(size = base_size * 1),
             legend.title =      element_text(size = base_size * 0.8, hjust = 0),
-            legend.position =   "right",
             legend.spacing = 	unit(base_size * 0.8, "pt"),
-
 
             panel.background =  element_rect(fill = plotbackground, colour = NA),
             panel.border =      element_blank(),

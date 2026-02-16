@@ -5,6 +5,7 @@
 require(imfapi)
 require(tidyquant)
 require(forecast)
+require(timetk)
 
 ratings_db <- fread("./inst/extdata/some_ratings_history.csv",na.strings="")[,let(DT_ENTRY=as.Date(DT_ENTRY,format="%m/%d/%Y"))]
 
@@ -30,13 +31,19 @@ consumer_sent <- tq_get("UMCSENT",get="economic.data")
 
 smalldta <- tail(eqtypx[,.(date,IBM,QQQ)],2*262)
 fcst_one <- function(ticker) {
-  t1_ts <- zoo::zoo(smalldta[[ticker]],smalldta[["date"]])
-  forecast::ets(t1_ts) |> forecast::forecast(h=36) |>  fg_predict(seriesnm=ticker)
+  t1_ts <- tk_ts(smalldta[,.SD,.SDcols=c("date",ticker)])
+  forecast::ets(t1_ts) |> forecast::forecast(h=36) |> sweep::sw_sweep(timetk_idx=TRUE) |> fg_sweep()
 }
 example_fcst_set <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
 
 earnings_ibm = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
   alphavantagepf::av_extract_df("quarterlyEarnings") |> dplyr::select(reportedDate, reportedEPS, symbol)
 
+
+fredset <- data.table::data.table(symbol=c("DGS2","DGS10","DGS30"), variable=c("CMS_2","CMS_10","CMS_30"))
+yc_CMSUST <- tq_get(fredset$symbol,get="economic.data") |> data.table(keyby=c("symbol","date"))
+yc_CMSUST <- fredset[yc_CMSUST,on=.(symbol)][,.(variable,date,value=price)]
+#yc_CMSUST[,.(min(date),max(date),.N), by=.(variable)]
+
 usethis::use_data(eqtypx,eqtypx_melt,eqtyrtn,nomfxdta,reerdta,consumer_sent,
-                  ratings_db, example_fcst_set,earnings_ibm, overwrite = TRUE)
+                  ratings_db, example_fcst_set,earnings_ibm, yc_CMSUST,overwrite = TRUE)

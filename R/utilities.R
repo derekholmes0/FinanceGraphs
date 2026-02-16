@@ -276,26 +276,19 @@ dtsetnm<-function(ain,fromcol,tocol,nullcol=NA_real_,existordie=FALSE) {
   return(ain)
 }
 
-## -- For Debusgging only
+## -- For Debugging only
 cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trace=FALSE,dpath=tempdir(),dbgkey="zz",suffix="",
                   skipsaveiftoday=FALSE, nbig=10000,title="",usefst=TRUE,pframe=3,tmp=F) {
-  #if(nchar(title)>1) { message("cAssign ---------------------------------------: ",title) }
   newfilename=""
   if(!is.character(x)) { stop("cAssign x must be character string for a variable name, not the actual variable..") }
   if(tmp || dpath=="t") { dpath="c:/t/" }
-  if(copytodisk | copysilent) { silent=TRUE } # eliminated reduncany
+  if(copytodisk | copysilent) { silent=TRUE }
     x=unlist(strsplit(x,";")[[1]])
     ppp=lapply(x,function(y){
       if(exists(y,envir=parent.frame(n=pframe))) {
         cadtmp=get(y,pos=parent.frame(n=pframe))
-        if(nchar(suffix)>0) {
-          ynew = paste0(y,"_",suffix)
-          ymessage = sprintf("%10s as %10s",y,ynew)
-        }
-        else{
-          ynew=y
-          ymessage = sprintf("%10s",y)
-        }
+        ynew = paste0(y,ifelse(nchar(suffix)>0,paste0("_",suffix),""))
+        ymessage = ifelse(y==ynew, sprintf("%10s",y),sprintf("%10s as %10s",y,ynew))
         if(!silent) {
           thistrace=ifelse(trace,try(traceback(max.lines=1),silent=T),"--notrace--")
           message("Assigning: ",ymessage, "(",paste(dim(cadtmp),collapse=";"),") ",
@@ -307,4 +300,34 @@ cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trac
       } )
 }
 
+#' @import data.table
+# Take input and puts into expected form: DT_ENTRY, data.table, keyed.  Use meltvar = eventid e.g f neces.
+generic_to_melt <- function(indata,newnames="",meltvar="variable") {
+  # Preprocessing: get into data.table format
+  if( xts::is.xts(indata) ) { indt <- xts2df(indata) }
+  if(dplyr::is.tbl(indata)) { indt <- dplyr::ungroup(indata) }
+  if(!is.data.table(indata)) { indt <- data.table(indata) }  # Try setDT ?
+  else {indt <- data.table::copy(indata) }
+  colt <- function(cls) { names(indt)[grep(cls,lapply(indt,class))] }
+  dt_colnames <- list(
+    'date' = grep("end",colt("Date|POSIX"),ignore.case=TRUE,invert=TRUE,value=TRUE)[1],
+    'enddate' = grep("end",colt("Date|POSIX"),ignore.case=TRUE,value=TRUE)[1],
+    'meltvar' = meltvar)
+  if(!(is.na(meltvar)) & !(meltvar %in% colnames(indt))) {
+    indt <- data.table::melt(indt,id.var=dt_colnames[['date']])
+  }
+  cvars <- setdiff(colt("character"),meltvar)
+  dt_colnames <- c(dt_colnames,list(
+    'cvar' = ifelse(length(cvars)<=0,NA_character_,cvars),
+    'value' = colt("numeric")[1]
+  )
+  )
+  ndtcols <- ifelse(is.na(dt_colnames[['enddate']]),1,2)
+  setnames(indt,unlist(dt_colnames[seq(1:ndtcols)]),c("DT_ENTRY","END_DT_ENTRY")[1:ndtcols])
+  keycols <- ifelse(is.na(meltvar),c("DT_ENTRY"),c("DT_ENTRY",meltvar))
+  setcolorder(indt, keycols)
+  setkeyv(indt,keycols)
+  newlist <- stats::setNames(list(indt,dt_colnames),s(c(newnames,"",""))[1:2])
+  return(newlist)
+}
 

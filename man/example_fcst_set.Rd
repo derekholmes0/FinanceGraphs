@@ -7,13 +7,15 @@
 \format{
 \subsection{\code{example_fcst_set}}{
 
-A named list of two outputs from forecasts on equity stock prices.
+A data table with forecasts for two equities
 \describe{
-\item{Point Forecast}{Forecast}
-\item{Lo 80}{80th percentile lower confidence bound}
-\item{Lo 95}{95th percentile lower confidence bound}
-\item{Hi 80}{80th percentile upper confidence bound}
-\item{Hi 95}{95th percentile upper confidence bound}
+\item{date}{Date}
+\item{QQQ.f}{Forecast price for QQQ}
+\item{QQQ.flo}{80th percentile in Forecast CI for QQQ}
+\item{QQQ.fhi}{20th percentile in Forecast CI for QQQ}
+\item{IBM.f}{Forecast price for IBM}
+\item{IBM.flo}{80th percentile in Forecast CI for IBM}
+\item{IBM.fhi}{20th percentile in Forecast CI for IBM}
 }
 }
 }

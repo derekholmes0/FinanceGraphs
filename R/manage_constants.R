@@ -168,23 +168,26 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #' @rdname fg_update_colors
 #' @export
 fg_get_colors <- function(item="",n_max=NA_integer_) {
+  #the$default_colors <- fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
   rtn <- the$default_colors[which(the$default_colors$category==item),]
   if(rtn[[1,"color"]]=="brewer") {
     stopifnot("fg_get_colors(brewer) needs n_max" = !is.na(n_max))
     brewer_dets <- s(rtn[[1,"variable"]],sep=",")
     cols <- scales::pal_brewer(brewer_dets[[1]],palette=brewer_dets[[2]],direction=-1)(as.numeric(rtn[[1,"const"]]))
-    colors <- pal_gradient_n(cols)(seq(0, 1, length.out = n_max))
+    colors <- pal_gradient_n(cols)(seq(0, 0.6, length.out = n_max)) # Dont want to go all the way to white
     rtn <- data.table(variable=paste0("C",1:n_max),color=colors)[,let(category=item)][]
   }
   else {
-    if(!is.na(n_max)) { rtn <- rtn[1:n_max,] }
+    if(!is.na(n_max)) {
+      if(n_max>0) {rtn <- rtn[1:n_max,] }
+    }
     if(item=="") { rtn <- the$default_colors }
   }
   return(rtn)
 }
 
-fg_get_colorstring <- function(item="",n_max=NA_integer_) {
-  return( fg_get_colors(item,n_max=n_max)[["color"]] )
+fg_get_colorstring <- function(item="",n_max=NA_integer_,toget="color") {
+  return( fg_get_colors(item,n_max=n_max)[[toget]] )
 }
 
 #' @import data.table
@@ -248,7 +251,7 @@ fg_reset_to_default_state <- function(reset="all") {
 #' @export
 fg_display_colors <- function(item="") {
   category=variable=color=x=y=ztext=i.DT_ENTRY=i.END_DT_ENTRY=NULL
-  tcolors <- fg_get_colors(item)
+  tcolors <- fg_get_colors(item)[!grepl("_ls",category)]
   tcolors <- tcolors[,let(x=20-(.I %% 20), y=floor(.I/20)+1,ztext=paste0(category,",",variable,":",color))]
   g1 <- ggplot(tcolors,aes(x,y,fill=color,label=ztext))+geom_tile()+geom_label(fill="white",size=3)
   g1 <- g1 +coord_flip()+scale_fill_identity()+labs(title="Current colors used")+theme_bw()
@@ -294,11 +297,11 @@ fg_create_defaults <- function() {
   dtmap  <- make_dtmap(yrs_ahead=10)
   datecols <- c("DT_ENTRY","END_DT_ENTRY")
   doi_default <- fread("./inst/extdata/doidates.csv",na.strings="")[,(datecols):=lapply(.SD,\(x) as.Date(x,"%m/%d/%Y")), .SDcols=datecols][]
-  colors_default <- fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
   tevents_defaults <- data.table(END_DT_ENTRY=as.Date(NA_real_),eventonly=FALSE,
                                               axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
   ratingsmapmelt <- fread("./inst/extdata/ratingsmapmelt.csv")
-  # usethis::use_data(doi_default,colors_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
+  colors_default <- fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
+  #usethis::use_data(doi_default,colors_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
 }
 
 # ----------------------- Dates
@@ -338,7 +341,7 @@ make_dtmap <- function(yrs_ahead=5) {
   setnafill(dtmap,"locf",cols=c('rolldt'))
   setkeyv(dtmap,c("DT_ENTRY"))
   # Business days and end periods
-  dtmap <- dtmap[,'isday':=between(lubridate::wday(DT_ENTRY),2,6)]
+  dtmap <- dtmap[,'isday':=data.table::between(lubridate::wday(DT_ENTRY),2,6) & !isholiday] # weekdays
   dtmapc <- copy(dtmap)
   dtmapc <- dtmapc[isday==TRUE,]
   dtmapc <- dtmapc[,'isweek':=(DT_ENTRY==max(DT_ENTRY)),by="yrwk"]
@@ -346,7 +349,7 @@ make_dtmap <- function(yrs_ahead=5) {
   dtmapc <- dtmapc[,'isqtr':=(DT_ENTRY==max(DT_ENTRY)),by="yrqtr"]
   dtmapc <- dtmapc[,'isyr':=(DT_ENTRY==max(DT_ENTRY)),by="yr"]
   dtmapc[,'daysfromroll':=.I-min(.I),by='rolldt'][,'rollpd':=format(rolldt,"%Y%m")]
-  dtmapc <- dtmapc[,':='('bdoy'=cumsum(isholiday==FALSE)), by=.(yr)]
+  dtmapc <- dtmapc[,':='('bdoy'=cumsum(isday==TRUE)), by=.(yr)]
   # Roll Dates (CDS)
   dtmap <- dtmapc[,c('DT_ENTRY','isweek','ismo','isqtr','isyr','daysfromroll','rollpd','bdoy')][dtmap,on=.(DT_ENTRY)]
   setnafill(dtmap,"locf",cols=c("daysfromroll"))

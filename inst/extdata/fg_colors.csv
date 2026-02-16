@@ -41,7 +41,7 @@ rebase,,grey50,
 tradesignal,flat,white,
 tradesignal,short,#f56462,
 tradesignal,long,#6161ff,
-boxplot,"seq,Greens",brewer,3
+boxplot,"seq,Greens",brewer,4
 boxplotlast,,red,3
 boxplotcat,,red,bold
 boxplotfacet,,wheat,
@@ -56,3 +56,18 @@ grayinv,D05,#74c476,
 grayinv,D06,#a1d99b,
 grayinv,D07,#c7e9c0,
 grayinv,D08,#e5f5e0,
+espath_lm,,black,2
+espath_line,,#433E85FF,
+espath_fill,,#C2DF23FF,
+espath_x,,gray,1
+espath_y,,darkgreen,1
+espath_gp,"seq,BuGn",brewer,7
+espath_ls,L01,84,
+espath_ls,L02,8282,
+espath_ls,L03,8484,
+espath_ls,L04,22,
+espath_ls,L05,24,
+espath_ls,L06,4242,
+espath_ls,L07,3313,
+espath_ls,L08,3131,
+espath_ls,L09,3A6A,
