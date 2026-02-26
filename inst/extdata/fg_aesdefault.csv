@@ -1,0 +1,118 @@
+category,variable,type,value,const,used,helpstr
+altbars,0,color,#FFE6E6,,,
+altbars,1,color,#E0E0FF,,,
+bdoy,,color,grey30,,fgts_dygraph,Bus Day of Year Color
+boxplot,,colorrange,"seq,Greens",4,fg_tsboxplot,Color scale to use if too many categories
+boxplotcat,,color,red,bold,fg_tsboxplot,Highlight color
+boxplotfacet,,color,wheat,,fg_tsboxplot,Facet label color
+boxplotlast,,color,red,3,fg_tsboxplot,Last Point color
+breakout,0,color,red,,fgts_dygraph,Breakout color
+corner_anno,,color,darkgreen,,fg_scatplot,Text Color of corner annotation
+corner_anno,,fill,yellow,,fg_scatplot,Fill Color of corner annotations
+corner_anno,,sizemult,1.2,,fg_scatplot,Text Size Multiplier
+date,,color,black,,fgts_dygraph,Date Text color
+date_range,,color,#FFE6E6,,fgts_dygraph,Date Range background color
+doq,,color,grey30,,fgts_dygraph,Day of Quarter text color
+doy,,color,grey30,,fgts_dygraph,Day of Year text color
+espath_fill,,color,#C2DF23FF,,fg_eventStudy,Fitline fill color
+espath_gp,,colorrange,"seq,BuGn",7,fg_eventStudy,Brewer colors if used
+espath_line,,color,#433E85FF,,fg_eventStudy,fitline color
+espath_lm,,color,black,2,fg_eventStudy,Fit line color
+espath_ls,L01,linestyle,84,,fg_eventStudy,Line styles per event
+espath_ls,L02,linestyle,8282,,fg_eventStudy,
+espath_ls,L03,linestyle,8484,,fg_eventStudy,
+espath_ls,L04,linestyle,22,,fg_eventStudy,
+espath_ls,L05,linestyle,24,,fg_eventStudy,
+espath_ls,L06,linestyle,4242,,fg_eventStudy,
+espath_ls,L07,linestyle,3313,,fg_eventStudy,
+espath_ls,L08,linestyle,3131,,fg_eventStudy,
+espath_ls,L09,linestyle,3A6A,,fg_eventStudy,
+espath_x,,color,gray,1,fg_eventStudy,Scatterplot x color
+espath_y,,color,darkgreen,1,fg_eventStudy,Scatterplot y color
+eventset,bad,color,#f56462,,fgts_dygraph,Bad event background
+eventset,good,color,#6161ff,,fgts_dygraph,Good event background
+extreme_max,,color,blue,,fgts_dygraph,Max Level Color
+extreme_min,,color,red,,fgts_dygraph,Min Level Color
+forecast_dates,,color,orange,,,
+gridcolor,,color,lightblue,,fg_scatplot,grid color
+hline,,color,grey20,,fgts_dygraph,Horizontal line color
+ip_color,,color,red,,fg_scatplot,Interactive Point Color
+labelhilight,,color,yellow,,fg_scatplot,Background of highlighted labels
+labelhilightsize,,sizefact,1.5,,fg_scatplot,Size multiplier of highlighted labels
+legloc_alpha,,legendloc,topright,,fg_scatplot,Location of Alphalegend
+legloc_color,,legendloc,topright,,fg_scatplot,Location of Color legend
+legloc_size,,legendloc,bottomright,,fg_scatplot,Location of Size Legend
+legloc_symbol,,legendloc,topright,,fg_scatplot,Location of Symbol legend
+linebrewer,,colorrange,"seq,BuGn",7,fg_scatplot,Color scale to use if too many categories
+lines,D01,color,black,,all,Low cardinality line colors
+lines,D02,color,red,,all,Low cardinality line colors
+lines,D03,color,blue,,all,Low cardinality line colors
+lines,D04,color,darkgreen,,all,Low cardinality line colors
+lines,D05,color,orange,,all,Low cardinality line colors
+lines,D06,color,gray,,all,Low cardinality line colors
+lines,D07,color,seagreen,,all,Low cardinality line colors
+lines,D08,color,pink,,all,Low cardinality line colors
+lines,D09,color,cyan,,all,Low cardinality line colors
+lines,D10,color,grey20,,all,Low cardinality line colors
+lines,D11,color,grey40,,all,Low cardinality line colors
+lines,D12,color,grey60,,all,Low cardinality line colors
+lines,D13,color,#cdcdff,,all,Low cardinality line colors
+lines,D14,color,#f2a7b5,,all,Low cardinality line colors
+mktregimes,-,color,#ffcdcd,,fgts_dygraph,Bear Market background color
+mktregimes,+,color,#c0dccc,,fgts_dygraph,Bull Market background color
+mktregimes,=,color,white,,fgts_dygraph,Neutral Market background color
+mktregimes,default,color,white,,fgts_dygraph,Undetermined background color
+oob_box,,color,pink,,fg_scatplot,Aesthetics of bounding box if winsorized
+oob_box,,fill,pink,,fg_scatplot,Aesthetics of bounding box if winsorized
+oob_box,,alpha,0.1,,fg_scatplot,Aesthetics of bounding box if winsorized
+optexp,,color,blue,,fgts_dygraph,Optiona Expiration color
+range,,color,#FFE6E6,,fgts_dygraph,Rnage Background color
+rebase,,color,grey50,,fgts_dygraph,Rebased data color
+retrace,base,color,blue,,,
+retrace,dot,color,red,,,
+roll,,color,grey30,,fgts_dygraph,IMM Roll Date color
+rolldates,,color,blue,,fgts_dygraph,IMM Roll Date color
+scathexfill,D01,colorrange,"seq,Greys",7,fg_scatplot,Hex fill shades
+scatlabel_bg,,color,wheat,,fg_scatplot,Last Point label background
+scatlast,,color,red,,fg_scatplot,Default Color of Last Point
+scatrecent,,colorrange,"seq,Greys",-7,fg_scatplot,Brewer Color scheme for recent
+scatshape,D01,shape,16,,fg_scatplot,Shape code
+scatshape,D02,shape,1,,fg_scatplot,Shape code
+scatshape,D03,shape,17,,fg_scatplot,Shape code
+scatshape,D04,shape,2,,fg_scatplot,Shape code
+scatshape,D05,shape,15,,fg_scatplot,Shape code
+scatshape,D06,shape,0,,fg_scatplot,Shape code
+scatshape,D07,shape,18,,fg_scatplot,Shape code
+scatshape,D08,shape,5,,fg_scatplot,Shape code
+scattextfont,,fontface,bold,,fg_scatplot,Text Font Face
+scattextsize,D01,size,6,,fg_scatplot,Text size
+scattextsize,D02,size,3,,fg_scatplot,Text size
+scattextsize,D03,size,2,,fg_scatplot,Text size
+scattextsize,D04,size,1,,fg_scatplot,Text size
+scattextsize,D05,size,1,,fg_scatplot,Text size
+scattextsize,D06,size,1,,fg_scatplot,Text size
+scattextsize,D07,size,1,,fg_scatplot,Text size
+scattextsize,D08,size,1,,fg_scatplot,Text size
+scattextsize,D00,size,1,,fg_scatplot,Text size
+scattextsize,D10,size,1,,fg_scatplot,Text size
+tradesignal,flat,color,white,,,
+tradesignal,long,color,#6161ff,,,
+tradesignal,short,color,#f56462,,,
+turningpoints,bot,color,red,,fgts_dygraph,Negative Turning Points
+turningpoints,top,color,blue,,fgts_dygraph,Positive Turning Points
+altlines_10,D01,color,#0055FF,,,Dichromat BluetoOrange.10
+altlines_10,D02,color,#3399FF,,,Dichromat BluetoOrange.10
+altlines_10,D03,color,#66CCFF,,,Dichromat BluetoOrange.10
+altlines_10,D04,color,#99EEFF,,,Dichromat BluetoOrange.10
+altlines_10,D05,color,#CCFFFF,,,Dichromat BluetoOrange.10
+altlines_10,D06,color,#FFFFCC,,,Dichromat BluetoOrange.10
+altlines_10,D07,color,#FFEE99,,,Dichromat BluetoOrange.10
+altlines_10,D08,color,#FFCC66,,,Dichromat BluetoOrange.10
+altlines_10,D09,color,#FF9933,,,Dichromat BluetoOrange.10
+altlines_10,D10,color,#FF5500,,,"Dichromat,DarkRedtoBlue.12"
+altlines_6,D01,color,#762a83,,,PRG6
+altlines_6,D03,color,#af8dc3,,,PRG6
+altlines_6,D05,color,#e7d4e8,,,PRG6
+altlines_6,D06,color,#d9f0d3,,,PRG6
+altlines_6,D04,color,#7fbf7b,,,PRG6
+altlines_6,D02,color,#1b7837,,,PRG6

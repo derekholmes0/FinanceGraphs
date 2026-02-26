@@ -42,7 +42,7 @@ numeric column.  Each column after the date column is treated as a separate seri
 the prefix of the name.
 
 Consistent colors used for all series and annotations are kept in a local (persistent) settings `data.frame`.  Default color schemes can
-be changed (again persisantly) using the [fg_update_colors()] function.
+be changed (again persisantly) using the [fg_update_aes()] function.
 
 ## Simple Examples
 
@@ -160,14 +160,14 @@ get their outputs into the appropriate `foreast_ds` forms
 
 ## Changing colors and adding dates of interest
 
-Default colors for series and annotations can be changed using [fg_update_colors()] or [fg_update_line_colors()].  
+Default colors for series and annotations can be changed using [fg_update_aes()] or [fg_update_line_colors()].  
 Any changes made to colors will persist across loads of the package (unless `persist=FALSE` is specified).
 As an example, to make a graduated set of colors for the first 3 series.
 
 ```{r}
-fg_get_colors("lines",n_max=4)
+fg_get_aes("lines",n_max=4)
 fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3] )
-fg_get_colors("lines",n_max=4)
+fg_get_aes("lines",n_max=4)
 ```
 
 New dates of interest used for the `events` parameter can also be added.  To add (for example) a new FOMC cut of 50bps on 6/16/2026
@@ -187,6 +187,37 @@ is synchronized.  There are times, however, when you want to turn these on or of
 if called with no parameters, sets the group name with a string, or turns off synchronization with a call `fg_sync_group(NULL)`.
 
 # Static Plots for Time Series
+
+## Scatter Plots with time dimension
+
+Key to understanding how time series co-move is a simple scatter plot.  The function [fg_scatplot()] tries to be a concise wrapper around the very comprehensive
+[ggplot::ggplot()] graphics framework.  [ggplot()] is a great ecosystem, but requires quite a bit of verbiage to get from idea to presentable graph quickly.
+The approach used here is to specify broad categories of aesthetics with a formula, while the details are kept behind the hood using the aesthetic sets
+managed by [fg_get_aes()] as above.  Fuller explanations and more examples are in the accompanying vignette.
+
+This "one-line" approach can be used with both date-based and non-date based datasets.  For example, suppose we wanted to plot two asset prices against
+each other so that we can easily understand both how they co-move, where they have been recently, and where they are now.  We will start by making a
+fake dataset of two random walks with a regime category we wish to highlight.
+
+
+```{r}
+set.seed(1); ndates <- 400;  dlyvol <- 0.2/sqrt(260)
+rtns <- cbind(cumsum(rnorm(ndates,sd=dlyvol)),cumsum(rnorm(ndates,sd=dlyvol)))
+dttest <- data.table(date=seq(as.Date("2021-01-01"),as.Date("2021-01-01")+ndates-1),
+             xtest=100*(1+rtns[,1]),ytest=100*(1+rtns[,2]),
+             ccat=fifelse(runif(ndates)<=0.2,"Rare","--"))
+dttest[1,]
+```
+
+A scatter plot of where those two assets are and where they have been is as easy as
+
+```{r}
+#| label: Scatter1
+#| fig.alt: "Scatterplot with two categories and recent highlighting."
+fg_scatplot(dttest,"ytest ~ xtest + color:ccat + doi:recent","scatter",datecuts=c(66,122),title="from recent")
+```
+
+
 
 ## Time-categorized box plots
 
@@ -214,6 +245,36 @@ observation, hide the boxplot whiskers, and reorder the currencies by their rela
 #| fig.alt: "Boxplot of Real Effective Exchange Rates"
 fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
 ```
+
+## Event Studies
+
+Trying to understand how events or environments may impact prices can be summarized well by plotting their movements relative to a date
+against time relative to the event.  The function [fg_eventStudy()] integrates a set of dates with a set of time series to plot
+their relative behavior over the business days before and after each event.  It is designed to show reasonably large sets of 
+assets or event dates by switching discrete color scales to gradient scales after a user specified number.
+
+There are several ways to show the data, including path-by-path, statistics by event (i.e. across assets) or by asset (across events), 
+boxplots, or scatter plots of moves at the edge of the intervals.
+
+For example, to see the behavior of various parts of the US yield curve around FOMC cuts, just use the following
+
+```{r}
+#| label: EventStudies1
+#| fig.alt: "Relative rate moves around recent Fed Cuts"
+dtset <- fg_get_dates_of_interest("fedmoves")[grepl("F:-",eventid),.(DT_ENTRY,text=eventid2)]
+fg_eventStudy(yc_CMSUST,dtset,output="pathbyvar",title="Constant Maturity UST tenors around Fed Cuts")
+```
+
+We can see that curves reach their peak steepening around a week after the event.  To see this a little more succinctly, we can use
+
+```{r}
+#| label: EventStudies2
+#| fig.alt: "Scatter plot of moves before and after Fed Rate Cuts
+fg_eventStudy(yc_CMSUST,dtset,output="scatter",nbd_back=5,nbd_fwd=6,title="Constant Maturity UST tenors around Fed Cuts at 5 days")
+```
+
+
+
 
 
 

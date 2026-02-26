@@ -18,7 +18,7 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
   indt2 <- stats::na.omit(as.numeric(indta[[2]]))
   res <- BreakoutDetection::breakout(indt2, min.size=24, method='multi', degree=1, beta=0.005, plot=FALSE)
   bo_only <- indta[res$loc,]
-  thiscolor <- fg_get_colorstring("breakout")
+  thiscolor <- fg_get_aesstring("breakout")
   tortn <- data.frame(DT_ENRY=bo_only[[1]],text="Bad Anotation Style",loc="top",color=thiscolor)
   rtntxt <- switch(annotationstyle,
                    "singleasdate" = paste0("Brk:",lapply(bo_only[[1]],as.character)),
@@ -56,9 +56,9 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
 #' @export
 fg_findTurningPoints<-function(indta,rtn="dates",
                             method="pctchg",npts=10,pts_of_interest="change",pctabovemin=0.05,maxwindow=-1,addlast=FALSE,cpmmethod="GLR",...) {
-  `.`<-DT_ENTRY<-value<-daysfrommin<-goodpt<-ino<-text<-color<-loc<-pctchg_func<-NULL
+  daysfrommin<-goodpt<-ino<-loc<-pctchg_func<-NULL
   pts <- data.table()
-  tcolors <- fg_get_colorstring("turningpoints")
+  tcolors <- fg_get_aesstring("turningpoints")
   if("prophet" %in% class(indta)) {
       ydta <- data.table(DT_ENTRY=as.Date(indta$history$ds),value=indta$history$y)
       pts <-ydta[data.table(DT_ENTRY=as.Date(indta$changepoints)),on=.(DT_ENTRY)]
@@ -139,8 +139,7 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 #' @rdname Event_Helpers
 #' @export
 fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RATINGS,DT_ENTRY
-  CREDIT=AGENCY=WATCH=WATCHNUM=NUMRAT=DT_ENTRY=RATING=END_DT_ENTRY=color=NULL
-  CREDIT <- AGENCY <- WATCH <- WATCHNUM <- NUMRAT <- DT_ENTRY <- RATING <- END_DT_ENTRY <- color <- NULL
+  CREDIT=AGENCY=WATCH=WATCHNUM=NUMRAT=RATING=NULL
   trats = ratings_db |> dplyr::filter(CREDIT==credit & AGENCY==agency)
   trats = trats |> dplyr::left_join(ratingsmapmelt,by=c("AGENCY",c("RATING"="RATCHAR"))) |> dplyr::mutate(WATCH= stringr::str_extract(WATCH,"(\\-|\\+)"))
   trats = trats |>  dplyr::left_join(dplyr::tibble(WATCH=s("+;-"),WATCHNUM=c(-0.5,+0.5)), by="WATCH") |>
@@ -167,7 +166,7 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #' * `"zscore"` Normalize data by using standard [scale()] function
 #' @param invert Use opposite color schemes for data, i.e. "red" for good outcomes
 #' @param extend Logical (Default: TRUE) to extend data to today (`Sys.Date()`)
-#'
+#'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAbElEQVR4Xs2RQQrAMAgEfZgf7W9LAguybljJpR3wEse5JOL3ZObDb4x1loDhHbBOFU6i2Ddnw2KNiXcdAXygJlwE8OFVBHDgKrLgSInN4WMe9iXiqIVsTMjH7z/GhNTEibOxQswcYIWYOR/zAjBJfiXh3jZ6AAAAAElFTkSuQmCC
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #' @examples
 #' smalldta <- narrowbydtstr(eqtypx[,.(date,IBM,QQQ)],"-2y::")
@@ -179,7 +178,7 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #' @import data.table
 #' @export
 fg_cut_to_events<-function(indta,ncutsperside=4,center=0,extend=TRUE,invert=FALSE) {
-  `.` <- value <- tmpcat <- DT_ENTRY <- END_DT_ENTRY <- NULL
+  tmpcat<- NULL
   dt_colname <- find_col_bytype(indta,lubridate::is.instant)
   val_colname <- find_col_bytype(indta,is.numeric)
   tmpdta <- data.table(indta)[,.(DT_ENTRY=get(dt_colname), value=get(val_colname))]
@@ -187,7 +186,7 @@ fg_cut_to_events<-function(indta,ncutsperside=4,center=0,extend=TRUE,invert=FALS
     tmpdta <- rbindlist(list(tmpdta,data.table(DT_ENTRY=Sys.Date(),value=NA_real_)))
     setnafill(tmpdta,"locf")
   }
-  tcolors <- fg_get_colorstring("eventset")
+  tcolors <- fg_get_aesstring("eventset")
   xcenter<-0
   if(is.numeric(center)) { xcenter <-center }
   else if (center=="median") { xcenter <- stats::median(tmpdta[["value"]]) }
@@ -225,7 +224,6 @@ fg_cut_to_events<-function(indta,ncutsperside=4,center=0,extend=TRUE,invert=FALS
 #' @import data.table
 #' @export
 fg_signal_to_events<-function(signal_df,colormap) {
-  `.`=value=NULL
   signal_df <- data.table(signal_df)
   colormap <- data.table(colormap)
   setnames(signal_df,colnames(signal_df)[1:2],c("DT_ENTRY","value")) # May have other columns
@@ -255,7 +253,6 @@ fg_signal_to_events<-function(signal_df,colormap) {
 #' @rdname Event_Helpers
 #' @export
 fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
-  `.`=value=symbol=color=text=NULL
   if(!requireNamespace("tidyquant",quietly=TRUE)) {
     stop("Tidyquant not installed, cannot use fg_tq_divs")
   }
@@ -296,7 +293,7 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' @rdname Event_Helpers
 #' @export
 fg_av_earnings<-function(indt,field="reportedEPS",ticker_in_label=FALSE) {
-  `.`=reportedDate=symbol=color=text=NULL
+  reportedDate=NULL
   rtn <- data.table(indt)[,.(DT_ENTRY=reportedDate,text=paste0("E:",format(get(field),digits=2)),
                               color=symbol,loc="top",category="series_color")]
   if(ticker_in_label==TRUE) {

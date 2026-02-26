@@ -6,9 +6,9 @@
 \alias{the}
 \alias{fg_get_dates_of_interest}
 \alias{fg_update_dates_of_interest}
-\title{Maintain Constants and Dates of Interest}
+\title{Maintain Aethestics  and Dates of Interest}
 \format{
-An object of class \code{environment} of length 11.
+An object of class \code{environment} of length 14.
 }
 \usage{
 the
@@ -44,7 +44,7 @@ Filtered datasets
 }
 \details{
 Retrieves default dates of interest given a grepstring of categories.  There are a default set of categories provided which may not be up to date.
-New data passed into \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}} or \code{\link[=fg_update_colors]{fg_update_colors()}} persists across future loads of the package. Any duplicates in the new file will be taken out.
+New data passed into \code{\link[=fg_update_dates_of_interest]{fg_update_dates_of_interest()}} or \code{\link[=fg_update_aes]{fg_update_aes()}} persists across future loads of the package. Any duplicates in the new file will be taken out.
 
 New doi \code{data.frames} must have at least three columns:\tabular{ll}{
    Column \tab Meaning \cr
@@ -56,12 +56,14 @@ New doi \code{data.frames} must have at least three columns:\tabular{ll}{
 }
 \examples{
 \dontrun{
-tail(fg_get_dates_of_interest("fedmoves"),3)
+require(utils)
+tail(fg_get_dates_of_interest("fedmoves"),2)
 # To add (for example) a new FOMC cut of 50bps on 6/16/2026:
 newdoi <-data.table(category="fedmoves",eventid="F:-50",
             DT_ENTRY=as.Date("6/16/2026",format="\%m/\%d/\%Y"))
 fg_update_dates_of_interest(newdoi)
-tail(fg_get_dates_of_interest("fedmoves"),3)
+# Since this is in the future, we have to make the future now.
+fg_get_dates_of_interest("fedmoves",totoday=as.Date("2026-12-31"))
 fg_reset_to_default_state("doi")
 }
 

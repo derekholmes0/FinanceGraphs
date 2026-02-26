@@ -1,11 +1,11 @@
 #' @import ggplot2
-gline_identify<- function(g1,xin,yin,color="blue",addpoint=FALSE)  {
-  x1=y1=x2=y2=label=hj=vj=NULL
-  rangex= layer_scales(g1)$x$range$range
-  rangey= layer_scales(g1)$y$range$range
-  toplot = data.frame(x1=c(xin,xin),y1=c(yin,yin), x2=c(xin,rangex[1]),y2=c(rangey[1],yin), label=c(xin,yin), hj=c("center","center"),vj=c("center","center"))
-  gga=list(geom_segment(aes(x=x1,y=y1,xend=x2,yend=y2),data=toplot,linetype=2,color=color),geom_label(aes(x2,y2,label=label,hjust=hj,vjust=vj),data=toplot,size=3))
-  if(addpoint) { gga=c(gga,geom_point(aes(x=x1,y=y1,color=color), data=data.frame(x1=xin,y1=yin), size=3))}
+gline_identify<- function(xdata,bbox)  {
+  toplot <- data.frame(x2=c(NA_real_,bbox[[1,1]]),y2=c(bbox[[1,2]],NA_real_),inbox=rep(TRUE,2))
+  toplot <- merge(xdata,toplot,all=TRUE)[,let(x2=fcoalesce(x2,xx),y2=fcoalesce(y2,yy))]
+  gga=list(geom_segment(aes(x=xx,y=yy,xend=x2,yend=y2),data=toplot,linetype=2),
+           geom_label(aes(x=x2,y=y2,label=lastlabel),size=3, data=toplot[abs(x2-xx)>0.01,][,let(lastlabel=format(yy,digits=1))]),
+           geom_label(aes(x=x2,y=y2,label=lastlabel),size=3, data=toplot[abs(y2-yy)>0.01,][,let(lastlabel=format(xx,digits=1))])
+  )
   gga
 }
 
@@ -22,56 +22,82 @@ gga
 }
 
 #' @import ggplot2
-legendPosition <- function(legendstr,title="",background= element_rect(fill=alpha('blue', 0.1)),pctin=0.9) {
-  p<-legend<-NULL
-  if(nchar(title)>1) { mytit=element_text(title) } else { mytit=element_blank() }
-  if(legendstr=="inside") {
-    p<-theme(legend.position="inside",legend.position.inside=c(pctin,pctin),legend.justification=c(1,1), legend.title=mytit,legend.background = background) }
-  else if(legendstr=="topleft") {
-    p<-theme(legend.position="inside",legend.position.inside=c(1-pctin,pctin),legend.justification=c(0,1), legend.title=mytit,legend.background = background) }
-  else if(legendstr=="bottomleft") {
-    p<-theme(legend.position="inside",legend.position.inside=c(1-pctin,1-pctin),legend.justification=c(0,0), legend.title=mytit,legend.background = background) }
-  else if(legendstr %in% c("insidebottom","bottomright")) {
-    p<-theme(legend.position="inside",legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0), legend.title=mytit,legend.background = background) }
-  else if(legendstr %in% c("insidetop","topright")) {
-    p<-theme(legend.position="inside",legend.position.inside=c(pctin,pctin),legend.justification=c(0,1), legend.title=mytit,legend.background = background) }
-  else if (grepl("loc:",legendstr)) {
-    ll=as.numeric(s(gsub("loc:","",legendstr)));
-    p<-theme(legend.position.inside=c(ll[1],ll[2]),legend.justification=c(ll[3],ll[4]), legend.title=mytit,legend.background = background) }
-  else if (nchar(legendstr)>0) {
-    p<-theme(legend.position=legend, legend.title=mytit,legend.background = background) }
-  else if (legendstr=="none") {
-    p<-theme(legend.position="none", legend.title=mytit,legend.background = background) }
-  return(p)
-}
-
-#' @import ggplot2
-legd_guide <- function(legendstr,title=waiver(),pctin=0.9,ncats=0,
+legd_guide <- function(legendstr,guidetype="legend",title=waiver(),pctin=0.9,ncats=0,
                            background= element_rect(fill=alpha('blue', 0.1))) {
-  pbase<-guide_legend(position="inside")
-  ppos <- ifelse(legendstr %in% c("top", "right", "bottom", "left"),legendstr,"inside")
+  xleg=NULL
+  ppos_map <- data.table(xleg=s("top;topleft;topright;bottom;bottomleft;bottomright"),
+                         ppos=s("top;left;right;bottom;left;right"))
+  ppos <- ppos_map[xleg==legendstr,]
+  ppos <- fifelse(nrow(ppos)<=0,"inside",ppos[1,]$ppos)
   ncols <- floor((ncats-1)/5)+1
   if (grepl("loc:",legendstr)) {
     ll=as.numeric(s(gsub("loc:","",legendstr)));
     p<-theme(legend.position.inside=c(ll[1],ll[2]),legend.justification=c(ll[3],ll[4])) }
   else {
-    p<-switch(legendstr,
+    # Prefer left/right isnted of up/down
+    ptheme<-switch(legendstr,
         inside = theme(legend.position.inside=c(pctin,pctin),legend.justification=c(1,1)),
-        topleft= theme(legend.position.inside=c(1-pctin,pctin),legend.justification=c(0,1)),
-        bottomleft = theme(legend.position.inside=c(1-pctin,1-pctin),legend.justification=c(0,0)),
+        insidebottomleft = theme(legend.position.inside=c(1-pctin,1-pctin),legend.justification=c(0,0)),
         insidebottom = theme(legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0)),
-        bottomright = theme(legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0)), # Same
+        insidebottomright = theme(legend.position.inside=c(pctin,1-pctin),legend.justification=c(0,0)), # Same
+        insidetopleft= theme(legend.position.inside=c(1-pctin,pctin),legend.justification=c(0,1)),
         insidetop = theme(legend.position.inside=c(pctin,pctin),legend.justification=c(0,1)),
-        topright = theme(legend.position.inside=c(pctin,pctin),legend.justification=c(0,1)),
+        insidetopright = theme(legend.position.inside=c(pctin,pctin),legend.justification=c(0,1)),
         top = theme(legend.position="top"),
+        topleft = theme(legend.position="left"),
+        topright = theme(legend.position="right"),
+        bottom = theme(legend.position="bottom"),
+        bottomleft = theme(legend.position="left"),
+        bottomright = theme(legend.position="right"),
         right = theme(legend.position="right"),
+        left = theme(legend.position="right"),
         none = theme(legend.position="none")
     )
     }
-  if(ncats<=1) { return("none") }
+  if(ncats<=1) {
+    return("none")
+    }
   else {
-    return(guide_legend(title=title,position=ppos,nrow=min(ncats,5),ncol=ncols,theme=p))
+    #return(guide_legend(title=title,position=ppos,nrow=min(ncats,5),ncol=ncols,theme=p))
+    ptheme <- theme(legend.position="inside") %+replace% ptheme
+    if(guidetype=="legend") {
+      return(guide_legend(position=ppos,title=title,nrow=min(ncats,5),ncol=ncols,theme=ptheme))
+      }
+    else if (guidetype=="binned") {
+      return(guide_bins(position=ppos,title=title,theme=ptheme))
+      }
   }
+}
+
+#' @import ggplot2
+fgts_set_gridstyle <- function(thistheme,gridstyle=NA_character_) {
+  gridstyle <- fcoalesce(gridstyle,"dotted")
+  gridcolor <- fg_get_aesstring("gridcolor")
+  if( gridstyle=="dotted") {
+    thistheme <- thistheme %+replace% theme(
+      panel.grid.minor.y=element_blank(), panel.grid.major.y=element_line(colour = gridcolor, linetype = 'dashed'),
+      panel.grid.minor.x=element_blank(), panel.grid.major.x=element_line(colour = gridcolor, linetype = 'dashed')
+    )
+  }
+  if( gridstyle=="dotted_x") {
+    thistheme <- thistheme %+replace% theme(
+      panel.grid.minor.y=element_line(colour = gridcolor, linetype = 'dotted'), panel.grid.major.y=element_line(colour = gridcolor, linetype = 'dashed'),
+      panel.grid.minor.x=element_blank(), panel.grid.major.x=element_blank()
+    )
+  }
+  if( gridstyle=="dotted_y") {
+    thistheme <- thistheme %+replace% theme(
+      panel.grid.minor.x=element_line(colour = gridcolor, linetype = 'dotted'), panel.grid.major.x=element_line(colour = gridcolor, linetype = 'dashed'),
+      panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()
+    )
+  }
+  if( gridstyle=="none") {
+    thistheme <- thistheme %+replace% theme(
+      panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank(),
+      panel.grid.minor.x=element_blank(), panel.grid.major.x=element_blank()
+    )
+  }
+  return(thistheme)
 }
 
 
@@ -117,32 +143,7 @@ fgts_BaseTheme <- function(base_size = 8,xangle=90,yangle=90, tit_mult=1.3, axis
             plot.caption = 		element_text(size = base_size * 0.9)
             #plot.margin =       unit(c(1, 1, 0.5, 0.5), "lines")`
     )
-    if( gridstyle=="dotted") {
-        thistheme <- thistheme %+replace% theme(
-            panel.grid.minor.y=element_blank(), panel.grid.major.y=element_line(colour = 'gray', linetype = 'dashed'),
-            panel.grid.minor.x=element_blank(), panel.grid.major.x=element_line(colour = 'gray', linetype = 'dashed')
-            )
-    }
-    if( gridstyle=="dotted_x") {
-        thistheme <- thistheme %+replace% theme(
-            panel.grid.minor.y=element_line(colour = 'gray', linetype = 'dotted'), panel.grid.major.y=element_line(colour = 'gray', linetype = 'dashed'),
-            panel.grid.minor.x=element_blank(), panel.grid.major.x=element_blank()
-            )
-    }
-    if( gridstyle=="dotted_y") {
-        thistheme <- thistheme %+replace% theme(
-            panel.grid.minor.x=element_line(colour = 'gray', linetype = 'dotted'), panel.grid.major.x=element_line(colour = 'gray', linetype = 'dashed'),
-            panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()
-            )
-    }
-    if( gridstyle=="none") {
-        thistheme <- thistheme %+replace% theme(
-            panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank(),
-            panel.grid.minor.x=element_blank(), panel.grid.major.x=element_blank()
-            )
-    }
-    if(nchar(legend)>0) {
-         thistheme <- thistheme + legendPosition(legend,title=title,background=element_rect(fill=alpha(legendbackground, legendalpha)))    }
+    thistheme <- fgts_set_gridstyle(thistheme,gridstyle)
     thistheme
 }
 

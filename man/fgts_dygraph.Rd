@@ -114,7 +114,7 @@ Plots interactive time series graphs with many options for highlighting key even
 Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
 ('date','variable','value') format.  This package infers date columns names from column types and seeks to be as agnostic
 as possible as to column names.
-Colors can be managed using \code{\link[=fg_update_colors]{fg_update_colors()}} and will persist across R sessions, See vignette for details.
+Colors can be managed using \code{\link[=fg_update_aes]{fg_update_aes()}} and will persist across R sessions, See vignette for details.
 Series are grouped together into bands around a series \code{series} if their names end as in 'series.lo' or 'series.hi'.  See examples and vignette for details.
 
 \strong{Events} are dates and date ranges to be highlighted in the graph. Multiple types of events can be strung together in

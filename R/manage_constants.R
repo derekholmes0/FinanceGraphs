@@ -1,4 +1,4 @@
-#' Maintain Constants and Dates of Interest
+#' Maintain Aethestics  and Dates of Interest
 #'
 #' @name fg_dates_of_interest
 #' @description
@@ -14,7 +14,7 @@
 #'
 #' @details
 #' Retrieves default dates of interest given a grepstring of categories.  There are a default set of categories provided which may not be up to date.
-#' New data passed into [fg_update_dates_of_interest()] or [fg_update_colors()] persists across future loads of the package. Any duplicates in the new file will be taken out.
+#' New data passed into [fg_update_dates_of_interest()] or [fg_update_aes()] persists across future loads of the package. Any duplicates in the new file will be taken out.
 #'
 #' New doi `data.frames` must have at least three columns:
 #'
@@ -28,12 +28,14 @@
 #' @seealso [fgts_dygraph()]
 #' @examples
 #' \dontrun{
-#' tail(fg_get_dates_of_interest("fedmoves"),3)
+#' require(utils)
+#' tail(fg_get_dates_of_interest("fedmoves"),2)
 #' # To add (for example) a new FOMC cut of 50bps on 6/16/2026:
 #' newdoi <-data.table(category="fedmoves",eventid="F:-50",
 #'             DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 #' fg_update_dates_of_interest(newdoi)
-#' tail(fg_get_dates_of_interest("fedmoves"),3)
+#' # Since this is in the future, we have to make the future now.
+#' fg_get_dates_of_interest("fedmoves",totoday=as.Date("2026-12-31"))
 #' fg_reset_to_default_state("doi")
 #'}
 #'
@@ -47,19 +49,27 @@ if(!dir.exists(the$cachedir)) {
 load("./R/sysdata.rda",envir=the)
 #  loads tevents_defaults and ratingsmapmelt
 the$doifn <- paste0( the$cachedir, "/fg_doi.RD")
-the$colorfn <- paste0( the$cachedir, "/fg_colors.RD")
+the$aesfn <- paste0( the$cachedir, "/fg_aes.RD")
+the$themefn <- paste0( the$cachedir, "/fg_theme.RD")
+
 the$doi_dates <-  the$doi_default
-the$default_colors <- the$colors_default
+the$aesset <- the$aes_default
+the$curr_theme <- the$theme_default
+
 the$gpname <- NULL
 
 if(file.exists(the$doifn)) {
   load(the$doifn)
   the$doi_dates <- newdoi
   }
-if(file.exists(the$colorfn)) {
-  load(the$colorfn)
-  the$default_colors <- newcolors
+if(file.exists(the$aesfn)) {
+  load(the$aesfn)
+  the$aesset <- newaes
   }
+if(file.exists(the$themefn)) {
+  load(the$themefn)
+  the$curr_theme <- newTheme
+}
 
 .datatable.aware = TRUE
 
@@ -69,9 +79,11 @@ if(file.exists(the$colorfn)) {
 fg_get_dates_of_interest <- function(search_categories="",use_default=TRUE,startdt=NULL,totoday=FALSE) {
   DT_ENTRY<-NULL
   rtn <- the$doi_dates[grepl(search_categories,the$doi_dates$category,ignore.case=TRUE),][order(DT_ENTRY)]
+  enddt <- ifelse(is.logical(totoday), Sys.Date(),lubridate::as_date(totoday))
   if(!is.null(startdt)) {
-    rtn <- rtn[DT_ENTRY>=as.Date(startdt),]
+    rtn <- rtn[END_DT_ENTRY>=as.Date(startdt),]
   }
+  rtn <- rtn[DT_ENTRY<=enddt,]
   if(nrow(rtn)>0 & !(totoday==FALSE)) {
     if(!is.na(rtn[.N][["END_DT_ENTRY"]])) {
       newdate <- ifelse(totoday==TRUE, Sys.Date(),lubridate::as_date(totoday))
@@ -113,109 +125,160 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
   invisible(newdoi)
 }
 
-
+# =======================================================================================================
 #' Maintain Colors
 #'
-#' @name fg_update_colors
+#' @name fg_update_aes
 #' @description
-#' `fg_get_colors()` gets default color `data.frame` for graphs
-#' `fg_display_colors()` SHows a plot with current colors.
-#' `fg_update_colors()` updates or replaces default colors
+#' `fg_get_aes()` gets aethestic  `data.frame` for use in graphs.
+#' `fg_get_aesstring()` takes a column from the `data.frame` retrieved by `fg_get_aes()`
+#' `fg_print_aes_list()` prints names of aesthetics used internally in FinanceGraph functions.
+#' `fg_update_aes()` updates or replaces default aesthestics (e.g. colors, linestyles, etc).
+#' `fg_display_colors()` Shows a plot with current colors.
 #' `fg_update_line_colors()` replaces line colors only
 #' `fg_reset_to_default_state()` resets colors and/or dates of interest
 #'
 #' @param item (Default: "") A grep string for categories desired.
-#' @param n_max Maximum number of rows to return.
-#' @param indta `data.table` with columns as shown in details.
+#' @param aestype (Default: `NA`) character string with type of aesthetic requested.  If not provided in `[fg_Update_aes()]` the
+#' aesthetic associated with `item` is inferred from existing data.
+#' @param toget Column in the aes `data.frame` to paste together as a string.
+#' @param grepstr narrow list of internal aesthetics sets to functions from `grepstr`
+#' @param n_max Maximum number of rows or entries to return.
+#' @param asdataframe (Default: FALSE) Return dataframe of parameters regardless of type. (See details)
+#' @param indta `data.table` aesthetic `data.fram` with columns as shown in details.
 #' @param colorlist List with up to 14 new colors just for line (series) coloring
 #' @param replace (Default: FALSE) Replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.
 #' @param persist (Default: TRUE) Keep changes across invocations of the package.
 #' @param reset (Default: "all"), options in ("all","colors","doi") to reset to defaults with the package.
 #'
-#' @returns `data.frame` or message
+#' @returns `data.frame`, `string` or message
 #'
 #' @details
-#' New data passed into [fg_update_colors()] persists across future loads of the package unless `persist=FALSE`.
+#' For colors,
+#' New data passed into [fg_update_aes()] persists across future loads of the package unless `persist=FALSE`.
 #' New color datasets must have at least three columns:
-#' | Column | Meaning |
-#' |:-------|:--------|
-#' |`category`| Coloring category, typically `"lines"` for line colors.
+#' |Column|Meaning|
+#' |:-------|:---------------------|
+#' |`category`| Arbitrary aestehtic category, e.g. `"lines"` for line colors.
 #' |`variable`| Any string that can be sorted or grepped to map to data.
-#' |`color`| Color desired |
+#' |`type`| Aesthetic type, in `c("color","colorrange","linetype","symbol","alpha")`
+#' |`value`| String with value detired (e.g a color)|
 #'
 #' `variable` is used to prioritize colors, so (e.g. `D01` will be the color of the first series in an input dataset)
 #'
-#' If `color=="brewer"` then a sequential scale of size `n_max` will be returned using details saved from  [fg_update_colors()]. See [scales::brewer_pal]
+#' If `aestype=="colorrange"` then a sequential scale of size `n_max` will be returned using details saved from  [fg_update_aes()]. See [scales::brewer_pal]
 #' and [colorbrewer](https://colorbrewer2.org/#type=sequential&scheme=Greens&n=7)
 #'
 #' @seealso [fgts_dygraph()]
 #' @examples
-#' \dontrun{
-#' fg_get_colors("lines")
-#' # To switch to graduated scales, with darkest being first
-#' require(RColorBrewer)
-#' fg_get_colors("lines",n_max=3) -> oldcolors
-#' fg_update_colors( oldcolors[,let(color=  rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3])][] )
-#' fg_get_colors("lines",n_max=3)
-#' fg_update_line_colors(c("black","green","red","blue"),persist=FALSE)
-#' show_col(fg_get_colorstring("lines",n_max=4))
-#' fg_reset_to_default_state("color")
-#'}
+#' # Data set, String
+#' head(fg_get_aes("lines"),3)
+#' fg_get_aesstring("lines")
+#' #  Gradient colors are stored in a `data.frame` as in a set of "Blue Greens"
+#' fg_get_aes("espath_gp",asdataframe=TRUE)
+#' # To get the actual colors, we need to know how many:
+#' fg_get_aes("espath_gp",n_max=8)
+#' # To add aesthetics or update them, get the original data (or make from scratch) with
+#' head(oldcolors <- fg_get_aes("lines"),3)
+#' # then change as needed.  For example, to make the second line blue, and the 4th line red,
+#' oldcolors[c(2,3),"value"] <- c("blue","red")
+#' fg_update_aes( oldcolors )
+#' head( fg_get_aes("lines"),3)
+#' # to create a new category, make a similar `data.frame`, as in
+#' newcolors <- data.frame(category=rep("mylines",3),variable=c("D01","D02","D03"),
+#'                 value=c("red","black","green"))
+#' fg_update_aes( newcolors, aestype="color")
+#' fg_get_aesstring("mylines")
+#' require(scales)
+#' show_col(fg_get_aesstring("mylines"))
+#' fg_reset_to_default_state("aes")
 #'
-
+#'
 #' @import data.table
 #' @import scales
-#' @rdname fg_update_colors
+#' @rdname constants
 #' @export
-fg_get_colors <- function(item="",n_max=NA_integer_) {
-  #the$default_colors <- fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
-  rtn <- the$default_colors[which(the$default_colors$category==item),]
-  if(rtn[[1,"color"]]=="brewer") {
-    stopifnot("fg_get_colors(brewer) needs n_max" = !is.na(n_max))
-    brewer_dets <- s(rtn[[1,"variable"]],sep=",")
-    cols <- scales::pal_brewer(brewer_dets[[1]],palette=brewer_dets[[2]],direction=-1)(as.numeric(rtn[[1,"const"]]))
-    colors <- pal_gradient_n(cols)(seq(0, 0.6, length.out = n_max)) # Dont want to go all the way to white
-    rtn <- data.table(variable=paste0("C",1:n_max),color=colors)[,let(category=item)][]
+fg_get_aes <- function(item="",n_max=NA_integer_,asdataframe=FALSE) {
+  if(item=="") { return(the$aesset) }
+  rtn <- the$aesset[category==item,]
+  if(nrow(rtn)<=0) {
+    message(paste("fg_get_aes Cannot find (",item,") in aesthetics db"))
+    stopifnot(sys.nframe()>0)
+    return()
+  }
+  if(asdataframe==TRUE) {
+    return(rtn)
+  }
+  if(rtn[[1,"type"]]=="colorrange") {
+    stopifnot("fg_get_aes(brewer) needs n_max" = !is.na(n_max))
+    brewer_dets <- s(rtn[[1,"value"]],sep=",")
+    brewer_range <- as.numeric(rtn[[1,"const"]])
+    # Need a better hack
+    brewer_direction <- sign(brewer_range)
+    cols <- scales::pal_brewer(brewer_dets[[1]],palette=brewer_dets[[2]],direction=-brewer_direction)(abs(brewer_range))
+    if(brewer_direction>0) {
+        colors <- pal_gradient_n(cols)(seq(0, 0.6, length.out = n_max)) }
+    else {
+        colors <- pal_gradient_n(cols)(seq(0.4, 1, length.out = n_max)) } # Dont want to go all the way to white
+    rtn <- data.table(category=item,variable=paste0("C",1:n_max),type="color",value=colors,const=NA_character_)
   }
   else {
     if(!is.na(n_max)) {
-      if(n_max>0) {rtn <- rtn[1:n_max,] }
+      if(n_max>0) {rtn <- rtn[1:min(.N,n_max),] }
     }
-    if(item=="") { rtn <- the$default_colors }
   }
   return(rtn)
 }
 
-fg_get_colorstring <- function(item="",n_max=NA_integer_,toget="color") {
-  return( fg_get_colors(item,n_max=n_max)[[toget]] )
+#' @import data.table
+#' @rdname constants
+#' @export
+fg_get_aesstring <- function(item="",n_max=NA_integer_,toget="value") {
+  return( fg_get_aes(item,n_max=n_max)[[toget]] )
 }
 
+fg_get_aeslist <- function(item="",toget="value") {
+  fgtmp <-fg_get_aes(item)
+  return( setNames(fgtmp[[toget]],fgtmp$type) )
+}
+
+
 #' @import data.table
-#' @rdname fg_update_colors
+#' @rdname constants
 #' @export
-fg_update_colors <- function(indta,replace=FALSE,persist=TRUE) {
+fg_update_aes <- function(indta,aestype=NA_character_,persist=TRUE,replace=FALSE) {
   category<-variable<-NULL
-  mincolset <- c("category","variable","color")
+  mincolset <- c("category","variable","value")
   mincolsmissing <- setdiff(mincolset,names(indta))
-  if( length(mincolsmissing)>0 ) {
-    stop("fg_create_colors: Need to add column(s) ",mincolsmissing)
+  if(length(mincolsmissing)>0) {
+    stop("fg_create_colors: Need to have (category,variable,value) at minimmum")
+  }
+  if( !("type" %in% colnames(indta))) {  # Infer from whats there
+    oldaestypes = the$aesset[,.N,by=.(category,type)][indta,on=.(category)]
+    indta <- the$aesset[,.N,by=.(category,type)][indta,on=.(category)][,let(N=NULL)]
+    if(is.na(aestype) & nrow(indta[is.na(type)])>0) {
+      stop(" fg_update_aes.  Cannot infer aesthetic type from either data or input parameter, speciffy `aestype=..`")
+    }
+    else {
+      indta <- indta[,type:=fcoalesce(type,aestype)]
+    }
   }
   if(replace==TRUE) {
-    newcolors <- indta
+    newaes <- indta
   } else {
-    newcolors <- DTUpsert(the$default_colors,indta,c("category","variable"))
+    newaes <- DTUpsert(the$aesset,indta,c("type","category","variable"),fill=TRUE)
   }
-  newcolors <- newcolors[order(category,variable)]
-  assign("default_colors",newcolors,envir=the)
+  newaes <- newaes[order(type,category,variable)]
+  assign("aesset",newaes,envir=the)
   if(persist==TRUE) {
-    save(newcolors,file=the$colorfn)
-    message("Saved Colors of interest file to ",the$colorfn)
+    save(newaes,file=the$aesfn)
+    message("Saved updates to ",the$aesfn)
   }
-  invisible(newcolors)
+  invisible(newaes)
 }
 
 #' @import data.table
-#' @rdname fg_update_colors
+#' @rdname constants
 #' @export
 fg_update_line_colors <- function(colorlist,replace=FALSE,persist=TRUE) {
   ncolors <- length(colorlist)
@@ -223,42 +286,38 @@ fg_update_line_colors <- function(colorlist,replace=FALSE,persist=TRUE) {
     message("Only taking first 14 colors...")
     ncolors <- 14
   }
-  old_colors <- fg_get_colors("lines",n_max=ncolors)
-  old_colors$color = colorlist
-  fg_update_colors(old_colors,replace=replace,persist=persist)
+  old_colors <- fg_get_aes("lines",n_max=ncolors)
+  old_colors$value = colorlist
+  fg_update_aes(old_colors,aestype="color",replace=replace,persist=persist)
   invisible(old_colors)
 }
 
-#' @import data.table
-#' @rdname fg_update_colors
-#' @export
-fg_reset_to_default_state <- function(reset="all") {
-  if(reset %in% c("all","doi","dates")) {
-    suppressWarnings(file.remove(the$doifn))
-    the$doi_dates <- copy(doi_default)
-  }
-  if(reset %in% c("all","color")) {
-    suppressWarnings(file.remove(the$colorfn))
-    the$default_colors <- copy(colors_default)
-  }
-  the$tevents_defaults <- copy(tevents_defaults)
-  message("fg_reset_to_default_state(",reset,") completed")
-}
-
+# --- Helpers
 #' @import ggplot2
 #' @import data.table
-#' @rdname fg_update_colors
+#' @rdname constants
 #' @export
 fg_display_colors <- function(item="") {
   category=variable=color=x=y=ztext=i.DT_ENTRY=i.END_DT_ENTRY=NULL
-  tcolors <- fg_get_colors(item)[!grepl("_ls",category)]
+  tcolors <- fg_get_aes(item, n_max=100)
   tcolors <- tcolors[,let(x=20-(.I %% 20), y=floor(.I/20)+1,ztext=paste0(category,",",variable,":",color))]
-  g1 <- ggplot(tcolors,aes(x,y,fill=color,label=ztext))+geom_tile()+geom_label(fill="white",size=3)
+  g1 <- ggplot(tcolors,aes(x,y,fill=value,label=ztext))+geom_tile()+geom_label(fill="white",size=3)
   g1 <- g1 +coord_flip()+scale_fill_identity()+labs(title="Current colors used")+theme_bw()
   return(g1)
 }
 
-#' Date Synchronization
+#' @rdname constants
+#' @export
+fg_print_aes_list <- function(grepstr="") {
+  used=NULL
+  grepstr <- paste0(grepstr,"|all")
+  rtn <- the$aesset[grepl(grepstr,used),]
+  rtn <- rtn[,.(helpstr=.SD[1][["helpstr"]],default=.SD[1][["value"]],N=.N),by=.(used,category)][order(used,category)]
+  return(rtn  |> as.data.frame())
+}
+
+# =======================================================================================================
+#' Group Synchronization
 #'
 #' @name fg_sync_group
 #' @description  Sets, gets, or resets a common name to be passed into  [fgts_dygraph()] for synchronization.
@@ -283,9 +342,56 @@ fg_sync_group <- function(gpname="") {
   the$gpname <- gpname
 }
 
-# =========================================================================
-# =========================================================================
-# =========================================================================
+# =======================================================================================================
+#' Theme Management
+#'
+#' @name fg_replace_theme
+#' @description  Sets, gets, or resets default ggplot themes to be used.
+#' @param newTheme  A new ggplot2 theme
+#' @param persist (Default: TRUE) Keep changes across invocations of the package.
+#' @returns Acknowledgement message if saved
+#' @seealso [fgts_dygraph()], [fg_scatplot()]
+#' @examples
+#' require(ggplot2)
+#' fg_replace_theme(ggplot2::theme_dark())
+#' @export
+fg_replace_theme <- function(newTheme,persist=TRUE) {
+  stopifnot("ggplot2::theme" %in% class(newTheme))
+  assign("curr_theme",newTheme,envir=the)
+  if(persist==TRUE) {
+    save(newTheme,file=the$themefn)
+    message("Saved Theme to ",the$themefn)
+  }
+}
+
+fg_current_theme <- function() {
+  return(the$curr_theme)
+}
+
+#' @import data.table
+#' @rdname constants
+#' @export
+fg_reset_to_default_state <- function(reset="all") {
+  if(reset %in% c("all","doi","dates")) {
+    suppressWarnings(file.remove(the$doifn))
+    message("Removing dates file and reverting to defaults of package")
+    the$doi_dates <- copy(the$doi_default)
+  }
+  if(reset %in% c("all","aes","color")) {
+    suppressWarnings(file.remove(the$aesfn))
+    message("Removing Aesthetics file and reverting to defaults of package")
+    the$aesset <- copy(the$aes_default)
+  }
+  if(reset %in% c("all","aes","theme")) {
+    suppressWarnings(file.remove(the$themefn))
+    message("Removing User-made Themes and reverting to defaults of package")
+    the$theme_default <-fgts_BaseTheme()
+
+  }
+  the$tevents_defaults <- copy(tevents_defaults)
+  message("fg_reset_to_default_state(",reset,") completed")
+}
+
 # =========================================================================
 # =========================================================================
 
@@ -300,8 +406,10 @@ fg_create_defaults <- function() {
   tevents_defaults <- data.table(END_DT_ENTRY=as.Date(NA_real_),eventonly=FALSE,
                                               axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
   ratingsmapmelt <- fread("./inst/extdata/ratingsmapmelt.csv")
-  colors_default <- fread("./inst/extdata/fg_colors.csv")[order(category,variable)]
-  #usethis::use_data(doi_default,colors_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
+  aes_default <- fread("./inst/extdata/fg_aesdefault.csv")[order(type,category,variable)]
+  the$aesset <- aes_default
+  theme_default <-fgts_BaseTheme()
+  #usethis::use_data(doi_default,aes_default,theme_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
 }
 
 # ----------------------- Dates

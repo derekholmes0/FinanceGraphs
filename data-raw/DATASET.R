@@ -42,8 +42,17 @@ earnings_ibm = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
 
 fredset <- data.table::data.table(symbol=c("DGS2","DGS10","DGS30"), variable=c("CMS_2","CMS_10","CMS_30"))
 yc_CMSUST <- tq_get(fredset$symbol,get="economic.data") |> data.table(keyby=c("symbol","date"))
-yc_CMSUST <- fredset[yc_CMSUST,on=.(symbol)][,.(variable,date,value=price)]
+yc_CMSUST <- fredset[yc_CMSUST,on=.(symbol)][,.(variable,date,value=price)][!is.na(value)]
 #yc_CMSUST[,.(min(date),max(date),.N), by=.(variable)]
 
 usethis::use_data(eqtypx,eqtypx_melt,eqtyrtn,nomfxdta,reerdta,consumer_sent,
                   ratings_db, example_fcst_set,earnings_ibm, yc_CMSUST,overwrite = TRUE)
+
+creditstoget=s("COLOM;BRAZIL;MEX;PERU;INDON;PHILIP;DBR;OAT;BTP;CHINA;REPHUN;POLAND")
+imcodes = ccliststr[data.table(CREDIT=creditstoget),on=.(CREDIT)][,.(ctryname,region,usedccy,CC=IMFCtry)]
+codestoget= ecmisc$inv |> filter(!is.na(SHORTDESC) & source=="weo") |> select(SUBJ,SHORTDESC) |> as.data.table()
+codestoget = data.table(SHORTDESC=s("CAGDP;NETDEBTGDP;REALGROWTH;INF"))[codestoget,on=.(SHORTDESC),nomatch=NULL]
+imfdta = ecmisc$WEO$wmelt[codestoget,on=.(SUBJ)]
+imfdta = imfdta[imcodes,on=.(CC)][!is.na(value)][between(as.numeric(as.character(variable)),2000,2030),]
+save(imfdta,file="./data/imfdta.rda")
+

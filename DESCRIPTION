@@ -1,9 +1,9 @@
 Package: FinanceGraphs
 Title: Flexible Graphs for Analysis of Financial Data and Time Series
-Version: 0.5.0
+Version: 0.6.0
 Authors@R: 
     person("Derek", "Holmes", , "derek@derekholmes.com", role = c("aut", "cre", "cph"))
-Description: Flexible wrapper and helper functions for display of Time Series using [dygraphs].  Helpers for adding date-specific events and ranges are included, as well as for adding forecasts and other annotations.
+Description: Flexible wrappers around R graphics modules [dygraphs] and [ggplot2] to visualize time-based data.  Interactive time series plots include multiple options for including external data such as forecasts and events.  Other static plots useful for time series data include boxplots for multiple categories, event study graphs for analysis around a set of dates, and scatter plots to visualize bivariate time series data.
 License: GPL (>= 3)
 Encoding: UTF-8
 Depends: 
@@ -12,26 +12,29 @@ Imports:
     dplyr (>= 1.0.0),
     purrr (>= 1.2.0),
     tibble (>= 1.0.0),
-    tidyquant (>= 1.0.0),
-    xts (>= 0.14.1),
+    broom (>= 1.0.0),
     stringr (>= 1.2.0),
     forcats (>= 1.0.0),
-    ggtext (>= 0.1.0),
-    timeDate (>= 4000.0),
+    tidyquant (>= 1.0.0),
     lubridate (>= 1.7.0),
+    glue (>= 1.0.0),
+    xts (>= 0.14.1),
+    timeDate (>= 4000.0),
     utils (>= 4.0.0),
     tidyr (>= 0.6.3),
     cpm (>= 2.0.0),
     BreakoutDetection (>= 0.9.0),
+    ggtext (>= 0.1.0),
+    graphics (>= 4.0.0),
     grDevices (>= 4.5.0),
     ggplot2 (>= 4.0.0),
     ggrepel (>= 0.9.0),
+    ggiraph (>= 0.9.0),
     scales (>= 1.1.0),
     knitr (>= 1.0.0),
     stats (>= 4.5.0),
     utils (>= 4.5.0),
     data.table (>= 1.9.8),
-    glue (>= 1.0.0),
     dygraphs (>= 1.1.0)
 Suggests:
     RColorBrewer (>= 1.0.0),

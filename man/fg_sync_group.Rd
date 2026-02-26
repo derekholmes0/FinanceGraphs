@@ -2,7 +2,7 @@
 % Please edit documentation in R/manage_constants.R
 \name{fg_sync_group}
 \alias{fg_sync_group}
-\title{Date Synchronization}
+\title{Group Synchronization}
 \usage{
 fg_sync_group(gpname = "")
 }

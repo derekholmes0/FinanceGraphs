@@ -57,8 +57,8 @@
 #'         addline="last",boxtype="violin",title="Real Eff. Exch Rates (Violin)")
 #'
 #' @import data.table
-#' @import forcats
-#' @import ggtext
+#' @importFrom forcats fct_reorder
+#' @importFrom ggtext element_markdown
 #'
 #' @export
 fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
@@ -70,8 +70,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
                       ycoord=NULL,trimpctile=0,
                       legend="insidetop",meltvar="variable",flip=FALSE,ptsize=3) {
     # Rename if necessary, premelt is if already in melted form, otherwise melt whatever we get
-  `.`=DT_ENTRY=END_DT_ENTRY=BEG_DT_ENTRY=eventid=daysback=histcat=dtlag=histcolor=value=variable=vmin=vmax=NULL
-  vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=rno=R1=R2=vmn=dtrolled=tcollist=`..tcollist`=xo=dt_colnames=lastval=NULL
+  vmin=vmax=vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=R1=R2=vmn=dtrolled=xo=`..tcollist`=NULL
 
   # Preprocessing: get into data.table format
   # Create dt and dt_colnames
@@ -85,30 +84,8 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
   dtlimits <- range(alldts)
   titadd <- list()
 
-  # Find Breakpoints
-  if (is.character(breaks) && nrow( bktmp <- fg_get_dates_of_interest(breaks,totoday=dtlimits[2]) )>0 ) {
-    break_set <- bktmp[DT_ENTRY>=dtlimits[1],.(BEG_DT_ENTRY=DT_ENTRY,END_DT_ENTRY,daysback=dtlimits[2]-DT_ENTRY,histcat=eventid)] }
-  else if (length(breaks)>1) {
-    if(all(range(breaks)==c(0,1))) {
-      breaks <- sort(breaks[which(breaks>0.001)])
-      bks <- alldts[pmax(1,floor(length(alldts)*(1-breaks)))] |> rev()
-      break_set<- data.table(BEG_DT_ENTRY=bks,daysback=as.numeric(dtlimits[2]-bks),histcat=NA_character_)
-    }
-    else {
-      break_set <- data.table(BEG_DT_ENTRY=dtlimits[2]-breaks,daysback=breaks)
-      end_break <- data.table(daysback=as.numeric(dtlimits[2]-dtlimits[1]),BEG_DT_ENTRY=dtlimits[1],histcat=NA_character_)
-      break_set <- rbindlist(list(break_set,end_break),fill=TRUE,use.names=TRUE)
-    }
-  }
-  tlbl <- function(d1) { fifelse(d1<=365,paste0(d1,"d"),paste0(floor(d1/31),"m")) }
-  break_set <- break_set[order(-BEG_DT_ENTRY)]
-  break_set <- break_set[,let(dtlag=shift(daysback, n=1, fill=0, type="lag"),END_DT_ENTRY=shift(BEG_DT_ENTRY, n=1, fill=dtlimits[2]+1, type="lag"))]
-  break_set <- break_set[,histcat:=fcoalesce(histcat,fifelse(BEG_DT_ENTRY==dtlimits[1],paste0("<-",tlbl(dtlag)),paste0("-",tlbl(dtlag),":-",tlbl(daysback))))]
-  if(length(s(dropset))>0) {
-    message_if( length(tlevels<-intersect(s(dropset),break_set$histcat))>0, "Dropping level(s) ",tlevels)
-    break_set <- break_set[!data.table(histcat=s(dropset)),on=.(histcat)]
-  }
-  break_set <- break_set[,histcolor:= fg_get_colorstring("boxplot",.N)][]
+  break_set <- form_breakset(alldts,breaks) # reused code!
+  break_set <- break_set[,histcolor:= fg_get_aesstring("boxplot",.N)][]
   tcollist <- dt_colnames[setdiff(names(dt_colnames),"date")]
   tcollist <- c("DT_ENTRY","histcat",unname(unlist(tcollist[!is.na(tcollist)])))
   dtm <- break_set[dtm,on=.(BEG_DT_ENTRY<=DT_ENTRY,END_DT_ENTRY>DT_ENTRY),j=..tcollist][!is.na(histcat) & is.finite(value)]
@@ -131,7 +108,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
   # NEed to get highlights done before doi
   labelcol<-"variable"
   if(length(s(hilightcats))>0) { # DOenst reorder properly, need to move to front
-    hilightcolor <- fg_get_colorstring("boxplotcat")
+    hilightcolor <- fg_get_aesstring("boxplotcat")
     labelcol <- "xlabel"
     dtm <- dtm[,let(xlabel=variable)]
     dtm[data.table(variable=s(hilightcats)),xlabel:=paste0("<span style='color:",hilightcolor,"'>",xlabel,"</span>"),on=.(variable)]
@@ -200,7 +177,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
     }
     g1 <- g1+scale_fill_manual(values=with(break_set,stats::setNames(histcolor,histcat)))
     if(nrow(dtoi)>0) {
-      last_color <- fg_get_colorstring("boxplotlast")
+      last_color <- fg_get_aesstring("boxplotlast")
       ptscast <- dcast(dtoi[,let(rno=paste0("R",rno))], ...  ~ rno)
       ptscast <- ptscast[,xo:=forcats::fct_reorder(get(labelcol),ii)]
       dotvar  <- ifelse("R2" %in% names(ptscast),"R2","R1")
@@ -214,16 +191,16 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
     }
     # Legends
     g1 <- g1+labs(title=title, caption=paste(titadd,collapse="\n"), x=xlab,y=ylab)
-    g1 <- g1+fgts_BaseTheme(base_size=7, legend=legend)
+    g1 <- g1+fg_current_theme()
     if(nchar(facetform)>0) {
         g1 <- g1+facet_grid(facetform,drop=TRUE,scales="free",space="free")
         g1 <- g1+theme(strip.text.y = element_text(size=11,color="black", face="bold"),
-                          strip.background=element_rect(fill=fg_get_colorstring("boxplotfacet")))
+                          strip.background=element_rect(fill=fg_get_aesstring("boxplotfacet")))
         }
     if(addline=="mean") {
         dmn <- dtm[,.(vmn=mean(value,na.rm=T)),by=.(histcat)]
         g1 <- g1+geom_hline(aes(yintercept=vmn),data=dtm[,.(vmn=mean(value,na.rm=T))],
-                            color=fg_get_colorstring("boxplotlast"), linewidth=1.5)
+                            color=fg_get_aesstring("boxplotlast"), linewidth=1.5)
     }
     if( labelcol=="xlabel") {
       g1 <- g1 +  theme(axis.text.x = element_markdown(hjust = 1))

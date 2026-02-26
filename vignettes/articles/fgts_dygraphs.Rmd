@@ -340,7 +340,7 @@ fgts_dygraph(toplot,title="With consumer sentiment",splitcols="UMCSENT",stepcols
     positioning) overlaid on EEM (Emerging Markets Equity ETF). Note how
     easy it is to make these with `data.table`. First we create the
     signal, and then get some colors to map to the labels. (For more on
-    `fg_get_colors()` see below)
+    `fg_get_aes()` see below)
 
 ```{r}
 suppressPackageStartupMessages(require(data.table))
@@ -350,7 +350,7 @@ tail(ma_signal,3)
 ```
 
 ```{r}
-colormap <- fg_get_colors("tradesignal")[,.(sig=variable,color)]
+colormap <- fg_get_aes("tradesignal")[,.(sig=variable,value)]
 colormap
 ```
 
@@ -430,8 +430,8 @@ The visual aesthetics of `fgts_dygraph`s are designed to have sensible
 defaults, but still somewhat customizable, and more importantly mostly
 out of the way of the function call. Colors in particular are stored
 internally in *persistent* `data.frames` To see the default line colors
-and shading, use `fg_get_colors(<category>)` as seen below, or run
-`fg_get_colors()` to get a chart with the actual colors used. Some
+and shading, use `fg_get_aes(<category>)` as seen below, or run
+`fg_get_aes()` to get a chart with the actual colors used. Some
 colors have `variables` associated with them, which are arbitrary
 ordering values or (in some cases) values mapped to greps on the text
 labels. [\^1]
@@ -441,20 +441,20 @@ labels that look like (e.g) `"TariffT-"`. The "-" at the end of the text
 is mapped to the `marketregines,-` color.
 
 ```{r}
-mycolors <-fg_get_colors("lines",n_max=4)
+mycolors <-fg_get_aes("lines",n_max=4)
 mycolors
 ```
 
 There are two ways to change colors. To persistently change them use
-`fg_update_colors()` which requires a `data.frame` in the same format as
-that obtained with `fg_get_colors()`. To use graduated colors instead of
+`fg_update_aes()` which requires a `data.frame` in the same format as
+that obtained with `fg_get_aes()`. To use graduated colors instead of
 the defaults chosen by the package:
 
 ```{r}
 suppressPackageStartupMessages(require(RColorBrewer))
-newcolors <- mycolors |> mutate(color = rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:4])
-fg_update_colors(newcolors, persist=TRUE )
-fg_get_colors("lines",n_max=4)
+newcolors <- mycolors |> mutate(value = rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:4])
+fg_update_aes(newcolors, persist=TRUE )
+fg_get_aes("lines",n_max=4)
 ```
 
 which gives, with annotations
@@ -475,7 +475,7 @@ fgts_dygraph(eqtypx, title="Stock Prices, line colors", annotations="last,label"
 To reset the colors back to their defaults, run
 ```{r}
 fg_reset_to_default_state("color")
-fg_get_colors("lines",n_max=2)
+fg_get_aesstring("lines",n_max=2)
 ```
 
 ## Customization: Adding Dates of Interest

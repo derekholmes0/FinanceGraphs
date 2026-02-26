@@ -24,7 +24,8 @@ fg_cut_to_events(
 \item \code{"zscore"} Normalize data by using standard \code{\link[=scale]{scale()}} function
 }}
 
-\item{extend}{Logical (Default: TRUE) to extend data to today (\code{Sys.Date()})}
+\item{extend}{Logical (Default: TRUE) to extend data to today (\code{Sys.Date()})
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAbElEQVR4Xs2RQQrAMAgEfZgf7W9LAguybljJpR3wEse5JOL3ZObDb4x1loDhHbBOFU6i2Ddnw2KNiXcdAXygJlwE8OFVBHDgKrLgSInN4WMe9iXiqIVsTMjH7z/GhNTEibOxQswcYIWYOR/zAjBJfiXh3jZ6AAAAAElFTkSuQmCC}
 
 \item{invert}{Use opposite color schemes for data, i.e. "red" for good outcomes}
 }

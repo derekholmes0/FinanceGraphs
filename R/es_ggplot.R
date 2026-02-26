@@ -47,23 +47,22 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
                                 title="Events",
                                 maxdelta=+Inf,meltvar="variable",verbose=FALSE) {
 
-  `.`=dt_colnames=NGP=rno=DT_ENTRY=EVENT_DT=EVENT_BEG_DT=EVENT_END_DT=firstval=eventval=lastval=NULL
-  eventid=s20=s50=s80=fidelta=ps=pe=EVENT_ORDER=startval=variable=idelta=value=NULL
-
+  s20=s50=s80=fidelta=ps=pe=mps=mpe=NULL
   stopifnot(changeas %in% c("diff","return","returnbps"))
   stopifnot(nbd_back>0 & nbd_fwd>0)
   mapassign <- function(dta) {  lapply(names(dta), \(x) { assign(x,as.Date(dta[[x]]),pos=sys.frame(1)) })}
   list2env(generic_to_melt(indata,"alldata;dt_colnames",meltvar=meltvar),envir=environment(NULL))
 
   if(nrow(baddata <- alldata[is.na(value)])>0) {
-    message("Warning: ",nrow(baddata), " values in melted data are NA.  They will be filled in locf as necessary")
+    message("Warning: ",nrow(baddata), " values in melted data are NA. Could be holidays?   They will be filled in locf as necessary")
   }
   alldata<- alldata[!is.na(value)]
   alldts <- sort(unique(alldata$DT_ENTRY))
   dtsrange <- range(alldts)
   match_events_to_GP <- FALSE # Analysis with facets, for future expansion
   gmatch_vars = fifelse(match_events_to_GP,dt_colnames[["cvar"]],NA_character_)
-  dtds <- es_dtset_to_dtds(dtset,nbd_back,nbd_fwd,"EVENT_DT",group_match_var=gmatch_vars, orderdesc=TRUE) # Sets up matchvar anyway
+  dtds <- es_dtset_to_dtds(dtset,nbd_back,nbd_fwd,"EVENT_DT",group_match_var=gmatch_vars,
+                           mindt=dtsrange[1]+nbd_back,orderdesc=TRUE) # Sets up matchvar anyway
  # stoprifnot( match_events & length(intersect(colnames(alldata),gmatch_vars))>0, " Match events true, but in both dates and data")
   if(is.na(gmatch_vars)) { # Set up anyway
     alldata <- alldata[,NGP:=1]
@@ -116,11 +115,11 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
                               sets=list(c("variable","idelta"),c("eventid","idelta")))
 
   if(output=="stats") { return(evstats[]) }
-  lt <- fg_get_colorstring("espath_ls")
-  var_colors <- fg_get_colors(ifelse(nvars>n_color_switch,"espath_gp","lines"),n_max=nvars)$color
-  e_colors <- fg_get_colors(ifelse(nevents>n_color_switch,"espath_gp","lines"),n_max=nevents)$color
-  lm_color <- fg_get_colorstring("espath_line")
-  lm_fill <- fg_get_colorstring("espath_fill")
+  lt <- fg_get_aesstring("espath_ls")
+  var_colors <- fg_get_aes(ifelse(nvars>n_color_switch,"espath_gp","lines"),n_max=nvars)$value
+  e_colors <- fg_get_aes(ifelse(nevents>n_color_switch,"espath_gp","lines"),n_max=nevents)$value
+  lm_color <- fg_get_aesstring("espath_line")
+  lm_fill <- fg_get_aesstring("espath_fill")
   if(grepl("path",what_to_plot[1])) {
     if(what_to_plot[[2]]=="var") {
       g1<- ggplot(evstats[is.na(eventid),],aes(x=idelta,color=variable,fill=variable))
@@ -182,7 +181,7 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
     }
   }
   if(what_to_plot[1]=="box") {
-    finaldta <- finaldta[,let(pastevent=(idelta>0),fidelta=fct(as.character(idelta)))]
+    finaldta <- finaldta[,let(pastevent=(idelta>0),fidelta=fctr(as.character(idelta)))]
     if(what_to_plot[[2]]=="var") {
       g1<- ggplot(finaldta,aes(x=fidelta,y=eventval,color=variable,fill=variable))+geom_boxplot(outlier.shape=NA,fill=0.2)
       g1<- g1 + scale_color_manual(values=var_colors,guide=legd_guide("insidetop",title=NULL,ncats=nvars))
@@ -198,8 +197,8 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
       g1<- ggplot(finaldta,aes(x=fidelta,y=eventval))+geom_boxplot(outlier.shape=NA,fill=0.2)
       curlabs[c("ccap")]<-c("Moves across tickers and variables")
     }
-    g1<- g1 + gline_y(color=fg_get_colorstring("espath_y"),linetype="dotted",int=as.factor(0),
-                      linewidth=fg_get_colorstring("espath_y",toget="const")  |> as.numeric())
+    g1<- g1 + gline_y(color=fg_get_aesstring("espath_y"),linetype="dotted",int=as.factor(0),
+                      linewidth=fg_get_aesstring("espath_y",toget="const")  |> as.numeric())
   }
   if(what_to_plot[1]=="scatter") {
     pdt_1<- finaldta[,.SD[c(1,.N),.(eventval,id=fifelse(sign(idelta)<0,"ps","pe"))],by=.(variable,eventid)]
@@ -208,44 +207,54 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
     g1 <- ggplot(pdt_2,aes(x=ps,y=pe,color=variable))+geom_point(size=1.5)
     g1 <- g1 + geom_polygon(aes(color=variable,fill=variable),alpha = 0.1,data = pdt_2[,.SD[grDevices::chull(ps,pe)], by=.(variable)])
     g1 <- g1 + ggrepel::geom_text_repel(aes(x=ps,y=pe,label=variable,color=variable),data=pdt_3,show.legend=FALSE)
+    # New Outlier
+    pdt_4 <- pdt_3[,.(variable,mps=ps,mpe=pe)][pdt_2,on=.(variable)][,xdist:=dist(rbind(c(mps,mpe),c(ps,pe))),by=.I]
+    pdt_4 <- pdt_4[,.SD[which.max(xdist)],by=.(variable)]
+    g1 <- g1 + geom_label(aes(x=ps,y=pe,label=eventid,color=variable),data=pdt_4,show.legend=FALSE)
     g1 <- g1 + scale_color_manual(values=var_colors,guide=legd_guide("bottomright",title=NULL,ncats=nvars))
     g1 <- g1 + scale_fill_manual(values=var_colors,guide="none")
     g1 <- g1 + gline_x(color="black")+gline_y(color="black")+scale_x_continuous(n.breaks=10)
-    curlabs[c("ccap","cx","cy")]<-c("Start move vs End Move, Labels at Median moves",paste(changeas,nbd_back,"bdays prior to event"),
+    curlabs[c("ccap","cx","cy")]<-c("Start move vs End Move, Labels at Median moves and extreme events",paste(changeas,nbd_back,"bdays prior to event"),
                                     paste(changeas,nbd_fwd,"bdays post event"))
 
   }
   if(!(what_to_plot[1] %in% c("box","scatter"))) {
-    g1<- g1 + gline_y(color=fg_get_colorstring("espath_y"),linetype="dotted",linewidth=fg_get_colorstring("espath_y",toget="const")  |> as.numeric())
+    g1<- g1 + gline_y(color=fg_get_aesstring("espath_y"),linetype="dotted",linewidth=fg_get_aesstring("espath_y",toget="const")  |> as.numeric())
     g1<- g1 + scale_x_continuous(breaks=seq(-nbd_back,nbd_fwd))
   }
   if(!(what_to_plot[1] %in% c("scatter"))) {
-    g1<- g1 + gline_x(color=fg_get_colorstring("espath_x"),linewidth=fg_get_colorstring("espath_x",toget="const")  |> as.numeric())
+    g1<- g1 + gline_x(color=fg_get_aesstring("espath_x"),linewidth=fg_get_aesstring("espath_x",toget="const")  |> as.numeric())
   }
   g1<- g1 + scale_y_continuous(n.breaks=10)
-  g1<- g1 + fgts_BaseTheme(legend="")
+  g1<- g1 + fg_current_theme()
   g1<- g1 + labs(title=curlabs[["ctitle"]],y=curlabs[["cy"]],x=curlabs[["cx"]],caption=curlabs[["ccap"]])
   return(g1)
 }
 
 #Assumes eventname is "text"
-es_dtset_to_dtds<- function(indtset,nbd_back,nbd_fwd, orderby="EVENT_DT",
+es_dtset_to_dtds<- function(indtset,nbd_back,nbd_fwd, orderby="EVENT_DT",mindt=0,
                             group_match_var=NA_character_, orderdesc=FALSE) {
-  `.`=dt_colnames=eventid=text=NGP=isday=DT_ENTRY=rno=mergecd=offset=id=EVENT_ORDER=NULL
+  isday=mergecd=offset=id=EVENT_ORDER=N=NULL
   if(is.data.frame(indtset)) { # Rename to my conventions
     list2env(generic_to_melt(indtset,"dtset;dt_colnames",meltvar=group_match_var),envir=environment(NULL))
     #setnames(dtset,c("DT_ENTRY","text"),c("EVENT_DT_ENTRY","eventid"),skip_absent=TRUE)  # includes cvar, eventid
     setnames(dtset,dt_colnames[["cvar"]][1],c("eventid"),skip_absent=TRUE)  # includes cvar, eventid, ok if eventid already thre
   }
   else if (lubridate::is.instant(dtset)) {
-    dtset <- data.table(DT_ENTRY=indtset,eventid=paste0("EV:",1:length(indtset)), EVENT_ORDER=indtset)
+    dtset <- data.table(DT_ENTRY=indtset,eventid=paste0("EV:",format(indtset,"%Y-%m-%d")), EVENT_ORDER=indtset)
   }
   else {
     stop("es_dtset_to_dtds unknown event dates format in first argument")
   }
+  dtset<- dtset[DT_ENTRY>=mindt,]
+  # Check for duplicate eventids
+  if(nrow( dtset[,.N,by=.(eventid)][N>1])>0 ) {
+    message("fg_eventStudy: EVent Ids are not unique, replacing with unique text labels")
+    dtset<-dtset[,text:=NA_character_][,eventid:=NULL]
+  }
   cln <- colnames(dtset)
   if( !any(grepl("eventid", cln)) ) {
-      dtset <- dtset[,eventid:=fcoalesce(text,paste0("EV:",1:nrow(dtset)))] }
+      dtset <- dtset[,eventid:=fcoalesce(text,paste0("EV:",format(DT_ENTRY,"%Y-%m-%d")))] }
   if( !is.na(group_match_var) & !(group_match_var %in% cln) ) {
       stop("You want to match events to ",group_match_var," but it is not in date set")
     }
@@ -260,7 +269,7 @@ es_dtset_to_dtds<- function(indtset,nbd_back,nbd_fwd, orderby="EVENT_DT",
   dtset_3 <- dttmp[dtset_2[,rno:=rno+offset],on=.(rno)][,let(mergecd=NULL,id=paste0("EVENT_",id))]
   dtds <- dcast(dtset_3,stats::formula(paste("eventid+",group_match_var,"~id")),value.var="DT_ENTRY")
   dtds <- dtds[,let(eventid=fctr(eventid),EVENT_ORDER = get(orderby))]
-  dtds <- dtds[order(fifelse(orderdesc,-1,1)*as.numeric(EVENT_ORDER))];
+  dtds <- dtds[order(fifelse(orderdesc,-1,1)*as.numeric(EVENT_ORDER))][!is.na(EVENT_DT )]
   return(dtds)
 }
 

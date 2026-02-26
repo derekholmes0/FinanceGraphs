@@ -150,11 +150,10 @@ get_fromlist <- function(indta,grepstr) {
     dplyr::filter(indta,grepl(grepstr,todo))
   }
 
-
+#' @importFrom purrr map2
 lineAssign<-function(xline) {
   if(nrow(xline)>1) message("lineAssign cannot assigm more than oneline")
-  aaa1 <- purrr::map2(
-    names(as.list(xline[1,])),as.list(xline[1,]), function(x,y){assign(x,y,pos=sys.frame(1))})
+  aaa1 <- map2(names(as.list(xline[1,])),as.list(xline[1,]), function(x,y){assign(x,y,pos=sys.frame(1))})
 }
 
 find_col_bytype <- function(indt,typeoffn,firstonly=TRUE,takeout=NA_character_) {
@@ -232,6 +231,11 @@ coalesce_DT_byentry<-function(DT1,DT2) { # Adds columns as necessary, either row
   return(DT3[])
 }
 
+DT_to_list <- function(DT1,nm_col,nm_val) {
+  DT1 <- na.omit(DT1,cols=c(nm_val))
+  return(setNames(DT1[[nm_val]], DT1[[nm_col]]))
+}
+
 #DT1 <- data.table::data.table(x=rep(c("b","a","c"),each=3), y=c(1,NA_integer_,6), v=1:9)
 #DT2 <- data.table::data.table(x=rep(c("b","a","c"),each=3), y=c(1,100,6), v=1:9,zz="ZZZ")
 #coalesce_DT_byentry(DT1,DT2)
@@ -266,16 +270,6 @@ generalbreaks<-function(dtset,dtds,rtnasoffset=TRUE) {  # Kind of ugly, but I ne
   dtset2
 }
 
-
-
-dtsetnm<-function(ain,fromcol,tocol,nullcol=NA_real_,existordie=FALSE) {
-  if(is.na(fromcol)) { fromcol="___nevergonnaguessthis__" }
-  if(existordie & !(fromcol %in% names(ain))) { stop(paste0("mscatplot error ",fromcol," not in dataset"))}
-  setnames(ain,fromcol,tocol,skip_absent=TRUE)
-  if( !(tocol %in% names(ain)) ) { ain[[tocol]]<-nullcol }
-  return(ain)
-}
-
 ## -- For Debugging only
 cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trace=FALSE,dpath=tempdir(),dbgkey="zz",suffix="",
                   skipsaveiftoday=FALSE, nbig=10000,title="",usefst=TRUE,pframe=3,tmp=F) {
@@ -302,12 +296,15 @@ cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trac
 
 #' @import data.table
 # Take input and puts into expected form: DT_ENTRY, data.table, keyed.  Use meltvar = eventid e.g f neces.
-generic_to_melt <- function(indata,newnames="",meltvar="variable") {
+# Assumes a date column is always there, not true for scatter plots
+generic_to_melt <- function(indata,newnames="",meltvar="variable",rtn="all") {
   # Preprocessing: get into data.table format
   if( xts::is.xts(indata) ) { indt <- xts2df(indata) }
   if(dplyr::is.tbl(indata)) { indt <- dplyr::ungroup(indata) }
   if(!is.data.table(indata)) { indt <- data.table(indata) }  # Try setDT ?
-  else {indt <- data.table::copy(indata) }
+  else {
+    indt <- data.table::copy(indata)
+    }
   colt <- function(cls) { names(indt)[grep(cls,lapply(indt,class))] }
   dt_colnames <- list(
     'date' = grep("end",colt("Date|POSIX"),ignore.case=TRUE,invert=TRUE,value=TRUE)[1],
@@ -317,17 +314,74 @@ generic_to_melt <- function(indata,newnames="",meltvar="variable") {
     indt <- data.table::melt(indt,id.var=dt_colnames[['date']])
   }
   cvars <- setdiff(colt("character"),meltvar)
+  if( length(cvars)<=0 ) { cvars <- NA_character_ }
   dt_colnames <- c(dt_colnames,list(
-    'cvar' = ifelse(length(cvars)<=0,NA_character_,cvars),
+    'cvar' = cvars,
     'value' = colt("numeric")[1]
+    )
   )
-  )
-  ndtcols <- ifelse(is.na(dt_colnames[['enddate']]),1,2)
-  setnames(indt,unlist(dt_colnames[seq(1:ndtcols)]),c("DT_ENTRY","END_DT_ENTRY")[1:ndtcols])
-  keycols <- ifelse(is.na(meltvar),c("DT_ENTRY"),c("DT_ENTRY",meltvar))
-  setcolorder(indt, keycols)
-  setkeyv(indt,keycols)
+  if(rtn=="dtc") { return(dt_colnames) }
+  if(!is.na(dt_colnames[['date']])) {
+    ndtcols <- ifelse(is.na(dt_colnames[['enddate']]),1,2)
+    setnames(indt,unlist(dt_colnames[seq(1:ndtcols)]),c("DT_ENTRY","END_DT_ENTRY")[1:ndtcols])
+    keycols <- ifelse(is.na(meltvar),c("DT_ENTRY"),c("DT_ENTRY",meltvar))
+    setcolorder(indt, keycols)
+    setkeyv(indt,keycols)
+  }
   newlist <- stats::setNames(list(indt,dt_colnames),s(c(newnames,"",""))[1:2])
   return(newlist)
 }
 
+form_breakset <- function(alldts,breaks,dropset="") {
+  dtlimits <- range(alldts)
+  if (is.character(breaks) && nrow( bktmp <- fg_get_dates_of_interest(breaks,totoday=dtlimits[2]) )>0 ) {
+    break_set <- bktmp[END_DT_ENTRY>=dtlimits[1],.(BEG_DT_ENTRY=DT_ENTRY,END_DT_ENTRY,daysback=dtlimits[2]-DT_ENTRY,histcat=eventid)] }
+  else if (length(breaks)>1) {
+    if(all(range(breaks)==c(0,1))) {
+      breaks <- sort(breaks[which(breaks>0.001)])
+      bks <- alldts[pmax(1,floor(length(alldts)*(1-breaks)))] |> rev()
+      break_set<- data.table(BEG_DT_ENTRY=bks,daysback=as.numeric(dtlimits[2]-bks),histcat=NA_character_)
+    }
+    else {
+      break_set <- data.table(BEG_DT_ENTRY=dtlimits[2]-breaks,daysback=breaks)
+      end_break <- data.table(daysback=as.numeric(dtlimits[2]-dtlimits[1]),BEG_DT_ENTRY=dtlimits[1],histcat=NA_character_)
+      break_set <- rbindlist(list(break_set,end_break),fill=TRUE,use.names=TRUE)
+    }
+  }
+  tlbl <- function(d1) { fifelse(d1<=365,paste0(d1,"d"),paste0(floor(d1/31),"m")) }
+  break_set <- break_set[order(-BEG_DT_ENTRY)]
+  break_set <- break_set[,let(dtlag=shift(daysback, n=1, fill=0, type="lag"),END_DT_ENTRY=shift(BEG_DT_ENTRY, n=1, fill=dtlimits[2]+1, type="lag"))]
+  break_set <- break_set[,histcat:=fcoalesce(histcat,fifelse(BEG_DT_ENTRY==dtlimits[1],paste0("<-",tlbl(dtlag)),paste0("-",tlbl(dtlag),":-",tlbl(daysback))))]
+  if(length(s(dropset))>0) {
+    message_if( length(tlevels<-intersect(s(dropset),break_set$histcat))>0, "Dropping level(s) ",tlevels)
+    break_set <- break_set[!data.table(histcat=s(dropset)),on=.(histcat)]
+  }
+  return(break_set)
+}
+
+# ---------------------------------------------------------------
+# GGPLot utilities
+
+lm_eqn = function(df,ynm,xnm,tformula=formula("y~x"),rtnstyle=""){
+  df2<-dplyr::select(df,x=!!{xnm},y=!!{ynm})
+  m = lm(tformula, df2);
+  llm<-list(y=ynm, x=xnm,a = format(coef(m)[1], digits = 2),
+            b = format(coef(m)[2], digits = 2),
+            r2 = format(summary(m)$r.squared, digits = 3),
+            lastresid=utils::tail(resid(m),1),
+            lastsresid=utils::tail(rstandard(m),1))
+  if(rtnstyle=="list") { return(llm) }
+  else if (rtnstyle=="simple") {
+    return(paste0("y=",llm[4]," x + ",llm[3]," rsq: ",llm[5]))        }
+  else if (rtnstyle=="simplewitht") {
+    return(paste0("y=x*",llm[4]," (",format(summary(m)$coefficients[6],digits=2),")+ ",llm[3]," (",
+                  format(summary(m)$coefficients[5],digits=2), ") rsq: ",llm[5], " eLast:",format(llm[6],digits=2),"/z:",
+                  format(llm[7],digits=2)))        }
+  else {
+    eq <- substitute(expression(y == a + b * x ~~rsq == r2),
+                     list(y=ynm, x=xnm,a = format(coef(m)[1], digits = 2),
+                          b = format(coef(m)[2], digits = 2),
+                          r2 = format(summary(m)$r.squared, digits = 3)))
+    return(as.character(as.expression(eq)))
+  }
+}

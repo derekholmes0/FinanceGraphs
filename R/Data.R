@@ -162,3 +162,25 @@
 #' @source <https://fred.stlouisfed.org/>
 "yc_CMSUST"
 
+
+#' IMF Economic FOrecasts
+#'
+#' IMF World Economic Outlook June 2025
+#'
+#' @format ## `imfdta`
+#' A long format `data.table` with both historical economic data and projections.
+#' \describe{
+#'  \item{CC}{ISO Country code}
+#'  \item{SUBJ}{IMF subject classification}
+#'  \item{value}{Value of historical data or forecast}
+#'  \item{variable}{Short abbreviation for SUBJ}
+#'  \item{ctryname}{Full country name correponding to CC}
+#'  \item{region}{Investment Region each country is in}
+#'  \item{usedccy}{Dominant currency used in Country}
+#'  \item{date}{Date of historical data or of forecast}
+#' }
+#'
+#' @source <https://www.imf.org/en/publications/weo>
+"imfdta"
+
+

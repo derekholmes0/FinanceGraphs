@@ -75,7 +75,7 @@
 #'  Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
 #' ('date','variable','value') format.  This package infers date columns names from column types and seeks to be as agnostic
 #' as possible as to column names.
-#' Colors can be managed using [fg_update_colors()] and will persist across R sessions, See vignette for details.
+#' Colors can be managed using [fg_update_aes()] and will persist across R sessions, See vignette for details.
 #' Series are grouped together into bands around a series `series` if their names end as in 'series.lo' or 'series.hi'.  See examples and vignette for details.
 #'
 #' **Events** are dates and date ranges to be highlighted in the graph. Multiple types of events can be strung together in
@@ -270,7 +270,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
 
     series_dets <- data.table( seriesnm=colnames(indtnew)[-1], gpnm=gsub("(.lo|.hi)","",colnames(indtnew)[-1]),
                                            axis='y',stepplot=FALSE,display=TRUE,width=1,style="solid")
-    curr_colors <- fg_get_colorstring("lines")
+    curr_colors <- fg_get_aesstring("lines")
     series_dets <- series_dets[,':='(color=curr_colors[.GRP]),by=.(gpnm)]
 
     # Style setup
@@ -322,7 +322,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
        indtnew <- indtnew[,names(.SD):=lapply(.SD,\(x) rebval*x/x[[rebloc]]),.SDcols=!c(1)]
        indtnew[rebloc,(fnames):=NA_real_]
        add_titles("x","Rebased data to ",rebval," as of ",rebdate)
-       tevents <- DTappend(tevents,data.table(DT_ENTRY=as.Date(rebdate),text="",color=fg_get_colorstring("rebase"),strokePattern="solid"))
+       tevents <- DTappend(tevents,data.table(DT_ENTRY=as.Date(rebdate),text="",color=fg_get_aesstring("rebase"),strokePattern="solid"))
        message_if(verbose,"fgts_dygraph: Rebased data to ",rebval," as of ",format(rebdate,"%m/%d/%Y"))
     }
 
@@ -354,7 +354,6 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     add_titles("y",ylab)
     add_titles("x",xlab)
     alltitles = paste0(title,paste0(titleadds[axis=="title"]$note,collapse=","))
-    #cAssign("indtnew;alltitles;series_dets;dt_colnames")
     g1 <- dygraphs::dygraph(indtnew,main=alltitles,group=groupnm)
     for(seriesgp in sort(unique(series_dets[display==TRUE,]$gpnm))) {
         trw <- series_dets[get("gpnm")==seriesgp,]
@@ -385,7 +384,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     #  Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
     # Dates of interest in memory.
     if(nrow( trow<-get_fromlist(elist,"doi") )>0 ) {
-      dirbars <- fg_get_colors("mktregimes")[,.(direct=variable,tcolor=color)]
+      dirbars <- fg_get_aes("mktregimes")[,.(direct=variable,tcolor=value)]
       for(irow in seq(1,nrow(trow))) {
           thiseventstr<- fcoal(trow[irow,]$a1, "")
           eventonly   <- grepl("startof",thiseventstr,ignore.case=T)
@@ -418,7 +417,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
             valoi <- dttmp[,.SD[.N]][[eventtype]] # almost dtlimits[2], but safer
             dt_oi <- dttmp[get(eventtype)==valoi,][,.(DT_ENTRY,text=eventtype)]
         }
-        thiscolor <-fg_get_colorstring(eventtype)
+        thiscolor <-fg_get_aesstring(eventtype)
         dt_oi <- dt_oi[,':='(color=thiscolor,loc="top")]
         tevents <- DTappend(tevents,dt_oi)
       }
@@ -444,7 +443,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
             if( !is.na(trow[[irow,"a3"]]) ) {
                 end_dt <- alldts[which(alldts>=trow[[irow,"a2"]])][1]
             }
-            colornm <- fg_get_colorstring(fifelse(end_dt>start_dt,"date_range","date"))
+            colornm <- fg_get_aesstring(fifelse(end_dt>start_dt,"date_range","date"))
             newevent <- data.table(DT_ENTRY=start_dt,END_DT_ENTRY=end_dt,text=this_nm,loc="bottom",color=colornm)
             tevents <- DTappend(tevents,newevent)
          }
@@ -465,7 +464,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
       # Breakouts: Done
       if(nrow( trow<-get_fromlist(elist,"break") )>0) {
         bodates <- fg_addbreakouts(indtnew, annotationstyle=fcoal(trow[1,]$a1,"singleasdate")) # Renames first col to DT_ENTRY
-        bodates <- bodates[,let(color= fg_get_colorstring("breakout"),loc="top")]
+        bodates <- bodates[,let(color= fg_get_aesstring("breakout"),loc="top")]
         tevents <- DTappend(tevents,bodates)
       }
         # "tp,nn" adds turning points as dotted vertical lines
@@ -518,14 +517,14 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     }
 
     if(nrow( trow<-get_fromlist(alist,"^(hline)"))>0) { #hline,no
-        thiscolor <-  fg_get_colorstring("hline")
+        thiscolor <-  fg_get_aesstring("hline")
         h_annos <- data.table(trow)[,let(text=fcoal(a2,""),value=as.numeric(a1),color=fcoal(a3,thiscolor))]
         h_annos <- h_annos[,.(category="hline",color,text,value,DT_ENTRY=dtlimits[2],axis="y")]
         tevents <- DTappend(tevents,h_annos)
     }
 
     if(nrow( trow<-get_fromlist(alist,"^(range)"))>0) { #range,lo,hi,<color>
-      thiscolor <-  fg_get_colorstring("range")
+      thiscolor <-  fg_get_aesstring("range")
       h_annos <- data.table(trow)[,':='(a1=as.numeric(a1),a2=as.numeric(fcoal(a2,a1)))]
       h_annos <- h_annos[,.(category="range",color=fcoal(a3,thiscolor),text="",value=pmin(a1,a2),value_2=pmax(a1,a2),axis="y",DT_ENTRY=dtlimits[2])]
       tevents <- DTappend(tevents,h_annos)

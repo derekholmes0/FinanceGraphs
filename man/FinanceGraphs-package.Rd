@@ -6,7 +6,7 @@
 \alias{FinanceGraphs-package}
 \title{FinanceGraphs: Flexible Graphs for Analysis of Financial Data and Time Series}
 \description{
-Flexible wrapper and helper functions for display of Time Series using [dygraphs]. Helpers for adding date-specific events and ranges are included, as well as for adding forecasts and other annotations.
+Flexible wrappers around R graphics modules [dygraphs] and [ggplot2] to visualize time-based data. Interactive time series plots include multiple options for including external data such as forecasts and events. Other static plots useful for time series data include boxplots for multiple categories, event study graphs for analysis around a set of dates, and scatter plots to visualize bivariate time series data.
 }
 \seealso{
 Useful links:
