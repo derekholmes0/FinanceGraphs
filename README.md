@@ -43,16 +43,11 @@ series associated with the prefix of the name.
 
 Consistent colors used for all series and annotations are kept in a
 local (persistent) settings `data.frame`. Default color schemes can be
-changed (again persisantly) using the \[fg_update_colors()\] function.
+changed (again persistently) using the `fg_update_aes()` function.
 
 ## Simple Examples
 
 ``` r
-require(FinanceGraphs)
-#> Loading required package: FinanceGraphs
-#> Registered S3 method overwritten by 'quantmod':
-#>   method            from
-#>   as.zoo.data.frame zoo
 fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
 ```
 
@@ -65,11 +60,12 @@ window* of the form “start::end” can be used in the `dtwindow`
 parameter. Each end of the window can be a full date (e.g. “2022-01-01”)
 or a relative date string (e.g. “-6m” for 6 months ago.
 
-- One of the most appealing features of \[dygraphs\] is the ability to
-  smooth series interactively. The `roller` parameter adds a rolling
-  average smoother of the specified width (in data points). A default
-  smoothing parameter is chosen depending on the length of the
-  underlying data, but can be overridden using the `roller` parameter.
+- One of the most appealing features of
+  [dygraphs](https://dygraphs.com/) is the ability to smooth series
+  interactively. The `roller` parameter adds a rolling average
+  smootherof the specified width (in data points). A default smoothing
+  parameter is chosen depending on the length of the underlying data,
+  but can be overridden using the `roller` parameter.
 
 - Individual series can be altered in several ways:
 
@@ -124,9 +120,9 @@ Events always have a start date and a text label. THey are shown as
 vertical lines on the graph unless they also have an End Date, in which
 case the entire region is shaded. Event strings starting with `doi`
 (date of interest) are predefined events included with the package.
-Those are customizable using the \[fg_update_dates_of_interest()\] and
-can be listed using \[fg_list_dates_of_interest()\]. Event strings can
-be added together with semicolons, as in the following example:
+Those are customizable using the `fg_update_dates_of_interest()` and can
+be listed using `fg_list_dates_of_interest()`. Event strings can be
+added together with semicolons, as in the following example:
 
 ``` r
 smalldta <- eqtypx[date>=as.Date("2023-01-01"),.(date,IBM,QQQ)]
@@ -134,7 +130,7 @@ fgts_dygraph(smalldta,title="With Events",ylab="Price",events="doi,regm;doi,fedm
 ```
 
 <img src="man/figures/README-Events1-1.png" alt="Graph of Equity Prices showing Event styles" width="100%" />
-Several types of events are predefined in \[fgts_dygraph()\] including
+Several types of events are predefined in `fgts_dygraph()` including
 equity option expirations, IMM CDS roll dates, seasonal events
 (e.g. “same day in quarter as last observation”) and series extremes.
 See the vignette for more examples. Events can also be passed in as a
@@ -143,10 +139,9 @@ See the vignette for more examples. Events can also be passed in as a
 ### Event helpers
 
 Custom events can also be passed in `data.frame` format using the
-`event_ds` parameter. The details are in \[fgts_dygraph()\], but the
-basic columns are a start date date, a text label, and if applicable an
-end date. Only events within the dates of the original input data are
-shown.
+`event_ds` parameter. The details are in `fgts_dygraph()`, but the basic
+columns are a start date date, a text label, and if applicable an end
+date. Only events within the dates of the original input data are shown.
 
 The package includes a few “event helpers” to make it easy to generate
 the right formats for given more complicated types of events and
@@ -157,7 +152,6 @@ two that can be done.
 events_consumer_sent <- fg_cut_to_events(consumer_sent,center="zscore")
 head(events_consumer_sent,2)
 #>    value     color END_DT_ENTRY   DT_ENTRY runlen
-#>    <int>    <char>       <Date>     <Date>  <int>
 #> 1:     3 #9595FFFF   2016-03-02 2016-01-01      3
 #> 2:     2 #CACAFFFF   2016-04-02 2016-03-02      1
 fgts_dygraph(smalldta,title="Equity Prices w Sentiment",event_ds=events_consumer_sent)
@@ -185,11 +179,9 @@ to show the transition.
 
 ``` r
 head(example_fcst_set,2)
-#> Key: <date>
 #>          date    QQQ.f  QQQ.flo  QQQ.fhi    IBM.f  IBM.flo  IBM.fhi
-#>        <Date>     <ts>    <num>    <num>     <ts>    <num>    <num>
-#> 1: 2026-01-31 622.6611 615.9843 629.3379 306.9482 301.3265 312.5699
-#> 2: 2026-02-01 622.9118 613.7795 632.0441 307.1080 299.3237 314.8924
+#> 1: 2026-02-14 601.8882 593.7090 610.0673 262.3268 256.2824 268.3712
+#> 2: 2026-02-15 601.8882 590.6732 613.1032 262.3268 253.8659 270.7877
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 ```
 
@@ -204,37 +196,32 @@ outputs into the appropriate `foreast_ds` forms
 | `fg_sweep()` | Converts [tidy forecast objects](https://business-science.github.io/sweep/) to `forecast_ds` form. |
 | `fg_prophet()` | Converts [Prophet](https://business-science.github.io/sweep/) to `forecast_ds` form. |
 
-## Changing colors and adding dates of interest
+## Changing aesthetics and adding dates of interest
 
 Default colors for series and annotations can be changed using
-\[fg_update_colors()\] or \[fg_update_line_colors()\].  
-Any changes made to colors will persist across loads of the package
-(unless `persist=FALSE` is specified). As an example, to make a
-graduated set of colors for the first 3 series.
+`fg_update_aes()` or `fg_update_line_colors()`. Any changes made to
+aesthetics colors will persist across loads of the package (unless
+`persist=FALSE` is specified). To see what aesthetics are used for any
+particular function, use `fg_print_aes_list()` As an example, to make a
+graduated set of colors for the first 2 series.
 
 ``` r
-fg_get_colors("lines",n_max=4)
-#>    category variable     color  const
-#>      <char>   <char>    <char> <char>
-#> 1:    lines      D01     black       
-#> 2:    lines      D02       red       
-#> 3:    lines      D03 darkgreen       
-#> 4:    lines      D04      blue
-fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:3] )
-#> Saved Colors of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_colors.RD
-fg_get_colors("lines",n_max=4)
-#> Key: <category, variable>
-#>    category variable   color  const
-#>      <char>   <char>  <char> <char>
-#> 1:    lines      D01 #08589E       
-#> 2:    lines      D02 #2B8CBE       
-#> 3:    lines      D03 #4EB3D3       
-#> 4:    lines      D04    blue
+fg_get_aes("lines",n_max=2)
+#>    category variable  type value const used                     helpstr
+#> 1:    lines      D01 color black        all Low cardinality line colors
+#> 2:    lines      D02 color   red        all Low cardinality line colors
+fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:2] )
+#> Saved updates to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_aes.RD
+fg_get_aes("lines",n_max=3)
+#>    category variable  type   value const used                     helpstr
+#> 1:    lines      D01 color #08589E        all Low cardinality line colors
+#> 2:    lines      D02 color #2B8CBE        all Low cardinality line colors
+#> 3:    lines      D03 color    blue        all Low cardinality line colors
 ```
 
 New dates of interest used for the `events` parameter can also be added.
 To add (for example) a new FOMC cut of 50bps on 6/16/2026 (after the
-development of this package), use \[fg_update_dates_of_interest()\].
+development of this package), use `fg_update_dates_of_interest()`.
 Resetting the lists (and colors) can also be done.
 
 ``` r
@@ -243,9 +230,12 @@ fg_update_dates_of_interest(newdoi)
 #> Saved dates of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_doi.RD
 tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 #>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
-#> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
-#> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
+#> 1 fedmoves   F:-25     rt:4 2025-10-29   2025-10-29  <NA>          <NA> <NA>
+#> 2 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
 fg_reset_to_default_state()
+#> Removing dates file and reverting to defaults of package
+#> Removing Aesthetics file and reverting to defaults of package
+#> Removing User-made Themes and reverting to defaults of package
 #> fg_reset_to_default_state(all) completed
 ```
 
@@ -254,50 +244,135 @@ fg_reset_to_default_state()
 Dygraphs have the very nice feature of allowing synchronized zoom in
 Markdown or Shiny applications. Each graph with a common `group`
 identifier is synchronized. There are times, however, when you want to
-turn these on or off. The function \[fg_sync_group()\] either returns
-the current group name if called with no parameters, sets the group name
+turn these on or off. The function `fg_sync_group()` either returns the
+current group name if called with no parameters, sets the group name
 with a string, or turns off synchronization with a call
 `fg_sync_group(NULL)`.
 
 # Static Plots for Time Series
 
+## Scatter Plots with time dimension enhancements
+
+Key to understanding how time series co-move is a simple scatter plot.
+The function `fg_scatplot()` tries to be a concise wrapper around the
+very comprehensive [ggplot2](https://ggplot2.tidyverse.org/) graphics
+framework.
+``` ggplot2()]`` is a great ecosystem, but requires quite a bit of verbiage to get from idea to presentable graph quickly.  The approach used here is to specify broad categories of aesthetics with a formula, while the details are kept behind the hood using the aesthetic sets managed by ```fg_get_aes()\`
+as above. Fuller explanations and more examples are in the accompanying
+vignette.
+
+This “one-line” approach can be used with both date-based and non-date
+based datasets. For example, suppose we wanted to plot two asset prices
+against each other so that we can easily understand both how they
+co-move, where they have been recently, and where they are now. We will
+start by making a fake dataset of two sets of two assets each.
+
+``` r
+set.seed(1)
+ndates <- 400;
+samp_rw <- function() { 100*(1+cumsum(rnorm(ndates,sd=0.2/sqrt(260)))) }
+dts <- seq(as.Date("2021-01-01"),as.Date("2021-01-01")+ndates-1)
+dttest <- rbind( data.table(date=dts,ccat="A",px_x=samp_rw(),px_y=samp_rw()),
+                 data.table(date=dts,ccat="B",px_x=samp_rw(),px_y=samp_rw()))
+```
+
+A scatter plot of where those two assets are and where they have been is
+as easy as specifying (in one string!) columns to plot, a column for
+color, and a term to split the dates into 2 month and 6 month intervals,
+and finally a term to show where the latest observations are. As with
+`fgts_dygraph()`, date partitions can be custom regimes managed by
+`fg_update_dates_of_interest()`.
+
+``` r
+fg_scatplot(dttest,"px_y ~ px_x + color:ccat + doi:recent + point:label","lmone",datecuts=c(60,182),title="Splitting dates")
+```
+
+<img src="man/figures/README-Scatter1-1.png" alt="Scatterplot with two categories and recent highlighting." width="100%" />
+One important feature of the static plots in this package to note is
+that they include options for switching the colors of large numbers of
+groups or points from discrete values to continuous values from the
+[RColorBrewer](https://colorbrewer2.org) package.
+
+`fg_scatplot()` does not require dates in the input data, and can be
+useful for communicating comparative analyses as well. The `mtcars`
+dataset shows how we can add a lot of information to a basic text
+scatterplot.
+
+``` r
+dt_mtcars=data.table(datasets::mtcars)[,let(id=lapply(rownames(datasets::mtcars),\(x) last(strsplit(x," ")[[1]])))]
+fg_scatplot(dt_mtcars,"disp ~ hp + color:carb + label:id","lmonenoeqn",n_color_switch=0,title="Text with color switch")
+```
+
+<img src="man/figures/README-Scatter2-1.png" alt="Scatterplot with text and linear models" width="100%" />
+
+Many more examples that encapsulate a large part of the
+[ggplot2](https://ggplot2.tidyverse.org/) corpus are in the accompanying
+vignette.
+
 ## Time-categorized box plots
 
 One way to visualize multiple time series comparatively with a boxplot
-or a violin plot. The function \[fg_tsboxplot()\] provides a flexible
-way to split several time series into time categories. Usually, those
+or a violin plot. The function `fg_tsboxplot()` provides a flexible way
+to split several time series into time categories. Usually, those
 categories are time periods with increasing horizons, but this function
-allows for arbitrary periods managed by
-\[fg_update_dates_of_interest()\]. Data can be normalized across
-historical categories and time series categories.
-
-As an example, suppose we would like to see normalized equity prices
-over the past two years, split into categories of the last week, month
-(less the last week) and the last quarter.
+allows for arbitrary periods managed by `fg_update_dates_of_interest()`.
+Data can be normalized across historical categories and time series
+categories. As an example, suppose we would like to see normalized
+equity prices over the past two years, split into categories of the last
+week, month (less the last week) and the last quarter.
 
 ``` r
 fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks=c(7,90),normalize="byvar",title="Normalized Equity prices by Date category")
-#> Warning in `[.data.table`(break_set, dtm, on = .(BEG_DT_ENTRY <= DT_ENTRY, :
-#> Both 'tcollist' and '..tcollist' exist in calling scope. Please remove the
-#> '..tcollist' variable in calling scope for clarity.
 ```
 
 <img src="man/figures/README-Boxplot1-1.png" alt="Boxplot of relative equity prices" width="100%" />
 
-Like \[fgts_dygraph()\], the function can take data in both wide and
-long formats. Longer formats have the advantage of adding more
-categorical levels to our graphs. For example, we can plotting recent
-ranges of the monthly FX Real Exchange Rate dataset in the following
-way. Here, we split the data into buckets of last 20pct of the months,
-the first half the months and the last. We will also show the last
-observation, hide the boxplot whiskers, and reorder the currencies by
-their relative weakness.
+Like `fgts_dygraph()`, the function can take data in both wide and long
+formats. Longer formats have the advantage of adding more categorical
+levels to our graphs. For example, we can plotting recent ranges of the
+monthly FX Real Exchange Rate dataset in the following way. Here, we
+split the data into buckets of last 20pct of the months, the first half
+the months and the last. We will also show the last observation, hide
+the boxplot whiskers, and reorder the currencies by their relative
+weakness.
 
 ``` r
 fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
-#> Warning in `[.data.table`(break_set, dtm, on = .(BEG_DT_ENTRY <= DT_ENTRY, :
-#> Both 'tcollist' and '..tcollist' exist in calling scope. Please remove the
-#> '..tcollist' variable in calling scope for clarity.
 ```
 
 <img src="man/figures/README-Boxplot2-1.png" alt="Boxplot of Real Effective Exchange Rates" width="100%" />
+
+## Event Studies
+
+Trying to understand how events or environments may impact prices can be
+summarized well by plotting their movements relative to a date against
+time relative to the event. The function `fg_eventStudy()` integrates a
+set of dates with a set of time series to plot their relative behavior
+over the business days before and after each event. It is designed to
+show reasonably large sets of assets or event dates by switching
+discrete color scales to gradient scales after a user specified number.
+
+There are several ways to show the data, including path-by-path,
+statistics by event (i.e. across assets) or by asset (across events),
+boxplots, or scatter plots of moves at the edge of the intervals.
+
+For example, to see the behavior of various parts of the US yield curve
+around FOMC cuts, just use the following
+
+``` r
+dtset <- fg_get_dates_of_interest("fedmoves")[grepl("F:-",eventid),.(DT_ENTRY,text=eventid2)]
+fg_eventStudy(yc_CMSUST,dtset,output="pathbyvar",
+              title="Constant Maturity UST tenors around Fed Cuts")
+```
+
+<img src="man/figures/README-EventStudies1-1.png" alt="Relative rate moves around recent Fed Cuts" width="100%" />
+
+We can see that curves reach their peak steepening around a week after
+the event. To see this a little more succinctly, we can use
+
+``` r
+fg_eventStudy(yc_CMSUST,dtset,output="scatter",nbd_back=5,nbd_fwd=6,
+                title="Constant Maturity UST tenors around Fed Cuts at 5 days")
+```
+
+<img src="man/figures/README-EventStudies2-1.png" alt="Scatter plot of moves before and after Fed Rate Cuts" width="100%" />

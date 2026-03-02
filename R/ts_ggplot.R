@@ -70,7 +70,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
                       ycoord=NULL,trimpctile=0,
                       legend="insidetop",meltvar="variable",flip=FALSE,ptsize=3) {
     # Rename if necessary, premelt is if already in melted form, otherwise melt whatever we get
-  vmin=vmax=vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=R1=R2=vmn=dtrolled=xo=`..tcollist`=NULL
+  vmin=vmax=vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=R1=R2=vmn=dtrolled=xo=NULL
 
   # Preprocessing: get into data.table format
   # Create dt and dt_colnames

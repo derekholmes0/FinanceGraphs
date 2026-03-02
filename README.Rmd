@@ -48,6 +48,7 @@ be changed (again persistently) using the `fg_update_aes()` function.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 options(datatable.print.keys=FALSE,datatable.print.class=FALSE)
+require(data.table)
 require(FinanceGraphs)
 ```
 
@@ -218,7 +219,7 @@ As with `fgts_dygraph()`, date partitions can be custom regimes managed by `fg_u
 fg_scatplot(dttest,"px_y ~ px_x + color:ccat + doi:recent + point:label","lmone",datecuts=c(60,182),title="Splitting dates")
 ```
 One important feature of the static plots in this package to note is that they include options for switching the colors of large numbers of groups
-or points from discrete values to continuous values from the [RColorBrewer](https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3) package.
+or points from discrete values to continuous values from the [RColorBrewer](https://colorbrewer2.org) package.
 
 `fg_scatplot()` does not require dates in the input data, and can be useful for communicating comparative analyses as well.  The `mtcars` dataset
 shows how we can add a lot of information to a basic text scatterplot.  
@@ -273,15 +274,17 @@ For example, to see the behavior of various parts of the US yield curve around F
 #| label: EventStudies1
 #| fig.alt: "Relative rate moves around recent Fed Cuts"
 dtset <- fg_get_dates_of_interest("fedmoves")[grepl("F:-",eventid),.(DT_ENTRY,text=eventid2)]
-fg_eventStudy(yc_CMSUST,dtset,output="pathbyvar",title="Constant Maturity UST tenors around Fed Cuts")
+fg_eventStudy(yc_CMSUST,dtset,output="pathbyvar",
+              title="Constant Maturity UST tenors around Fed Cuts")
 ```
 
 We can see that curves reach their peak steepening around a week after the event.  To see this a little more succinctly, we can use
 
 ```{r}
 #| label: EventStudies2
-#| fig.alt: "Scatter plot of moves before and after Fed Rate Cuts
-fg_eventStudy(yc_CMSUST,dtset,output="scatter",nbd_back=5,nbd_fwd=6,title="Constant Maturity UST tenors around Fed Cuts at 5 days")
+#| fig.alt: "Scatter plot of moves before and after Fed Rate Cuts"
+fg_eventStudy(yc_CMSUST,dtset,output="scatter",nbd_back=5,nbd_fwd=6,
+                title="Constant Maturity UST tenors around Fed Cuts at 5 days")
 ```
 
 

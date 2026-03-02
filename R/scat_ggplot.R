@@ -158,7 +158,6 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
                 tformula=formula("y~x"),returnregresults=FALSE,
                 keepcols="", meltvar="variable") {
 
-    `..tcollist`<-NULL
     if(nrow(indata)<=0) { return(ggplot()) }
     regres <- data.table()
     titleadds <- data.table(axis=c("title","subtitle","caption","x","y"),

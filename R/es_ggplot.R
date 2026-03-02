@@ -78,7 +78,10 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
 
     for(irow in 1:nrow(dtds)){
       thisevent <- dtds[irow,]
-      mapassign(thisevent[,c("EVENT_BEG_DT","EVENT_DT","EVENT_END_DT")])
+      #mapassign(thisevent[,c("EVENT_BEG_DT","EVENT_DT","EVENT_END_DT")])
+      EVENT_BEG_DT <- thisevent[[1,"EVENT_BEG_DT"]]
+      EVENT_DT <- thisevent[[1,"EVENT_DT"]]
+      EVENT_END_DT <- thisevent[[1,"EVENT_END_DT"]]
       dtstring <- extenddtstr(paste0(EVENT_BEG_DT,"::",EVENT_END_DT),begchg=0,endchg=0)
       message_if(verbose,"eventStudy.givendates(",irow,"): ",dtstring)
       adta <- narrowbydtstr(alldata,dtstr=dtstring)

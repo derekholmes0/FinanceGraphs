@@ -182,7 +182,6 @@
 #' fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,rebase=",100",forecast_ds=fpred)
 #'}
 #' @import data.table
-#' @import xts
 #' @export
 fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts="hair,both;grid,both",
                         splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
