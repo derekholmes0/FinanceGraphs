@@ -7,12 +7,18 @@
 \alias{fg_update_line_colors}
 \alias{fg_display_colors}
 \alias{fg_print_aes_list}
+\alias{fg_verbose}
 \alias{fg_reset_to_default_state}
 \title{Maintain Colors}
 \usage{
 fg_get_aes(item = "", n_max = NA_integer_, asdataframe = FALSE)
 
-fg_get_aesstring(item = "", n_max = NA_integer_, toget = "value")
+fg_get_aesstring(
+  item = "",
+  n_max = NA_integer_,
+  toget = "value",
+  rtnifnotfound = FALSE
+)
 
 fg_update_aes(indta, aestype = NA_character_, persist = TRUE, replace = FALSE)
 
@@ -21,6 +27,8 @@ fg_update_line_colors(colorlist, replace = FALSE, persist = TRUE)
 fg_display_colors(item = "")
 
 fg_print_aes_list(grepstr = "")
+
+fg_verbose(item = "")
 
 fg_reset_to_default_state(reset = "all")
 }
@@ -32,6 +40,8 @@ fg_reset_to_default_state(reset = "all")
 \item{asdataframe}{(Default: FALSE) Return dataframe of parameters regardless of type. (See details)}
 
 \item{toget}{Column in the aes \code{data.frame} to paste together as a string.}
+
+\item{rtnifnotfound}{Return \code{NA_character_} if aes not found}
 
 \item{indta}{\code{data.table} aesthetic \code{data.fram} with columns as shown in details.}
 
@@ -59,6 +69,7 @@ aesthetic associated with \code{item} is inferred from existing data.}
 \code{fg_display_colors()} Shows a plot with current colors.
 \code{fg_update_line_colors()} replaces line colors only
 \code{fg_reset_to_default_state()} resets colors and/or dates of interest
+\code{fg_verbose()} Toggles printing of aesthetics
 }
 \details{
 For colors,

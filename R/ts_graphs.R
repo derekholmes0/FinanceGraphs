@@ -10,7 +10,7 @@
 #'  events = "", event_ds = NULL,
 #'  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
 #'  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
-#'  meltvar = "variable", dylegend = "always", fillGraph = FALSE,
+#'  meltvar = "variable", dylegend = "always", fillGraph = FALSE, colorset="lines",
 #'  groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 #'
 #' @param indata Input data in long or wide format.  THere must be at least one date column, one
@@ -66,6 +66,7 @@
 #' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
 #' @param dylegend (Default: "auto") Passed to [dygraphs::dyLegend()], can be one of ("auto", "always", "onmouseover", "follow", "never")
 #' @param fillGraph (Default: FALSE) Shade area underneath each series.
+#' @param colorset (Default: "lines") Set of default colors to use.  See Customization vignette .
 #' @param groupnm  (Default: NULL, unless set via [fg_sync_group()] )  Group name used in `shiny` or `RMarkdown` to synchronize graphs. See [fg_sync_group()] for details.
 #' @param verbose (Default: FALSE) Print extra details about what will be graphed.
 #' @param extraoptions Additional options passed to [dygraphs::dyOptions()]
@@ -168,7 +169,7 @@
 #' # Other helpers for use with credit ratings, breakouts, and earnings data are available.
 #'
 #' # use with forecasts
-#'
+#' \dontrun{
 #' require(forecast)
 #' require(timetk)
 #' require(sweep)
@@ -179,8 +180,9 @@
 #'   }
 #' fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
 #' fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,rebase=",100",forecast_ds=fpred)
-#'
+#'}
 #' @import data.table
+#' @import xts
 #' @export
 fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts="hair,both;grid,both",
                         splitcols=FALSE,stepcols=FALSE,hidecols=FALSE,
@@ -189,7 +191,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
                         annotations="",annotation_ds=NULL,
                         forecast_ds=NULL,
                         ylimits=NULL,dtstartfrac=0,dtwindow="",rebase="",
-                        exportevents=NULL, meltvar="variable",dylegend="always",fillGraph=FALSE,
+                        exportevents=NULL, meltvar="variable",dylegend="always",fillGraph=FALSE,colorset="lines",
                        groupnm=fg_sync_group(),verbose=FALSE,extraoptions=list()) {
 
   # NSE crap.  There has to be a better way
@@ -270,7 +272,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
 
     series_dets <- data.table( seriesnm=colnames(indtnew)[-1], gpnm=gsub("(.lo|.hi)","",colnames(indtnew)[-1]),
                                            axis='y',stepplot=FALSE,display=TRUE,width=1,style="solid")
-    curr_colors <- fg_get_aesstring("lines")
+    curr_colors <- fg_get_aesstring(colorset)
     series_dets <- series_dets[,':='(color=curr_colors[.GRP]),by=.(gpnm)]
 
     # Style setup

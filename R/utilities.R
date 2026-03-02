@@ -79,6 +79,8 @@ narrowbydtstr<-function(xin,dtstr="",includetoday=TRUE, windowdays=0, invert=FAL
 #' extenddtstr("-2m::-1m")
 #' extenddtstr("-2m::-1m",begchg=10,endchg=5)
 #'
+#' @import xts
+#' @import lubridate
 #' @export
 extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtnstyle="string") {
   index=NULL
@@ -140,7 +142,7 @@ message_if <- function(reallydothis,...) {
 form_xlist <- function(instring) {
   todo <- NULL
   if(is.data.frame(instring)) return(instring)
-  suppressWarnings(tibble::tibble(todo=s(tolower(instring))) |>
+  suppressWarnings(tibble::tibble(todo=s(instring)) |>  # Column names are case sensitive
                    tidyr::separate_wider_delim(todo,",",names= c("todo","a1","a2","a3","a4","a5"),
                                                too_many="drop",too_few="align_start"))
 }
@@ -231,11 +233,6 @@ coalesce_DT_byentry<-function(DT1,DT2) { # Adds columns as necessary, either row
   return(DT3[])
 }
 
-DT_to_list <- function(DT1,nm_col,nm_val) {
-  DT1 <- na.omit(DT1,cols=c(nm_val))
-  return(setNames(DT1[[nm_val]], DT1[[nm_col]]))
-}
-
 #DT1 <- data.table::data.table(x=rep(c("b","a","c"),each=3), y=c(1,NA_integer_,6), v=1:9)
 #DT2 <- data.table::data.table(x=rep(c("b","a","c"),each=3), y=c(1,100,6), v=1:9,zz="ZZZ")
 #coalesce_DT_byentry(DT1,DT2)
@@ -273,6 +270,7 @@ generalbreaks<-function(dtset,dtds,rtnasoffset=TRUE) {  # Kind of ugly, but I ne
 ## -- For Debugging only
 cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trace=FALSE,dpath=tempdir(),dbgkey="zz",suffix="",
                   skipsaveiftoday=FALSE, nbig=10000,title="",usefst=TRUE,pframe=3,tmp=F) {
+  if(dbg==FALSE) { return()}
   newfilename=""
   if(!is.character(x)) { stop("cAssign x must be character string for a variable name, not the actual variable..") }
   if(tmp || dpath=="t") { dpath="c:/t/" }
@@ -295,6 +293,7 @@ cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trac
 }
 
 #' @import data.table
+#' @import xts
 # Take input and puts into expected form: DT_ENTRY, data.table, keyed.  Use meltvar = eventid e.g f neces.
 # Assumes a date column is always there, not true for scatter plots
 generic_to_melt <- function(indata,newnames="",meltvar="variable",rtn="all") {

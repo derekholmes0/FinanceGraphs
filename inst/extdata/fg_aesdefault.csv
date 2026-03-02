@@ -19,14 +19,14 @@ espath_gp,,colorrange,"seq,BuGn",7,fg_eventStudy,Brewer colors if used
 espath_line,,color,#433E85FF,,fg_eventStudy,fitline color
 espath_lm,,color,black,2,fg_eventStudy,Fit line color
 espath_ls,L01,linestyle,84,,fg_eventStudy,Line styles per event
-espath_ls,L02,linestyle,8282,,fg_eventStudy,
-espath_ls,L03,linestyle,8484,,fg_eventStudy,
-espath_ls,L04,linestyle,22,,fg_eventStudy,
-espath_ls,L05,linestyle,24,,fg_eventStudy,
-espath_ls,L06,linestyle,4242,,fg_eventStudy,
-espath_ls,L07,linestyle,3313,,fg_eventStudy,
-espath_ls,L08,linestyle,3131,,fg_eventStudy,
-espath_ls,L09,linestyle,3A6A,,fg_eventStudy,
+espath_ls,L02,linestyle,8282,,fg_eventStudy,Line styles per event
+espath_ls,L03,linestyle,8484,,fg_eventStudy,Line styles per event
+espath_ls,L04,linestyle,22,,fg_eventStudy,Line styles per event
+espath_ls,L05,linestyle,24,,fg_eventStudy,Line styles per event
+espath_ls,L06,linestyle,4242,,fg_eventStudy,Line styles per event
+espath_ls,L07,linestyle,3313,,fg_eventStudy,Line styles per event
+espath_ls,L08,linestyle,3131,,fg_eventStudy,Line styles per event
+espath_ls,L09,linestyle,3A6A,,fg_eventStudy,Line styles per event
 espath_x,,color,gray,1,fg_eventStudy,Scatterplot x color
 espath_y,,color,darkgreen,1,fg_eventStudy,Scatterplot y color
 eventset,bad,color,#f56462,,fgts_dygraph,Bad event background
@@ -39,10 +39,10 @@ hline,,color,grey20,,fgts_dygraph,Horizontal line color
 ip_color,,color,red,,fg_scatplot,Interactive Point Color
 labelhilight,,color,yellow,,fg_scatplot,Background of highlighted labels
 labelhilightsize,,sizefact,1.5,,fg_scatplot,Size multiplier of highlighted labels
-legloc_alpha,,legendloc,topright,,fg_scatplot,Location of Alphalegend
+legloc_alpha,,legendloc,bottomright,,fg_scatplot,Location of Alphalegend
 legloc_color,,legendloc,topright,,fg_scatplot,Location of Color legend
-legloc_size,,legendloc,bottomright,,fg_scatplot,Location of Size Legend
-legloc_symbol,,legendloc,topright,,fg_scatplot,Location of Symbol legend
+legloc_size,,legendloc,topright,,fg_scatplot,Location of Size Legend
+legloc_symbol,,legendloc,bottomleft,,fg_scatplot,Location of Symbol legend
 linebrewer,,colorrange,"seq,BuGn",7,fg_scatplot,Color scale to use if too many categories
 lines,D01,color,black,,all,Low cardinality line colors
 lines,D02,color,red,,all,Low cardinality line colors
@@ -72,10 +72,8 @@ retrace,base,color,blue,,,
 retrace,dot,color,red,,,
 roll,,color,grey30,,fgts_dygraph,IMM Roll Date color
 rolldates,,color,blue,,fgts_dygraph,IMM Roll Date color
-scathexfill,D01,colorrange,"seq,Greys",7,fg_scatplot,Hex fill shades
 scatlabel_bg,,color,wheat,,fg_scatplot,Last Point label background
 scatlast,,color,red,,fg_scatplot,Default Color of Last Point
-scatrecent,,colorrange,"seq,Greys",-7,fg_scatplot,Brewer Color scheme for recent
 scatshape,D01,shape,16,,fg_scatplot,Shape code
 scatshape,D02,shape,1,,fg_scatplot,Shape code
 scatshape,D03,shape,17,,fg_scatplot,Shape code
@@ -116,3 +114,16 @@ altlines_6,D05,color,#e7d4e8,,,PRG6
 altlines_6,D06,color,#d9f0d3,,,PRG6
 altlines_6,D04,color,#7fbf7b,,,PRG6
 altlines_6,D02,color,#1b7837,,,PRG6
+doisizemult,D01,size,2.5,,fg_scatplot,doi recent size multipliers
+doisizemult,D02,size,1.4,,fg_scatplot,doi recent size multipliers
+doisizemult,D03,size,1,,fg_scatplot,doi recent size multipliers
+doisizemult,D04,size,0.8,,fg_scatplot,doi recent size multipliers
+doisizemult,D05,size,0.5,,fg_scatplot,doi recent size multipliers
+doisizemult,D06,size,0.5,,fg_scatplot,doi recent size multipliers
+doisizemult,D07,size,0.5,,fg_scatplot,doi recent size multipliers
+lmeqn,,misc,simple,,fg_scatplot,Reg Eqn: simple or simplewitht
+legend_bg,,color,wheat,,fg_scatplot,Legend Backgrounds
+sizedefault,D01,size,2.5,,fg_scatplot,Default Point sizes
+sizedefault,D02,size,1.5,,fg_scatplot,Default Point sizes
+sizedefault,D03,size,1,,fg_scatplot,Default Point sizes
+sizedefault,D04,size,0.7,,fg_scatplot,Default Point sizes

@@ -244,9 +244,8 @@ fg_signal_to_events<-function(signal_df,colormap) {
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #'
 #' @examples
-#' \dontrun{
-#' require(tidyquant)
-#' fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
+#' if (requireNamespace("tidyquant", quietly = TRUE)) {
+#'   fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
 #' }
 #' @import data.table
 #' @import tidyquant
@@ -281,8 +280,7 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #'
 #' @examples
-#' \dontrun{
-#' require(alphavantagepf)
+#' if (requireNamespace("alphavantagepf", quietly = TRUE)) {
 #' earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
 #'         alphavantagepf::av_extract_df("quarterlyEarnings") |>
 #'         fg_av_earnings()

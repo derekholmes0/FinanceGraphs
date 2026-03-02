@@ -51,12 +51,12 @@ load("./R/sysdata.rda",envir=the)
 the$doifn <- paste0( the$cachedir, "/fg_doi.RD")
 the$aesfn <- paste0( the$cachedir, "/fg_aes.RD")
 the$themefn <- paste0( the$cachedir, "/fg_theme.RD")
-
 the$doi_dates <-  the$doi_default
 the$aesset <- the$aes_default
 the$curr_theme <- the$theme_default
-
 the$gpname <- NULL
+the$verbose <- FALSE
+the$cassign <- FALSE
 
 if(file.exists(the$doifn)) {
   load(the$doifn)
@@ -78,6 +78,7 @@ if(file.exists(the$themefn)) {
 #' @export
 fg_get_dates_of_interest <- function(search_categories="",use_default=TRUE,startdt=NULL,totoday=FALSE) {
   DT_ENTRY<-NULL
+  message_if(the$verbose,"fg_get_dates_of_interest(",search_categories,")")
   rtn <- the$doi_dates[grepl(search_categories,the$doi_dates$category,ignore.case=TRUE),][order(DT_ENTRY)]
   enddt <- ifelse(is.logical(totoday), Sys.Date(),lubridate::as_date(totoday))
   if(!is.null(startdt)) {
@@ -137,6 +138,7 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #' `fg_display_colors()` Shows a plot with current colors.
 #' `fg_update_line_colors()` replaces line colors only
 #' `fg_reset_to_default_state()` resets colors and/or dates of interest
+#' `fg_verbose()` Toggles printing of aesthetics
 #'
 #' @param item (Default: "") A grep string for categories desired.
 #' @param aestype (Default: `NA`) character string with type of aesthetic requested.  If not provided in `[fg_Update_aes()]` the
@@ -150,6 +152,7 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #' @param replace (Default: FALSE) Replaces existing dates of interest with new set provided, otherwise replaces/inserts new rows only.
 #' @param persist (Default: TRUE) Keep changes across invocations of the package.
 #' @param reset (Default: "all"), options in ("all","colors","doi") to reset to defaults with the package.
+#' @param rtnifnotfound Return `NA_character_` if aes not found
 #'
 #' @returns `data.frame`, `string` or message
 #'
@@ -200,6 +203,7 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
 #' @export
 fg_get_aes <- function(item="",n_max=NA_integer_,asdataframe=FALSE) {
   if(item=="") { return(the$aesset) }
+  message_if(the$verbose,"fg_get_aes(",item,ifelse(is.na(n_max),"",paste0(", n_max=",n_max)),")")
   rtn <- the$aesset[category==item,]
   if(nrow(rtn)<=0) {
     message(paste("fg_get_aes Cannot find (",item,") in aesthetics db"))
@@ -233,8 +237,13 @@ fg_get_aes <- function(item="",n_max=NA_integer_,asdataframe=FALSE) {
 #' @import data.table
 #' @rdname constants
 #' @export
-fg_get_aesstring <- function(item="",n_max=NA_integer_,toget="value") {
-  return( fg_get_aes(item,n_max=n_max)[[toget]] )
+fg_get_aesstring <- function(item="",n_max=NA_integer_,toget="value",rtnifnotfound=FALSE) {
+  if(rtnifnotfound==TRUE & nrow(the$aesset[category==item,])<=0) {
+    return(NA_character_)
+  }
+  else {
+    return( fg_get_aes(item,n_max=n_max)[[toget]] )
+  }
 }
 
 fg_get_aeslist <- function(item="",toget="value") {
@@ -302,7 +311,7 @@ fg_display_colors <- function(item="") {
   tcolors <- fg_get_aes(item, n_max=100)
   tcolors <- tcolors[,let(x=20-(.I %% 20), y=floor(.I/20)+1,ztext=paste0(category,",",variable,":",color))]
   g1 <- ggplot(tcolors,aes(x,y,fill=value,label=ztext))+geom_tile()+geom_label(fill="white",size=3)
-  g1 <- g1 +coord_flip()+scale_fill_identity()+labs(title="Current colors used")+theme_bw()
+  g1 <- g1 +coord_flip()+scale_fill_identity()+labs(title=paste0("Aesthetic Set '",item,"' colors used"))+theme_bw()
   return(g1)
 }
 
@@ -312,9 +321,20 @@ fg_print_aes_list <- function(grepstr="") {
   used=NULL
   grepstr <- paste0(grepstr,"|all")
   rtn <- the$aesset[grepl(grepstr,used),]
-  rtn <- rtn[,.(helpstr=.SD[1][["helpstr"]],default=.SD[1][["value"]],N=.N),by=.(used,category)][order(used,category)]
+  rtn <- rtn[,.(helpstr=.SD[1][["helpstr"]],default=.SD[1][["value"]],N=.N),by=.(used,category)]
+  rtn <- rtn[order(used,category)][,used:=NULL]
   return(rtn  |> as.data.frame())
 }
+
+#' @rdname constants
+#' @export
+fg_verbose<- function(item="") {
+  the$verbose <- !the$verbose
+  if(item=="all") {
+    the$cassign <- !the$cassign
+  }
+}
+
 
 # =======================================================================================================
 #' Group Synchronization
@@ -385,7 +405,7 @@ fg_reset_to_default_state <- function(reset="all") {
   if(reset %in% c("all","aes","theme")) {
     suppressWarnings(file.remove(the$themefn))
     message("Removing User-made Themes and reverting to defaults of package")
-    the$theme_default <-fgts_BaseTheme()
+    the$curr_theme <-fgts_BaseTheme()
 
   }
   the$tevents_defaults <- copy(tevents_defaults)

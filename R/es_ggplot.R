@@ -40,7 +40,6 @@
 #' fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="scatter")
 #'
 #' @import data.table
-#' @import glue
 #' @export
 fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
                                 nbd_back=10,nbd_fwd=20,n_color_switch=5,
@@ -80,7 +79,7 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
     for(irow in 1:nrow(dtds)){
       thisevent <- dtds[irow,]
       mapassign(thisevent[,c("EVENT_BEG_DT","EVENT_DT","EVENT_END_DT")])
-      dtstring <- extenddtstr(glue("{EVENT_BEG_DT}::{EVENT_END_DT}"),begchg=0,endchg=0)
+      dtstring <- extenddtstr(paste0(EVENT_BEG_DT,"::",EVENT_END_DT),begchg=0,endchg=0)
       message_if(verbose,"eventStudy.givendates(",irow,"): ",dtstring)
       adta <- narrowbydtstr(alldata,dtstr=dtstring)
       bdta<- thisevent[,.SD,.SDcols=c(gmatch_vars,"eventid")][adta,on=c(gmatch_vars)]

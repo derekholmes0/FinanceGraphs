@@ -8,7 +8,7 @@
 \alias{fg_update_dates_of_interest}
 \title{Maintain Aethestics  and Dates of Interest}
 \format{
-An object of class \code{environment} of length 14.
+An object of class \code{environment} of length 16.
 }
 \usage{
 the

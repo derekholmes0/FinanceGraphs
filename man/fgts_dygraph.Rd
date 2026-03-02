@@ -11,7 +11,7 @@ fgts_dygraph( indata,
  events = "", event_ds = NULL,
  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
- meltvar = "variable", dylegend = "always", fillGraph = FALSE,
+ meltvar = "variable", dylegend = "always", fillGraph = FALSE, colorset="lines",
  groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 }
 \arguments{
@@ -97,6 +97,8 @@ as of the given date.  See examples.}
 \item{dylegend}{(Default: "auto") Passed to \code{\link[dygraphs:dyLegend]{dygraphs::dyLegend()}}, can be one of ("auto", "always", "onmouseover", "follow", "never")}
 
 \item{fillGraph}{(Default: FALSE) Shade area underneath each series.}
+
+\item{colorset}{(Default: "lines") Set of default colors to use.  See Customization vignette .}
 
 \item{groupnm}{(Default: NULL, unless set via \code{\link[=fg_sync_group]{fg_sync_group()}} )  Group name used in \code{shiny} or \code{RMarkdown} to synchronize graphs. See \code{\link[=fg_sync_group]{fg_sync_group()}} for details.}
 
@@ -210,7 +212,7 @@ fgts_dygraph(smalldta,title="W dividends",event_ds=fg_tq_divs(c("IBM","QQQ")))
 # Other helpers for use with credit ratings, breakouts, and earnings data are available.
 
 # use with forecasts
-
+\dontrun{
 require(forecast)
 require(timetk)
 require(sweep)
@@ -221,5 +223,5 @@ fcst_one <- function(ticker) {
   }
 fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,rebase=",100",forecast_ds=fpred)
-
+}
 }

@@ -1,27 +1,30 @@
 ---
-title: "fgts_dygraphs"
-editor_options: 
-  markdown: 
-    wrap: 72
+title: "Time-Series-dygraph"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Time-Series-dygraph}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.width = 10 
+  comment = "#>"
 )
 ```
 
 ```{r setup}
-library(FinanceGraphs)
+suppressPackageStartupMessages(require(dplyr))
+suppressPackageStartupMessages(require(FinanceGraphs))
 ```
 
 ```{r,echo=FALSE}
+knitr::opts_chunk$set(fig.width = 7)
 options(datatable.print.keys=FALSE, datatable.print.class=FALSE)
 ```
 
-# Financial Time Series visualization
+# Interactive Time Series Visualization with Dygraphs
 
 Visualizing financial time series is critical to communicating ideas and
 deciding how to trade or invest.
@@ -40,7 +43,7 @@ always customizable. The package is designed to be as agnostic as
 possible about input data, and also seeks to manage other *common data*
 which may add useful information to the graph.
 
-# Dygraphs with `fgts_dygraph`
+# Data vs Time plots with `fgts_dygraph`
 
 `fgts_dygraph()` is a flexible wrapper around
 [dygraphs](https://rstudio.github.io/dygraphs/index.html) building
@@ -142,8 +145,7 @@ are turned off.
 
 ```{r}
 fgts_dygraph(eqtypx, title="Stock Prices, rebased",hidecols="TLT;EEM", dtstartfrac=0.7,
-             rebase="2025-01-01,120",
-             events="pt,2025-02-01,QQQ,Feb3",
+             rebase="2025-01-01,120",events="pt,2025-02-01,QQQ,Feb3",
              annotations="last,linelabel;range,100,120",
              dylegend = "never", bg_opts="grid,none")
 ```
@@ -247,23 +249,24 @@ fgts_dygraph(smalldta,title="With Precanned Events",ylab="Price",rebase=",100",r
 
 
 
-
 Internally, a **persistent** data set is kept that includes dates
 (beginning and/or end), text labels (as `eventid`) and formatting
 information. In some cases the formatting is inferred from the label
 (e.g. ending in "+" makes it green), but each point in customizable.
 
+
 ```{r}
 fg_get_dates_of_interest("fedmoves|regm") |> group_by(category) |> slice_tail(n=2)
 ```
 
+
 New data can be added easily. We can add new events (e.g a FOMC move in
-2026) by using the `fg_update_dates_of_interest` function.
+2026) by using the `fg_update_dates_of_interest()` function.
 
 ```{r}
 newdoi <-data.frame(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 fg_update_dates_of_interest(newdoi)
-fg_get_dates_of_interest("fedmoves") |> slice_tail(n=2) |> as.data.frame()
+fg_get_dates_of_interest("fedmoves") |> dplyr::slice_tail(n=2) |> as.data.frame()
 ```
 
 -   **Seasonal factors** : Regularly recurring dates can also be added.
@@ -369,8 +372,6 @@ fgts_dygraph(eqtypx[,.(date,EEM)],dtstartfrac=0.6,roller=1,title="5/20 MA positi
 
 ```{r}
 suppressPackageStartupMessages(require(tidyquant))
-#require(alphavantagepf)
-#earnings_ibm <- av_get_pf("IBM","EARNINGS") |> av_extract_df("quarterlyEarnings") 
 all_events <- rbindlist(list(fg_tq_divs(c("IBM")),earnings_ibm |> fg_av_earnings() ))
 fgts_dygraph(eqtypx[,.(date,QQQ,IBM)],title="With earnings and divs",dtstartfrac=0.8,event_ds=all_events)
 ```
@@ -436,14 +437,15 @@ colors have `variables` associated with them, which are arbitrary
 ordering values or (in some cases) values mapped to greps on the text
 labels. [\^1]
 
-[\^1]: In particular, the included events in the set `regm` have text
-labels that look like (e.g) `"TariffT-"`. The "-" at the end of the text
-is mapped to the `marketregines,-` color.
 
 ```{r}
 mycolors <-fg_get_aes("lines",n_max=4)
 mycolors
 ```
+
+[\^1] In particular, the included events in the set `regm` have text
+labels that look like (e.g) `"TariffT-"`. The "-" at the end of the text
+is mapped to the `marketregines,-` color.
 
 There are two ways to change colors. To persistently change them use
 `fg_update_aes()` which requires a `data.frame` in the same format as
@@ -522,8 +524,8 @@ fg_update_dates_of_interest(newevents[!color=="grey"]) # Only add real moves
 tail(newevents,2)
 ```
 
-and use it easily with 
-
+and use it easily 
+with 
 ```{r}
 fgts_dygraph(filter(nomfxdta,variable=="BRL"),title="BRL w/ COPOM",dtstartfrac=0.6,events="doi,COPOM")
 ```

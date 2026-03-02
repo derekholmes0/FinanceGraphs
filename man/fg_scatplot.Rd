@@ -4,14 +4,13 @@
 \alias{fg_scatplot}
 \title{fg_scatplot:  Easy scatterplot generator, with time specific enhancements}
 \usage{
-fg_scatplot(indata, plotform, type="scatter",
-      noscales="", datecuts=c(7,66), xlabeldecoration="", annotatecorners="",
-      tsize=3, psize=1, n_color_switch=7, n_hex_switch=400, repel=TRUE, jitter=c(0,0),
-      title="", subtitle="", caption="", axislabels="",
-      boundbox=c(), boundboxtype="",
-      gridstyle=NA_character_, legendinside=TRUE,
-      tformula=formula("y~x"), returnregresults=FALSE,
-      keepcols="", meltvar="variable", verbose=FALSE)
+fg_scatplot(indata,plotform,type="scatter",datecuts=c(7,66),
+               noscales="",xdecoration="",ydecoration="",annotatecorners="",
+               tsize=3,psize=1,n_color_switch=7,n_hex_switch=400,repel=TRUE,jitter=c(0,0),
+               title="",subtitle="",caption="",axislabels="",
+               boundbox=c(),boundboxtype="",gridstyle=NA_character_,legendinside=FALSE,
+               tformula=formula("y~x"),returnregresults=FALSE,
+               keepcols="", meltvar="variable")
 }
 \arguments{
 \item{indata}{\code{data.frame} with columns for (x,y) coordinates and possibly other categorical data or a date column. Alternatively,
@@ -59,17 +58,19 @@ Other annotations:
 \item{type}{character string for the type of graph to plot:
 \itemize{
 \item \code{scat} plots points, text or labels
-\item \verb{lm<one><noeqn>} adds linear regression lines per \verb{color`` category or across all points (}lmone`)
+\item \verb{lm<one><noeqn><nofill>} adds linear regression lines per \code{color} category or across all points (\code{lmone}).
 \item \verb{loess<one><noeqn>}adds loess line per per \code{color} category or across all points (\code{loessone})
+\item \code{density} Creates a density plot
 }
 
-if \code{noeqn} is part of the string, equations are suppressed.  If \code{one} is part of the string, no subcategories are used.}
-
-\item{noscales}{String to suppress guides with any of \verb{<color|size|symbol>}}
+if \code{noeqn} is part of the string, equations are suppressed.  If \code{one} is part of the string, no subcategories are used. `nofill``
+removes confidence bands.}
 
 \item{datecuts}{list of integers (Default \code{c(7,66)} for days prior to last date to make date classes. (See examples and \code{doi:recent} as above.)}
 
-\item{xlabeldecoration}{2 element string list to add to either side of the x axis label.}
+\item{noscales}{String to suppress guides with any of \verb{<color|size|symbol>}}
+
+\item{xdecoration, ydecoration}{2 element string list to add to either side of an axis label.}
 
 \item{annotatecorners}{4 element string list to add notes to each of 4 quadrants of the graph.  See examples.}
 
@@ -116,8 +117,6 @@ options \code{c("color","symbol","size","alpha")} as grouping variables}
 \item{keepcols}{list of \code{indata} columns to be kept with the graph data, useful for further faceting using \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}}
 
 \item{meltvar}{(Default \code{"variable"}) If \code{indata} is melted, then this is used to create \code{x} and \code{y} categories.}
-
-\item{verbose}{(Default FALSE) Logical to add select messages on plot construction.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
@@ -163,6 +162,8 @@ dttest <- data.table(date=seq(as.Date("2021-01-01"),as.Date("2021-01-01")+ndates
             ccat=fifelse(runif(ndates)<=0.2,"Rare","--"))
 # Making categories out of recent data
 fg_scatplot(dttest,"ytest ~ xtest + doi:recent","scatter",datecuts=c(66,122),title="from recent")
+fg_scatplot(dttest ,"ytest ~ xtest + color:ccat + doi:recent + point:label","scat",
+              datecuts=c(7,66),title="from recent")
 # Makes categories out of event sets from [fg_get_dates_of_interest()]
 fg_scatplot(dttest,"ytest ~ xtest + doi:regm","scatter",title="from a regime")
 # Point graphing switches.

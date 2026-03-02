@@ -2,7 +2,7 @@
 gline_identify<- function(xdata,bbox)  {
   toplot <- data.frame(x2=c(NA_real_,bbox[[1,1]]),y2=c(bbox[[1,2]],NA_real_),inbox=rep(TRUE,2))
   toplot <- merge(xdata,toplot,all=TRUE)[,let(x2=fcoalesce(x2,xx),y2=fcoalesce(y2,yy))]
-  gga=list(geom_segment(aes(x=xx,y=yy,xend=x2,yend=y2),data=toplot,linetype=2),
+  gga=list(geom_segment(aes(x=xx,y=yy,xend=x2,yend=y2),data=toplot,linetype=2,linewidth=1.2),
            geom_label(aes(x=x2,y=y2,label=lastlabel),size=3, data=toplot[abs(x2-xx)>0.01,][,let(lastlabel=format(yy,digits=1))]),
            geom_label(aes(x=x2,y=y2,label=lastlabel),size=3, data=toplot[abs(y2-yy)>0.01,][,let(lastlabel=format(xx,digits=1))])
   )
@@ -22,14 +22,14 @@ gga
 }
 
 #' @import ggplot2
-legd_guide <- function(legendstr,guidetype="legend",title=waiver(),pctin=0.9,ncats=0,
-                           background= element_rect(fill=alpha('blue', 0.1))) {
+legd_guide <- function(legendstr,guidetype="legend",title=waiver(),pctin=0.9,ncats=0) {
   xleg=NULL
   ppos_map <- data.table(xleg=s("top;topleft;topright;bottom;bottomleft;bottomright"),
                          ppos=s("top;left;right;bottom;left;right"))
   ppos <- ppos_map[xleg==legendstr,]
   ppos <- fifelse(nrow(ppos)<=0,"inside",ppos[1,]$ppos)
   ncols <- floor((ncats-1)/5)+1
+  message_if(the$verbose,"legd_guide(",legendstr, ",title: ",title,")")
   if (grepl("loc:",legendstr)) {
     ll=as.numeric(s(gsub("loc:","",legendstr)));
     p<-theme(legend.position.inside=c(ll[1],ll[2]),legend.justification=c(ll[3],ll[4])) }
@@ -59,7 +59,7 @@ legd_guide <- function(legendstr,guidetype="legend",title=waiver(),pctin=0.9,nca
     }
   else {
     #return(guide_legend(title=title,position=ppos,nrow=min(ncats,5),ncol=ncols,theme=p))
-    ptheme <- theme(legend.position="inside") %+replace% ptheme
+    ptheme <- theme(legend.position="inside",legend.location="plot") %+replace% ptheme
     if(guidetype=="legend") {
       return(guide_legend(position=ppos,title=title,nrow=min(ncats,5),ncol=ncols,theme=ptheme))
       }
@@ -104,12 +104,13 @@ fgts_set_gridstyle <- function(thistheme,gridstyle=NA_character_) {
 #' @import ggplot2
 fgts_BaseTheme <- function(base_size = 8,xangle=90,yangle=90, tit_mult=1.3, axiscolor="grey20", gridstyle="dotted",
                         plotbackground="white",
-                        legend="inside",title="",subtitle=NULL, caption="",legendbackground="blue",
+                        legend="inside",title="",subtitle=NULL, caption="",
                         strip_face="bold",strip_mult=1.2,strip_color="black"  ) {
 #    if(nchar(title)>0) {    thistheme <- ggtitle(title,subtitle=subtitle)+theme_bw() }
 #    if(nchar(caption)>0) {  thistheme <- thistheme + labs(caption=caption)+theme_bw() }
-    legendalpha = ifelse(legendbackground=="white",1,0.1)
-    thistheme <- ggplot2::theme_bw() %+replace%
+  legendbackground <- fg_get_aesstring("legend_bg")
+  legendalpha = ifelse(legendbackground=="white",1,0.2)
+  thistheme <- ggplot2::theme_bw() %+replace%
 	theme(
             axis.line =         element_blank(),
             axis.text.x =       element_text(size = base_size , lineheight = 0.9, colour = axiscolor, hjust = 1, angle = xangle),

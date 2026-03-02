@@ -5,14 +5,13 @@
 #' graph aesthetics, a simple formula-based approach is used.  This approach allows quick specification of
 #' many customizaton options.
 #' @usage
-#' fg_scatplot(indata, plotform, type="scatter",
-#'       noscales="", datecuts=c(7,66), xlabeldecoration="", annotatecorners="",
-#'       tsize=3, psize=1, n_color_switch=7, n_hex_switch=400, repel=TRUE, jitter=c(0,0),
-#'       title="", subtitle="", caption="", axislabels="",
-#'       boundbox=c(), boundboxtype="",
-#'       gridstyle=NA_character_, legendinside=TRUE,
-#'       tformula=formula("y~x"), returnregresults=FALSE,
-#'       keepcols="", meltvar="variable", verbose=FALSE)
+#' fg_scatplot(indata,plotform,type="scatter",datecuts=c(7,66),
+#'                noscales="",xdecoration="",ydecoration="",annotatecorners="",
+#'                tsize=3,psize=1,n_color_switch=7,n_hex_switch=400,repel=TRUE,jitter=c(0,0),
+#'                title="",subtitle="",caption="",axislabels="",
+#'                boundbox=c(),boundboxtype="",gridstyle=NA_character_,legendinside=FALSE,
+#'                tformula=formula("y~x"),returnregresults=FALSE,
+#'                keepcols="", meltvar="variable")
 #' @param indata `data.frame` with columns for (x,y) coordinates and possibly other categorical data or a date column. Alternatively,
 #' `indata` can be in long format with `meltvar` present.  Note that aesthetic characteristics (if used) must be present for both
 #' long and wide input formats.
@@ -53,14 +52,16 @@
 #'  * `grid:<dotted|dotted_x|dotted_y|none>` formats background grids
 #' @param type character string for the type of graph to plot:
 #'  * `scat` plots points, text or labels
-#'  * `lm<one><noeqn>` adds linear regression lines per `color`` category or across all points (`lmone`)
+#'  * `lm<one><noeqn><nofill>` adds linear regression lines per `color` category or across all points (`lmone`).
 #'  * `loess<one><noeqn>`adds loess line per per `color` category or across all points (`loessone`)
+#'  * `density` Creates a density plot
 #'
-#' if `noeqn` is part of the string, equations are suppressed.  If `one` is part of the string, no subcategories are used.
+#' if `noeqn` is part of the string, equations are suppressed.  If `one` is part of the string, no subcategories are used. `nofill``
+#' removes confidence bands.
 #'
 #' @param noscales String to suppress guides with any of `<color|size|symbol>`
 #' @param datecuts list of integers (Default `c(7,66)` for days prior to last date to make date classes. (See examples and `doi:recent` as above.)
-#' @param xlabeldecoration 2 element string list to add to either side of the x axis label.
+#' @param xdecoration,ydecoration 2 element string list to add to either side of an axis label.
 #' @param annotatecorners 4 element string list to add notes to each of 4 quadrants of the graph.  See examples.
 #' @param tsize default text size (with some scaled variations for graph parts such as titles)
 #' @param psize default point size.
@@ -88,8 +89,6 @@
 #' options `c("color","symbol","size","alpha")` as grouping variables
 #' @param keepcols list of `indata` columns to be kept with the graph data, useful for further faceting using [ggplot2::facet_wrap()]
 #' @param meltvar (Default `"variable"`) If `indata` is melted, then this is used to create `x` and `y` categories.
-#' @param verbose (Default FALSE) Logical to add select messages on plot construction.
-#'
 #' @returns A [ggplot2::ggplot()] object
 #' @examples
 #' # Simple text examples
@@ -107,6 +106,8 @@
 #'             ccat=fifelse(runif(ndates)<=0.2,"Rare","--"))
 #' # Making categories out of recent data
 #' fg_scatplot(dttest,"ytest ~ xtest + doi:recent","scatter",datecuts=c(66,122),title="from recent")
+#' fg_scatplot(dttest ,"ytest ~ xtest + color:ccat + doi:recent + point:label","scat",
+#'               datecuts=c(7,66),title="from recent")
 #' # Makes categories out of event sets from [fg_get_dates_of_interest()]
 #' fg_scatplot(dttest,"ytest ~ xtest + doi:regm","scatter",title="from a regime")
 #' # Point graphing switches.
@@ -148,18 +149,19 @@
 #' @import data.table
 #'
 #' @export
-fg_scatplot<-function(indata,plotform,type="scatter",
-                noscales="",datecuts=c(7,66),xlabeldecoration="",annotatecorners="",
+fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
+                noscales="",xdecoration="",ydecoration="",annotatecorners="",
                 tsize=3,psize=1,n_color_switch=7,n_hex_switch=400,repel=TRUE,jitter=c(0,0),
                 title="",subtitle="",caption="",axislabels="",
                 boundbox=c(),boundboxtype="",
-                gridstyle=NA_character_,legendinside=TRUE,
+                gridstyle=NA_character_,legendinside=FALSE,
                 tformula=formula("y~x"),returnregresults=FALSE,
-                keepcols="", meltvar="variable", verbose=FALSE) {
+                keepcols="", meltvar="variable") {
 
+    `..tcollist`<-NULL
     if(nrow(indata)<=0) { return(ggplot()) }
     regres <- data.table()
-    titleadds <- data.table(axis=c("title","subtitle","cap","xlab","ylab"),
+    titleadds <- data.table(axis=c("title","subtitle","caption","x","y"),
                             note=c(title,subtitle,caption,s(axislabels)[1],s(axislabels)[2])  )
     pextra <- list()
     do_not_fill <- grepl("nofill",type)
@@ -178,7 +180,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",
     }
     # Keep DT of all possible column elements of the graph
     grparts <- data.table(nm=s("xx;yy;colfactor;labels;text;symbolfactor;labelhilight;tooltips;sizefactor;alphafactor;fill;doi"),
-                         item = s("x;y;color;label;text;symbol;labelhilight;tooltip;circlesize;alpha;fill;doi"),
+                         item = s("x;y;color;label;text;symbol;labelhilight;tooltip;size;alpha;fill;doi"),
                          ggaes = s("x;x;color;label;label;shape;label;label;size;alpha;x;fill"),
                          required=c(rep(TRUE,2),rep(FALSE,10)))
     # Use read.table to parse compoents neatly
@@ -197,7 +199,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",
       message("fg_scatplot: ERROR: All of (",paste(badparts$colnm,collapse=","),") must be indata..  Quitting")
       stop()
     }
-    if( nrow( badparts <- grparts[!is.na(colnm) & !(colnm %in% colnames(indata))] )>0 ) {
+    if( nrow( badparts <- grparts[!is.na(colnm) & !(colnm %in% colnames(indata)) & !(item %in% c("doi"))] )>0 ) {
       message("fg_scatplot: WARNING: Modifiers ",paste(badparts$colnm,collapse=",")," not in data, so will be ignored")
     }
 
@@ -221,7 +223,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",
     a2[,grparts[coltodo=="copy"]$nm := .SD,.SDcols=grparts[coltodo=="copy"]$colnm] # Copy dups
     setnames(a2,grparts[coltodo=="rename"]$colnm,grparts[coltodo=="rename"]$nm)  # rename rest
     a2[,grparts[coltodo=="makenull"]$nm := "1"] # Set rest to one element factors
-    # cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts")
+    cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts",dbg=the$cassign)
     # SHould be able to do group reset and DTmerge rest
     # Helper functions
     use_col <- function(what) { grparts[item==what]$indta }
@@ -230,19 +232,22 @@ fg_scatplot<-function(indata,plotform,type="scatter",
       alldts=sort(unique(a2$dt))
       if(grepl("recent",doi)) {
         break_set <- form_breakset(alldts,datecuts)
-        grparts[item=="color",let(style="scatrecent")]
+        grparts[item=="size",let(style="doisizemult",colnm="doi",indta=FALSE)]
       }
       else { # Must be from dates_of_interest
         break_set <- form_breakset(alldts,doi)
+        message_if(use_col("color"),"scat_ggplot, replacing color categories with dates of interest categories")
+        grparts[item=="color",let(style="lines")]
       }
       if(nrow(break_set)>0) {
-        message_if(use_col("color"),"scat_ggplot, replacing color categories with dates of interest categories")
-        grupdate <- grparts[item=="color",][,let(colnm=doi,indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
+        grupdate <- grparts[item=="size",][,let(colnm=doi,indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
         grparts <- DTUpsert(grparts,grupdate,"item")
-        break_set <- break_set[,.(BEG_DT_ENTRY,END_DT_ENTRY,colfactor=histcat)]
+        break_set <- break_set[,.(BEG_DT_ENTRY,END_DT_ENTRY,sizefactor=histcat)]
         tcollist <- union(names(a2),names(break_set))
         a2 <- break_set[a2,on=.(BEG_DT_ENTRY<=dt,END_DT_ENTRY>dt),j=..tcollist]
+        n_hex_switch <- +Inf
       }
+      # This is the only place where we want to make factors
     }
 
     mycols_to_keep <- s("xx;yy;colfactor;text;labels;sizefactor;alphafactor;symbolfactor;dt;tooltips;labelhilight")
@@ -250,6 +255,9 @@ fg_scatplot<-function(indata,plotform,type="scatter",
     a3<-a2[,.SD,.SDcols=!cols_to_toss]
     cols_to_factor <- intersect(colnames(a3),s("colfactor;symbolfactor"))
     a3<-a3[,(cols_to_factor):=lapply(.SD,fctr),.SDcols=cols_to_factor ][]
+
+    cols_to_factor <- intersect(colnames(a3),s("sizefactor"))
+    a3<-a3[,(cols_to_factor):=lapply(.SD,\(x) fctr(x,sort=TRUE)),.SDcols=cols_to_factor ][]
 
     # Bonding boxes, similar to squish
     bboxq <- function(colnm,xprob) { quantile(a3[[colnm]],xprob,na.rm=T) }
@@ -273,7 +281,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",
         bbox <- as.data.table(bbox)
       }
     }
-    if(length(boundbox)>1 & verbose) {
+    if(length(boundbox)>1 & the$verbose==TRUE) {
       message("Bounding Boxes ",boundboxtype," gives (x,y)=",paste(round(bbox,4),collapse=" "))}
 
     a3[,inbox:=(between(xx,bbox[[1,1]],bbox[[2,1]]) & between(yy,bbox[[1,2]],bbox[[2,2]]))]
@@ -286,17 +294,18 @@ fg_scatplot<-function(indata,plotform,type="scatter",
                      color=oob_aes[['color']],fill=oob_aes[['fill']],alpha=as.numeric(oob_aes[['alpha']]),
                      data=cbind(a3[1,],oob_data))
       if(use_col("text") | use_col("label") | use_col("labelhilight")) {
-        a3[inbox==FALSE,let(text=fifelse(is.na(text),text,paste0(text,"^*")), label=fifelse(is.na(label),label,paste0(label,"^*")))]
-        titleadds <- DTappend(titleadds, data.table(axis="cap",note="^* : Beyond Borders shown"))
+        a3[inbox==FALSE,names(.SD):=lapply(.SD,\(x) fifelse(is.na(x),x,paste0(x,"**"))),
+                          .SDcols=grparts[indta==TRUE & ggaes=="label"]$nm,by=.I]
+        titleadds <- DTappend(titleadds, data.table(axis="caption",note="** : Point beyond borders shown"))
       }
       else {
         # Add rects to indicate squished components
-        titleadds <- DTappend(titleadds, data.table(axis="cap",note="Box indicates values may be truncated"))
+        titleadds <- DTappend(titleadds, data.table(axis="caption",note="Box indicates values may be truncated"))
       }
     }
     else if (grepl("value|prob",boundboxtype)) {
       if(nrow(a3[inbox==FALSE,])>0) {
-          titleadds <- DTappend(titleadds, data.table(axis="cap",note="Values outside box are dropped"))
+          titleadds <- DTappend(titleadds, data.table(axis="caption",note="Values outside box are dropped"))
       }
       a3 <- a3[inbox==TRUE,]  # Take out
     }
@@ -305,7 +314,6 @@ fg_scatplot<-function(indata,plotform,type="scatter",
 
    # Actual Plot
     tsizes <- as.numeric(fg_get_aesstring("scattextsize"))
-
     # DO later: colno a new color
     # Separate hex determination by group
     p<-ggplot(a3,aes(x=xx,y=yy))
@@ -345,7 +353,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",
       if( use_col("tooltip") ) {
           message("Remember: Show plot using `girafe(ggob=`")
           p<-p+ggiraph::geom_point_interactive(aes(x=xx,y=yy,tooltip=tooltips, data_id=tooltips),
-                                               size=2, color=fg_get_aesstring("ip_color"), alpha=0.2, show.legend=FALSE)
+                                               size=psize, color=fg_get_aesstring("ip_color"), alpha=0.2, show.legend=FALSE)
         }
       }
       # Check to see if thre's still points to be done.
@@ -360,23 +368,20 @@ fg_scatplot<-function(indata,plotform,type="scatter",
         }
     if( !havetext ) { # Do Points
       pts_aes <- collect_aes(grparts[!ggaes=="label"])
-      if(grepl("join",type)) {
-          p<-p+pts_aes+geom_line(show.legend=TRUE,data=a3)
+      if(grepl("path",type)) {
+          p<-p+pts_aes+geom_path(show.legend=TRUE,data=a3)
       }
-      if(grepl("dens",type)) {
-          if( do_not_fill ) { p<-p+pts_aes + geom_density_2d() }
-          else {p<-p+pts_aes+geom_density_2d_filled() }
+      else if (grepl("dens",type)) {  # Want unfilled always.
+          p<-p+pts_aes + geom_density_2d()
       }
-      if(grepl("path",type)) { stop("Not implmented yet")}
-      if(grepl("scat|lm|loess",type)) {
+      else if (grepl("scat|lm|loess",type)) {
         # Now Separate out hex from points: First find the one key'd aethetic
-        aes_to_focus <- grparts[data.table(nm=s("colfactor;symbolfactor;sizefactor")),on=.(nm)][indta==TRUE,][1,][order(-ncnt)]$nm
+        aes_to_focus <- first_category_nm(grparts,ifnone=NA_character_)
         if(!is.na(aes_to_focus)) {
           dohex_cats <- a3[,.(usehex=(.N>=n_hex_switch)),by=c(aes_to_focus)][usehex==TRUE,][,hexgp:=.I]
           if(sum(dohex_cats$usehex)>0) { # Doing Hex
-            fillcolors <- fg_get_aesstring("scathexfill",n_max=2)
             a3 <- dohex_cats[a3,on=c(aes_to_focus)][,usehex:=fcoalesce(usehex,FALSE)]
-            # Wish I could get thhis to look better
+            # Wish I could get this to look better
             p<-p+geom_hex(aes(color=colfactor,fill=after_scale(scales::alpha(color,ncount)),alpha=after_stat(ncount)),
                                   data=a3[usehex==TRUE,],show.legend=FALSE)
             grparts[item=="fill",addscales:=FALSE]
@@ -385,13 +390,14 @@ fg_scatplot<-function(indata,plotform,type="scatter",
         if(!("usehex" %in% names(a3))){
           a3 <- a3[,usehex:=FALSE]
         }
-        p<-p + collect_aes(grparts[!ggaes=="label"]) + geom_point(data=a3[usehex==FALSE,])
+        p<-p + pts_aes + geom_point(data=a3[usehex==FALSE,],size=psize)
       }
     }
 
       # summary lines
     if(grepl("(lm|loess)",type)) {
-      actmethod =  fcoalesce(str_extract(type,"(lm|loess)"),"lm")
+      actmethod <-  fcoalesce(str_extract(type,"(lm|loess)"),"lm")
+      regform <- fg_get_aesstring("lmeqn")
       if(returnregresults) {
         if(grepl("one",type)) {
           a3[,regfactor:="one"] }
@@ -402,23 +408,30 @@ fg_scatplot<-function(indata,plotform,type="scatter",
         regres <-regres[,p.value:=round(p.value,5)][]
       }
       talpha    = ifelse(do_not_fill,0,0.2)
-      if(verbose) {   print(summary(lm(tformula,data=a3[,.(x=xx,y=yy)]))) }
-      if( grepl("one",type) | use_col("color")==FALSE) {
+      if(the$verbose) {   print(summary(lm(tformula,data=a3[,.(x=xx,y=yy)]))) }
+      if( grepl("one",type)) {
         grparts[item=="alpha",addscales:=FALSE]
-        p<-p+geom_smooth(method=actmethod,formula=tformula,colour="black",alpha=talpha,show.legend=FALSE,data=a3)
+        p<-p+geom_smooth(aes(x=xx,y=yy),method=actmethod,formula=tformula,colour="black",alpha=talpha,show.legend=FALSE,inherit.aes=FALSE)
         if(!grepl("noeq",type) & grepl("lm",type)) {
           legx <- a3[,.(xx=quantile(xx,probs=c(0.1)),yy=quantile(yy,probs=c(0.1+.GRP/10)),labels=lm_eqn(.SD,"xx","yy",
-                            tformula=tformula,rtnstyle="simplewitht"))]
-          p<-p+geom_text(aes(x=xx,y=yy,label=labels),data=legx,color="black",size=tsize*0.8)
+                            tformula=tformula,rtnstyle=regform))]
+          p<-p+geom_label(aes(x=xx,y=yy,label=labels),data=legx,color="black",size=tsize*0.8)
         }
       }
       else {
         lm_aes <- collect_aes(data.table(nm=rep(firstcat,2),ggaes=c("color","fill"),indta=rep(TRUE,2)))
         p<-p+lm_aes+geom_smooth(method=actmethod,formula=tformula,alpha=talpha,show.legend=FALSE,data=a3)
         if(!grepl("noeq",type) & grepl("lm",type)) {
-          legx <- a3[,.(xx=quantile(xx,probs=c(0.9)),yy=quantile(yy,probs=c(1-.GRP/10)),
-                        labels=lm_eqn(.SD,"xx","yy",tformula=tformula,rtnstyle="simplewitht")),by=.(colfactor)]
-          p<-p+geom_text(aes(x=xx,y=yy,label=labels,color=colfactor),data=legx,size=tsize*0.8)
+          firstcat <- first_category_nm(grparts)
+          legx_x <- 0.2*bbox[[2,1]]+0.8*(bbox[[1,1]])
+          legx_y <- 0.2*bbox[[1,2]]+0.8*(bbox[[2,2]])
+          legx_ydelta <- (bbox[[2,2]]-bbox[[1,2]])/15
+          legx <- a3[,.(xx=legx_x,yy=legx_y - (.GRP-1)*legx_ydelta,
+                        labels=lm_eqn(.SD,"xx","yy",tformula=tformula,rtnstyle=regform)),by=c(firstcat)]
+          legx <- legx[,labels:=paste0(get(firstcat),":",labels)]
+          lab_aes <- collect_aes(data.table(nm=firstcat,ggaes=c("fill"),indta=rep(TRUE,1)))
+          grparts[nm=="fill",addscales:=TRUE]
+          p<-p+lab_aes+geom_label(aes(x=xx,y=yy,label=labels),data=legx,color="black",size=tsize*0.8)
           #p<-p+annotate("text",x=legx[[1,"xx"]],y=legx[[1,"yy"]],label=legx[[1,"labels"]],size=floor(tsize*0.8))
         }
       }
@@ -441,9 +454,10 @@ fg_scatplot<-function(indata,plotform,type="scatter",
     if(gropts[item=="point",]$include==TRUE) {
       pointopts <- gropts[item=="point",]$opt
       todo <- fifelse(grepl("all",pointopts), "group","date")
-      lastdta <- rbindlist(list(a3[dt==max(dt),][,let(var="date")],a3[,.SD[.N],by=.(colfactor)][,let(var="group")]),fill=TRUE)
+      firstcat <- first_category_nm(grparts,ifnone="dt")
+      lastdta <- rbindlist(list(a3[dt==max(dt),][,let(var="date")],a3[,.SD[.N],by=c(firstcat)][,let(var="group")]),fill=TRUE)
       lastdta <- lastdta[,label:=fifelse(grepl("value",pointopts),paste0(format(xx,digits=1),",",format(yy,digits=2)),""),by=.I]
-      lastdta <- lastdta[,label:=fifelse(grepl("label",pointopts),paste(as.character(colfactor),label),label),by=.I]
+      lastdta <- lastdta[,label:=fifelse(grepl("label",pointopts),paste(as.character(get(firstcat)),label),label),by=.I]
       if(grepl("anno",pointopts)) {
         p <- p + gline_identify(lastdta[var==todo,],bbox)
       }
@@ -470,20 +484,22 @@ fg_scatplot<-function(indata,plotform,type="scatter",
     }
 
     # Deal with titles
-    titledefs <- data.table(axis=s("xlab;ylab"),note=c(grparts[item=="x",]$colnm,grparts[item=="y",]$colnm))
-    xtitleadds <- rbindlist(list(titleadds,titledefs))[order(axis)][!is.na(note)]
-    titleadds <- xtitleadds[,.(note=paste0(.SD$note,collapse=",")),by=.(axis)]
-    if(length(xlabdec<-s(xlabeldecoration))==2) {
-      titleadds[axis="ylab",note:=paste0(xlabdec[1]," <-- ",note," --> ",xlabdec[2])]
+    titledefs <- data.table(axis=s("x;y"),note=c(grparts[item=="x",]$colnm,grparts[item=="y",]$colnm))
+    if(nchar(axislabels)<=0) {
+      titleadds <- rbind(titleadds,titledefs)[order(axis)][!is.na(note)]
     }
-    tlist <- DT_to_list(titleadds,"axis","note")
-    p<-p+labs(title=tlist[['title']],subtitle=tlist[['subtitle']], caption=tlist[['cap']],x=tlist[['xlab']],y=tlist[['ylab']])
-
+    titleadds <- titleadds[,.(note=paste0(.SD$note,collapse=",")),by=.(axis)]
+    if(length(xlabdec<-s(xdecoration))==2) {
+      titleadds[axis=="x",note:=paste0(xlabdec[1]," <-- ",note," --> ",xlabdec[2])]
+    }
+    if(length(ylabdec<-s(ydecoration))==2) {
+      titleadds[axis=="y",note:=paste0(ylabdec[1]," <-- ",note," --> ",ylabdec[2])]
+    }
+    p <- p + class_labels(split(titleadds$note,titleadds$axis))
     # Guides
-    guideset <- as.list(setNames(rep("none", 6), s("color;alpha;size;symbol;fill")))
+    guideset <- split( rep("none",5), s("color;alpha;size;symbol;fill"))
     legend_prefix <- ifelse(legendinside==TRUE,"inside","")
     symboldets <- as.list(grparts[item=="symbol",])
-    guideset <- list()
     if(symboldets[["addscales"]]) {
       shapeset <- as.numeric(fg_get_aesstring("scatshape"))
       legloc <- paste0(legend_prefix,fg_get_aesstring("legloc_symbol"))
@@ -501,7 +517,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",
     filldets <- as.list(grparts[item=="fill",])
     if(filldets[["addscales"]]) {  # May be able to eliminate this with after_scale
       ncolors <- as.numeric(colordets[["ncnt"]])
-      tcolors <- fg_get_aesstring(grparts[item=="color",]$style,n_max=ncolors)
+      tcolors <- fg_get_aesstring(grparts[item=="color",]$style,n_max=ncolors) |> alpha(0.2)
       legloc <- paste0(legend_prefix,fg_get_aesstring("legloc_color"))
       p<-p+scale_fill_manual(values=tcolors,name=colordets[['colnm']],labels=levels(a3$colfactor),guide="none")
     }
@@ -512,17 +528,29 @@ fg_scatplot<-function(indata,plotform,type="scatter",
       guideset[['alpha']]<- legd_guide(legloc,title=alphadets[['colnm']],ncats=nalphas)
       p<-p+scale_alpha_manual(values=seq(nalphas)/nalphas,name=alphadets[['colnm']],labels=levels(a3$alphafactor))
     }
-    sizedets <- as.list(grparts[item=="circlesize",])
-    if(grparts[item=="circlesize"]$addscales) {
-      nsizes =length(unique(a3$sizefac))
+    sizedets <- as.list(grparts[item=="size",])  # What if size is continuous?
+    if(grparts[item=="size"]$addscales) {
+      nsizes <- length(unique(a3$sizefac))
+      legloc <- paste0(legend_prefix,fg_get_aesstring("legloc_size"))
       if(nsizes<=10) {
+        szset <- fcoalesce(grparts[item=="size"]$style,"sizedefault")
+        szmults <- fg_get_aesstring(szset,n_max=nsizes)
+        if( any(is.na(szmults)) ) {
+          szmults <- psize*seq(nsizes)/nsizes
+        } else {
+          szmults <- psize*as.numeric(szmults)
+        }
         guideset[['size']]<-legd_guide(legloc,title=sizedets[['colnm']],ncats=nsizes)
-        p<-p+scale_size_manual(values=psize*seq(nsizes)/nsizes,name=sizedets[['colnm']])
+        p<-p+scale_size_manual(values=szmults,name=sizedets[['colnm']])
         }
       else {
         guideset[['size']]<-legd_guide(legloc,title=sizedets[['colnm']],ncats=nsizes,guidetype="binned")
         p<-p+scale_size_binned(range=c(2,8),name=sizedets[['colnm']])
       }
+    }
+    else {
+      thissize <- fifelse(havetext,tsize,psize)
+      p<-p+scale_size_manual(values=thissize)
     }
     p<-p + fgts_set_gridstyle(fg_current_theme(),gridstyle) + pextra # captions, etc.
     p<-p + guides(alpha=guideset[['alpha']],fill=guideset[['color']],color=guideset[['color']],size=guideset[['size']],shapes=guideset[["symbol"]])
@@ -541,9 +569,9 @@ scatform_to_df <- function(form) {
   dfout <- dfout[,lapply(.SD, \(x) fifelse(nchar(x)<=0,NA_character_,x)),.SDcols=is.character]
 }
 
-first_category_nm <- function(grparts) {
+first_category_nm <- function(grparts,ifnone="") {
   tortn <- grparts[data.table(item=s("color;symbol;size;alpha")),on=.(item)][indta==TRUE]$nm[1]
-  return(fcoalesce(tortn,""))
+  return(fcoalesce(tortn,ifnone))
 }
 
 make_datecutlabels=function(dta, dtsback=c(7,22),lastonly=FALSE,maxdate=NA_real_,labels=NULL) {
