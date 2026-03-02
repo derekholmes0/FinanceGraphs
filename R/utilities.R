@@ -79,8 +79,6 @@ narrowbydtstr<-function(xin,dtstr="",includetoday=TRUE, windowdays=0, invert=FAL
 #' extenddtstr("-2m::-1m")
 #' extenddtstr("-2m::-1m",begchg=10,endchg=5)
 #'
-#' @import xts
-#' @import lubridate
 #' @export
 extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtnstyle="string") {
   index=NULL
@@ -293,7 +291,6 @@ cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trac
 }
 
 #' @import data.table
-#' @import xts
 # Take input and puts into expected form: DT_ENTRY, data.table, keyed.  Use meltvar = eventid e.g f neces.
 # Assumes a date column is always there, not true for scatter plots
 generic_to_melt <- function(indata,newnames="",meltvar="variable",rtn="all") {
