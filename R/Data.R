@@ -124,7 +124,7 @@
 #'  \item{symbol}{Company}
 #' }
 #'
-#' @source <https://alphavantage.com>
+#' @source <https://finance.yahoo.com>
 "earnings_ibm"
 
 #' Example forecasts

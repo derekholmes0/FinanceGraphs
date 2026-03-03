@@ -314,7 +314,7 @@ the correct annotations. The currently implemented helpers are
 |`fg_cut_to_events()`|"Cut" a univariate series into colored bands, with two different colors for positive and negative values |
 |`fg_signal_to_events()`|Map a long/short signal to events |
 |`fg_tq_divs()`|Add dividend events from [tidyquant](https://business-science.github.io/tidyquant/) dividend data |
-|`fg_av_earnings()`|Add earnings events from [AlphaVantage](https://alphavantage.co) earnings data |
+|`fg_av_earnings()`|Add earnings events from [alphavantagepf](https://github.com/derekholmes0/alphavantagepf) earnings data |
 |`fg_ratingsEvents()`|Add colored ranges based on analyst credit ratings |
 
 The first two are described in the function documentation. The next two

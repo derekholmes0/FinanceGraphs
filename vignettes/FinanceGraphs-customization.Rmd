@@ -72,7 +72,7 @@ For example, here are the a few aesthetic sets for `fg_eventStudy()`. This funct
 so for example there are actually 14 different line colors in `"lines"`.
 
 ```{r}
-fg_print_aes_list("fg_eventStudy") |> arrange(desc(N)) |> head(n=4)
+print(fg_print_aes_list("fg_eventStudy"))
 ```
 
 Each set can have multiple rows, as in 

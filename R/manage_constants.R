@@ -316,6 +316,7 @@ fg_display_colors <- function(item="") {
 }
 
 #' @rdname constants
+#' @import knitr
 #' @export
 fg_print_aes_list <- function(grepstr="") {
   used=NULL
@@ -323,7 +324,7 @@ fg_print_aes_list <- function(grepstr="") {
   rtn <- the$aesset[grepl(grepstr,used),]
   rtn <- rtn[,.(helpstr=.SD[1][["helpstr"]],default=.SD[1][["value"]],N=.N),by=.(used,category)]
   rtn <- rtn[order(used,category)][,used:=NULL]
-  return(rtn  |> as.data.frame())
+  return(kable(rtn))
 }
 
 #' @rdname constants

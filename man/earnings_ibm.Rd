@@ -16,7 +16,7 @@ A \code{data.table} with 120 observations and e columns
 }
 }
 \source{
-\url{https://alphavantage.com}
+\url{https://finance.yahoo.com}
 }
 \usage{
 earnings_ibm
