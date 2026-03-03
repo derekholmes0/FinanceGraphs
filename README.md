@@ -196,7 +196,7 @@ outputs into the appropriate `foreast_ds` forms
 | `fg_sweep()` | Converts [tidy forecast objects](https://business-science.github.io/sweep/) to `forecast_ds` form. |
 | `fg_prophet()` | Converts [Prophet](https://business-science.github.io/sweep/) to `forecast_ds` form. |
 
-## Changing aesthetics and adding dates of interest
+## Changing aesthetics and adding “dates of interest”
 
 Default colors for series and annotations can be changed using
 `fg_update_aes()` or `fg_update_line_colors()`. Any changes made to
@@ -256,10 +256,12 @@ with a string, or turns off synchronization with a call
 Key to understanding how time series co-move is a simple scatter plot.
 The function `fg_scatplot()` tries to be a concise wrapper around the
 very comprehensive [ggplot2](https://ggplot2.tidyverse.org/) graphics
-framework.
-``` ggplot2()]`` is a great ecosystem, but requires quite a bit of verbiage to get from idea to presentable graph quickly.  The approach used here is to specify broad categories of aesthetics with a formula, while the details are kept behind the hood using the aesthetic sets managed by ```fg_get_aes()\`
-as above. Fuller explanations and more examples are in the accompanying
-vignette.
+framework. `ggplot2()` is a great ecosystem, but requires quite a bit of
+verbiage to get from idea to presentable graph quickly. The approach
+used here is to specify broad categories of aesthetics with a formula,
+while the details are kept behind the hood using the aesthetic sets
+managed by `fg_get_aes()` as above. Fuller explanations and more
+examples are in the accompanying vignette.
 
 This “one-line” approach can be used with both date-based and non-date
 based datasets. For example, suppose we wanted to plot two asset prices
