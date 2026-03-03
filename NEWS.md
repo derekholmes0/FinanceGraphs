@@ -1,3 +1,5 @@
+# FinanceGraphs 0.8.0
+
 # FinanceGraphs 0.7.0
 
 1
