@@ -517,7 +517,8 @@ We can add other central bank moves, e.g. Brazil's COPOM decisions  [BCB](https:
 by downloaded the data and using
 
 ```{r}
-selic<-data.table::fread("c:/d/src/R/FinanceGraphs/inst/extdata/selic_historical_rates.csv",skip=1,select=c(2,5),col.names=c("date","tgt"))
+filepath <- system.file("extdata", "selic_historical_rates.csv", package = "FinanceGraphs")
+selic<-data.table::fread(filepath,skip=1,select=c(2,5),col.names=c("date","tgt"))
 selic<-selic[,let(DT_ENTRY=as.Date(date,format="%m/%d/%Y"))][order(DT_ENTRY)][,move:=c(0,diff(tgt,1))]
 newevents <- selic[,.(category="COPOM",eventid=format(tgt,digits=2), DT_ENTRY,color=c("blue","grey","red")[sign(move)+2])]
 fg_update_dates_of_interest(newevents[!color=="grey"]) # Only add real moves
