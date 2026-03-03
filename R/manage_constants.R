@@ -406,6 +406,7 @@ fg_reset_to_default_state <- function(reset="all") {
     suppressWarnings(file.remove(the$themefn))
     message("Removing User-made Themes and reverting to defaults of package")
     the$curr_theme <-fgts_BaseTheme()
+    the$theme_default <-fgts_BaseTheme()
 
   }
   the$tevents_defaults <- copy(tevents_defaults)

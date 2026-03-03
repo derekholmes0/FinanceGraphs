@@ -243,7 +243,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         grparts <- DTUpsert(grparts,grupdate,"item")
         break_set <- break_set[,.(BEG_DT_ENTRY,END_DT_ENTRY,sizefactor=histcat)]
         tcollist <- union(names(a2),names(break_set))
-        a2 <- break_set[a2,on=.(BEG_DT_ENTRY<=dt,END_DT_ENTRY>dt),j=..tcollist]
+        a2 <- break_set[a2,on=.(BEG_DT_ENTRY<=dt,END_DT_ENTRY>dt)][,dt:=BEG_DT_ENTRY][,.SD,.SDcols=tcollist]
         n_hex_switch <- +Inf
       }
       # This is the only place where we want to make factors
@@ -366,9 +366,13 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
           }
         }
     if( !havetext ) { # Do Points
+      # Get AES
       pts_aes <- collect_aes(grparts[!ggaes=="label"])
+      hassize <- grparts[ggaes=="size",]$indta
+      size_default <- switch(as.character(hassize),"TRUE"=list(),"FALSE"=list(size=psize))
+      # Plot styles
       if(grepl("path",type)) {
-          p<-p+pts_aes+geom_path(show.legend=TRUE,data=a3)
+          p<-p+pts_aes+geom_path(show.legend=TRUE,data=a3)  # Keep size default
       }
       else if (grepl("dens",type)) {  # Want unfilled always.
           p<-p+pts_aes + geom_density_2d()
@@ -389,7 +393,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         if(!("usehex" %in% names(a3))){
           a3 <- a3[,usehex:=FALSE]
         }
-        p<-p + pts_aes + geom_point(data=a3[usehex==FALSE,],size=psize)
+        p<-p + pts_aes + layer(geom="point",stat="identity",position="identity",params=size_default)
       }
     }
 
@@ -547,12 +551,8 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         p<-p+scale_size_binned(range=c(2,8),name=sizedets[['colnm']])
       }
     }
-    else {
-      thissize <- fifelse(havetext,tsize,psize)
-      p<-p+scale_size_manual(values=thissize)
-    }
     p<-p + fgts_set_gridstyle(fg_current_theme(),gridstyle) + pextra # captions, etc.
-    p<-p + guides(alpha=guideset[['alpha']],fill=guideset[['color']],color=guideset[['color']],size=guideset[['size']],shapes=guideset[["symbol"]])
+    p<-p + guides(guideset)
     if(returnregresults) {
       return(list(p,regres))
     } else {

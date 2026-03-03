@@ -3,13 +3,10 @@ Title: Flexible Graphs for Analysis of Financial Data and Time Series
 Version: 0.6.0
 Authors@R: 
     person("Derek", "Holmes", , "derek@derekholmes.com", role = c("aut", "cre", "cph"))
-Description: Flexible wrappers around R graphics modules [dygraphs] and [ggplot2] 
-to visualize data commonly found in Financial Studies, with an emphasis on time series.
-Interactive time series plots include multiple options for incorporating
-external data such as forecasts and events.  Other static plots useful for time 
-series data include an intuitive and generic scatter plotter, a boxplot generator
-suitable for multiple time series, and event study plotters for time series analysis 
-around sets of dates.
+Description: Flexible wrappers around R graphics modules 'dygraphs' <https://dygraphs.com/> and 'ggplot2' <https://ggplot2.tidyverse.org/> to visualize data commonly found in Financial Studies, with an emphasis on time series.
+    Interactive time series plots include multiple options for incorporating external data such as forecasts and events.  Other static plots useful for time 
+    series data include an intuitive and generic scatter plotter, a boxplot generator suitable for multiple time series, and event study plotters for time series analysis 
+    around sets of dates.
 License: GPL (>= 3)
 Encoding: UTF-8
 Depends: 
@@ -28,7 +25,7 @@ Imports:
     tidyr (>= 0.6.3),
     xts (>= 0.10.0),
     cpm (>= 2.0.0),
-    BreakoutDetection (>= 0.9.0),
+    ecp (>= 3.1.0),
     ggtext (>= 0.1.0),
     graphics (>= 4.0.0),
     grDevices (>= 4.5.0),

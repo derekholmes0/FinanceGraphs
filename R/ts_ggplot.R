@@ -88,7 +88,10 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
   break_set <- break_set[,histcolor:= fg_get_aesstring("boxplot",.N)][]
   tcollist <- dt_colnames[setdiff(names(dt_colnames),"date")]
   tcollist <- c("DT_ENTRY","histcat",unname(unlist(tcollist[!is.na(tcollist)])))
-  dtm <- break_set[dtm,on=.(BEG_DT_ENTRY<=DT_ENTRY,END_DT_ENTRY>DT_ENTRY),j=..tcollist][!is.na(histcat) & is.finite(value)]
+
+  dtm_1 <- break_set[dtm,on=.(BEG_DT_ENTRY<=DT_ENTRY,END_DT_ENTRY>DT_ENTRY)]
+  dtm <- dtm_1[!is.na(histcat) & is.finite(value)][,DT_ENTRY:=BEG_DT_ENTRY][,.SD,.SDcols=tcollist]
+  # R CMD does not like dots: dtm_good <- break_set[dtm,on=.(BEG_DT_ENTRY<=DT_ENTRY,END_DT_ENTRY>DT_ENTRY),verbose=TRUE][!is.na(histcat) & is.finite(value)]
   dtm <- dtm[,let(variable=fctr(variable),histcat=fctr(histcat))]
   if(grepl("byhistcat|byvar|zbyvar",normalize)) {
     cols_to_keep = names(dtm)

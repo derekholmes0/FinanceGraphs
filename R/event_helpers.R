@@ -2,22 +2,22 @@
 #'
 #' @title Event_Helpers
 #' @name fg_addbreakouts
+#' @description Wrapper around the function [ecp::e.divisive()] to create events for [fgts_dygraph()]
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
 #' @param annotationstyle String in set (`singleasdate`,`singleasvalue`,'breakno')
-#'
+#' @param ... Parameters passed to [ecp::e.divisive()]
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
-#'
 #' @examples
-#' dta <- eqtypx[,.(date,QQQ,TLT)]
-#' fgts_dygraph(dta,event_ds=fg_addbreakouts(dta),title="With Breakouts")
-#'
+#' require(ecp)
+#' dta <- tail(eqtypx[,.(date,QQQ,TLT)],3*260)
+#' fgts_dygraph(dta,event_ds=fg_addbreakouts(dta,min.size=44,R=60),title="With Breakouts")
 #' @import data.table
-#' @import knitr
+#' @import ecp
 #' @export
-fg_addbreakouts<-function(indta,annotationstyle="singleasdate") {
-  indt2 <- stats::na.omit(as.numeric(indta[[2]]))
-  res <- BreakoutDetection::breakout(indt2, min.size=24, method='multi', degree=1, beta=0.005, plot=FALSE)
-  bo_only <- indta[res$loc,]
+fg_addbreakouts<-function(indta,annotationstyle="singleasdate",...) {
+  indt2 <- indta[stats::complete.cases(indta)]
+  res <- ecp::e.divisive(indt2,...) # Takes a while
+  bo_only <- indta[res$estimates,]
   thiscolor <- fg_get_aesstring("breakout")
   tortn <- data.frame(DT_ENRY=bo_only[[1]],text="Bad Anotation Style",loc="top",color=thiscolor)
   rtntxt <- switch(annotationstyle,

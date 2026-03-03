@@ -6,7 +6,7 @@
 \alias{FinanceGraphs-package}
 \title{FinanceGraphs: Flexible Graphs for Analysis of Financial Data and Time Series}
 \description{
-Flexible wrappers around R graphics modules [dygraphs] and [ggplot2] to visualize time-based data. Interactive time series plots include multiple options for including external data such as forecasts and events. Other static plots useful for time series data include boxplots for multiple categories, event study graphs for analysis around a set of dates, and scatter plots to visualize bivariate time series data.
+Flexible wrappers around R graphics modules 'dygraphs' \url{https://dygraphs.com/} and 'ggplot2' \url{https://ggplot2.tidyverse.org/} to visualize data commonly found in Financial Studies, with an emphasis on time series. Interactive time series plots include multiple options for incorporating external data such as forecasts and events. Other static plots useful for time series data include an intuitive and generic scatter plotter, a boxplot generator suitable for multiple time series, and event study plotters for time series analysis around sets of dates.
 }
 \seealso{
 Useful links:

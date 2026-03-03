@@ -124,7 +124,7 @@
 #'  \item{symbol}{Company}
 #' }
 #'
-#' @source <https://alphavantage.co>
+#' @source <https://alphavantage.com>
 "earnings_ibm"
 
 #' Example forecasts
@@ -152,9 +152,9 @@
 #' FRED calculated constant maturity interest rates
 #'
 #' @format ## `yc_CMSUST`
-#' A long format `data.table` with constant maturity UST with tenors 2yr, 10yr and 30yr.
+#' A long format `data.table` with constant maturity UST with tenors 2 year, 10 year and 30 year
 #' \describe{
-#'  \item{variable}{Identifier with "CMS_<yr>"}
+#'  \item{variable}{Term of UST}
 #'  \item{date}{Date of observation}
 #'  \item{value}{Annualized Percent interest rae}
 #' }

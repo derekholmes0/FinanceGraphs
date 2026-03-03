@@ -4,21 +4,26 @@
 \alias{fg_addbreakouts}
 \title{Event_Helpers}
 \usage{
-fg_addbreakouts(indta, annotationstyle = "singleasdate")
+fg_addbreakouts(indta, annotationstyle = "singleasdate", ...)
 }
 \arguments{
 \item{indta}{Time series \code{data.table} with a date as the first column and a value series as the second column.}
 
 \item{annotationstyle}{String in set (\code{singleasdate},\code{singleasvalue},'breakno')}
+
+\item{...}{Parameters passed to \code{\link[ecp:e.divisive]{ecp::e.divisive()}}}
 }
 \value{
 \code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
 }
 \description{
+Wrapper around the function \code{\link[ecp:e.divisive]{ecp::e.divisive()}} to create events for \code{\link[=fgts_dygraph]{fgts_dygraph()}}
+}
+\details{
 Event Helpers : fg_addbreakouts
 }
 \examples{
-dta <- eqtypx[,.(date,QQQ,TLT)]
-fgts_dygraph(dta,event_ds=fg_addbreakouts(dta),title="With Breakouts")
-
+require(ecp)
+dta <- tail(eqtypx[,.(date,QQQ,TLT)],3*260)
+fgts_dygraph(dta,event_ds=fg_addbreakouts(dta,min.size=44,R=60),title="With Breakouts")
 }
