@@ -285,24 +285,13 @@ and finally a term to show where the latest observations are. As with
 
 ``` r
 fg_scatplot(dttest,"px_y ~ px_x + color:ccat + doi:recent + point:label","lmone",datecuts=c(60,182),title="Splitting dates")
-<<<<<<< HEAD
-=======
-#> Warning in `[.data.table`(break_set, a2, on = .(BEG_DT_ENTRY <= dt,
-#> END_DT_ENTRY > : Both 'tcollist' and '..tcollist' exist in calling scope.
-#> Please remove the '..tcollist' variable in calling scope for clarity.
->>>>>>> 99ab1e3e05255862fc4af862eda6525ac758161b
 ```
 
 <img src="man/figures/README-Scatter1-1.png" alt="Scatterplot with two categories and recent highlighting." width="100%" />
 One important feature of the static plots in this package to note is
 that they include options for switching the colors of large numbers of
 groups or points from discrete values to continuous values from the
-<<<<<<< HEAD
 [RColorBrewer](https://colorbrewer2.org) package.
-=======
-[RColorBrewer](https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3)
-package.
->>>>>>> 99ab1e3e05255862fc4af862eda6525ac758161b
 
 `fg_scatplot()` does not require dates in the input data, and can be
 useful for communicating comparative analyses as well. The `mtcars`
