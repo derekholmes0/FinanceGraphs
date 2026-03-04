@@ -23,7 +23,8 @@ Wrapper around the function \code{\link[ecp:e.divisive]{ecp::e.divisive()}} to c
 Event Helpers : fg_addbreakouts
 }
 \examples{
-require(ecp)
-dta <- tail(eqtypx[,.(date,QQQ,TLT)],3*260)
-fgts_dygraph(dta,event_ds=fg_addbreakouts(dta,min.size=44,R=60),title="With Breakouts")
+if (requireNamespace("ecp", quietly = TRUE)) {
+dta <- tail(eqtypx[,.(date,QQQ,TLT)],2*260)
+fgts_dygraph(dta,event_ds=fg_addbreakouts(dta,min.size=66,R=40),title="With Breakouts")
+}
 }

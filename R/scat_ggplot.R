@@ -222,7 +222,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
     a2[,grparts[coltodo=="copy"]$nm := .SD,.SDcols=grparts[coltodo=="copy"]$colnm] # Copy dups
     setnames(a2,grparts[coltodo=="rename"]$colnm,grparts[coltodo=="rename"]$nm)  # rename rest
     a2[,grparts[coltodo=="makenull"]$nm := "1"] # Set rest to one element factors
-    cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts",dbg=the$cassign)
+    # Debug only: cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts",dbg=the$cassign)
     # SHould be able to do group reset and DTmerge rest
     # Helper functions
     use_col <- function(what) { grparts[item==what]$indta }

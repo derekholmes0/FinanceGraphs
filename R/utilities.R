@@ -265,31 +265,6 @@ generalbreaks<-function(dtset,dtds,rtnasoffset=TRUE) {  # Kind of ugly, but I ne
   dtset2
 }
 
-## -- For Debugging only
-cAssign<-function(x,dbg=TRUE,silent=FALSE,copytodisk=FALSE,copysilent=FALSE,trace=FALSE,dpath=tempdir(),dbgkey="zz",suffix="",
-                  skipsaveiftoday=FALSE, nbig=10000,title="",usefst=TRUE,pframe=3,tmp=F) {
-  if(dbg==FALSE) { return()}
-  newfilename=""
-  if(!is.character(x)) { stop("cAssign x must be character string for a variable name, not the actual variable..") }
-  if(tmp || dpath=="t") { dpath="c:/t/" }
-  if(copytodisk | copysilent) { silent=TRUE }
-    x=unlist(strsplit(x,";")[[1]])
-    ppp=lapply(x,function(y){
-      if(exists(y,envir=parent.frame(n=pframe))) {
-        cadtmp=get(y,pos=parent.frame(n=pframe))
-        ynew = paste0(y,ifelse(nchar(suffix)>0,paste0("_",suffix),""))
-        ymessage = ifelse(y==ynew, sprintf("%10s",y),sprintf("%10s as %10s",y,ynew))
-        if(!silent) {
-          thistrace=ifelse(trace,try(traceback(max.lines=1),silent=T),"--notrace--")
-          message("Assigning: ",ymessage, "(",paste(dim(cadtmp),collapse=";"),") ",
-                    paste(class(cadtmp),collapse=";"), " from ",utils::tail(thistrace,1),">",title); }
-        assign(ynew,cadtmp,envir=.GlobalEnv)
-        }
-      else {
-        if(!silent) { print(paste("cAssign: CANNOT FIND ",y)) } }
-      } )
-}
-
 #' @import data.table
 # Take input and puts into expected form: DT_ENTRY, data.table, keyed.  Use meltvar = eventid e.g f neces.
 # Assumes a date column is always there, not true for scatter plots

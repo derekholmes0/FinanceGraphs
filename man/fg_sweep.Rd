@@ -23,13 +23,16 @@ Forecast Helpers
 }
 \examples{
 \dontrun{
-require("timetk")
-require("forecast")
-require("sweep")
+if (
+    requireNamespace("forecast", quietly = TRUE) &
+    requireNamespace("timetk", quietly = TRUE) &
+    requireNamespace("sweep", quietly = TRUE)
+) {
 fcst_eqtypx <- tk_ts(eqtypx[,.(date,QQQ)]) |> ets() |>
       forecast::forecast(h=30) |> sweep::sw_sweep(timetk_idx=TRUE)
 fcst_in <- fg_sweep(fcst_eqtypx)
 toplot <- eqtypx[,.(date,IBM,QQQ)]
 fgts_dygraph(toplot,title="With Forecasts", roller=1,dtstartfrac=0.7,forecast_ds=fcst_in)
+}
 }
 }

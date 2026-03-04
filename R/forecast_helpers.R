@@ -13,14 +13,17 @@
 #'
 #' @examples
 #' \dontrun{
-#' require("timetk")
-#' require("forecast")
-#' require("sweep")
+#' if (
+#'     requireNamespace("forecast", quietly = TRUE) &
+#'     requireNamespace("timetk", quietly = TRUE) &
+#'     requireNamespace("sweep", quietly = TRUE)
+#' ) {
 #' fcst_eqtypx <- tk_ts(eqtypx[,.(date,QQQ)]) |> ets() |>
 #'       forecast::forecast(h=30) |> sweep::sw_sweep(timetk_idx=TRUE)
 #' fcst_in <- fg_sweep(fcst_eqtypx)
 #' toplot <- eqtypx[,.(date,IBM,QQQ)]
 #' fgts_dygraph(toplot,title="With Forecasts", roller=1,dtstartfrac=0.7,forecast_ds=fcst_in)
+#' }
 #' }
 #' @import data.table
 #' @export
@@ -52,10 +55,9 @@ fg_sweep <- function(swept_data,confidence=80)  {
 #' @details Note that  [prophet::predict.prophet()] loses the name of the series, the
 #' @examples
 #' if (requireNamespace("prophet", quietly = TRUE)) {
-#' p_model <- eqtypx[,.(ds=date,y=QQQ)] |> prophet::prophet()
+#' p_model <- eqtypx[,.(ds=date,y=QQQ)] |> narrowbydtstr(dtstr="-1y::") |> prophet::prophet()
 #' p_fcst <- predict(p_model,prophet::make_future_dataframe(p_model,periods=60))
-#' fgts_dygraph(eqtypx[,.(date,QQQ)],title="With Prophet Forecasts", roller=1,dtstartfrac=0.6,
-#'       event_ds = fg_findTurningPoints(p_model),
+#' fgts_dygraph(eqtypx[,.(date,QQQ)],title="With Prophet Forecasts", roller=1,dtstartfrac=0.8,
 #'       forecast_ds=fg_prophet(p_fcst,seriesname="QQQ"))
 #' }
 #' @import data.table

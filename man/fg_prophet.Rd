@@ -22,10 +22,9 @@ Note that  \code{\link[prophet:predict.prophet]{prophet::predict.prophet()}} los
 }
 \examples{
 if (requireNamespace("prophet", quietly = TRUE)) {
-p_model <- eqtypx[,.(ds=date,y=QQQ)] |> prophet::prophet()
+p_model <- eqtypx[,.(ds=date,y=QQQ)] |> narrowbydtstr(dtstr="-1y::") |> prophet::prophet()
 p_fcst <- predict(p_model,prophet::make_future_dataframe(p_model,periods=60))
-fgts_dygraph(eqtypx[,.(date,QQQ)],title="With Prophet Forecasts", roller=1,dtstartfrac=0.6,
-      event_ds = fg_findTurningPoints(p_model),
+fgts_dygraph(eqtypx[,.(date,QQQ)],title="With Prophet Forecasts", roller=1,dtstartfrac=0.8,
       forecast_ds=fg_prophet(p_fcst,seriesname="QQQ"))
 }
 }

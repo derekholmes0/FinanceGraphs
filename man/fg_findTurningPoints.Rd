@@ -52,7 +52,4 @@ Event Helpers : fg_findTurningPoints
 \examples{
 dta <-eqtypx[,.(date,QQQ,TLT)]
 fgts_dygraph(dta,event_ds=fg_findTurningPoints(dta),title="With turningPoints")
-require(prophet)
-fc_prophet = eqtypx[,.(ds=date,y=QQQ)] |> prophet::prophet()
-fgts_dygraph(dta,event_ds=fg_findTurningPoints(fc_prophet),title="With Prophet turningPoints")
 }

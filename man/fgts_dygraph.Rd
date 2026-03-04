@@ -10,7 +10,7 @@ fgts_dygraph( indata,
  hilightwidth = 2, hilightstyle = "solid",
  events = "", event_ds = NULL,
  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
- ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
+ ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = FALSE,
  meltvar = "variable", dylegend = "always", fillGraph = FALSE, colorset="lines",
  groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 }
@@ -90,7 +90,7 @@ series, e.g \verb{-3m} or \verb{-2w}.  Example: \code{"-3m::-1m"} defines a 2 mo
 \item{rebase}{String of the form \verb{yyyy-mm-dd,<value>} with \verb{<value>} assumed 100 if not specified.  This normalizes all series to \verb{<value>}
 as of the given date.  See examples.}
 
-\item{exportevents}{String of name of \code{data.frame} to create in  \code{.GlobalEnv} with event dates displayed on graph.}
+\item{exportevents}{(Default: FALSE) Return list of the form \verb{c(<graph>,<event dataframe>)} instead of just the graph.}
 
 \item{meltvar}{(Default: \code{variable}) Column name in \code{indt} with series names, if melted.}
 

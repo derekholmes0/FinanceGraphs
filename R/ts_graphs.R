@@ -9,7 +9,7 @@
 #'  hilightwidth = 2, hilightstyle = "solid",
 #'  events = "", event_ds = NULL,
 #'  annotations = "", annotation_ds = NULL, forecast_ds = NULL,
-#'  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = NULL,
+#'  ylimits = NULL,  dtstartfrac = 0,  dtwindow = "",  rebase = "",  exportevents = FALSE,
 #'  meltvar = "variable", dylegend = "always", fillGraph = FALSE, colorset="lines",
 #'  groupnm = fg_sync_group(), verbose = FALSE,  extraoptions = list() )
 #'
@@ -62,7 +62,7 @@
 #' series, e.g `-3m` or `-2w`.  Example: `"-3m::-1m"` defines a 2 month period 1 month back from the end of the series.
 #' @param rebase String of the form `yyyy-mm-dd,<value>` with `<value>` assumed 100 if not specified.  This normalizes all series to `<value>`
 #' as of the given date.  See examples.
-#' @param exportevents String of name of `data.frame` to create in  `.GlobalEnv` with event dates displayed on graph.
+#' @param exportevents (Default: FALSE) Return list of the form `c(<graph>,<event dataframe>)` instead of just the graph.
 #' @param meltvar (Default: `variable`) Column name in `indt` with series names, if melted.
 #' @param dylegend (Default: "auto") Passed to [dygraphs::dyLegend()], can be one of ("auto", "always", "onmouseover", "follow", "never")
 #' @param fillGraph (Default: FALSE) Shade area underneath each series.
@@ -190,8 +190,8 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
                         annotations="",annotation_ds=NULL,
                         forecast_ds=NULL,
                         ylimits=NULL,dtstartfrac=0,dtwindow="",rebase="",
-                        exportevents=NULL, meltvar="variable",dylegend="always",fillGraph=FALSE,colorset="lines",
-                       groupnm=fg_sync_group(),verbose=FALSE,extraoptions=list()) {
+                        exportevents=FALSE, meltvar="variable",dylegend="always",fillGraph=FALSE,colorset="lines",
+                        groupnm=fg_sync_group(),verbose=FALSE,extraoptions=list()) {
 
   # NSE crap.  There has to be a better way
   `.`=gpnm=suffix=seriesnm=display=color=axis=series_no=variable=eventid=direct=tcolor=optexp=DT_ENTRY=NULL
@@ -478,7 +478,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
 
     # Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
 
-        if(is.data.frame(event_ds)) {
+    if(is.data.frame(event_ds)) {
         event_ds <- data.table(event_ds)
         # Rename columns smartly, only first two date columns taken
         dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.instant,firstonly=FALSE),2)
@@ -541,12 +541,6 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
       } else {
         message("fgts_dygraph problem: annotation_ds no in format (date,series,text)")
       }
-    }
-
-    if(is.character(exportevents)) {
-      exportevents <- tevents
-      cAssign("exportevents")
-      message_if(verbose,"Copied events as ",exportevents," to Global Namespace")
     }
 
     if(nrow(tevents)>0) {
@@ -612,7 +606,12 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     if(!is.na(rollpd)) {
       g1 = g1 |> dygraphs::dyRoller(rollPeriod=rollpd) }
 
-    return(g1)
+    if(exportevents==TRUE) {
+      return(list(g1,tevents))
+    }
+    else {
+      return(g1)
+    }
 }
 
 

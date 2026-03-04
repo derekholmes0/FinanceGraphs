@@ -8,11 +8,11 @@
 #' @param ... Parameters passed to [ecp::e.divisive()]
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #' @examples
-#' require(ecp)
-#' dta <- tail(eqtypx[,.(date,QQQ,TLT)],3*260)
-#' fgts_dygraph(dta,event_ds=fg_addbreakouts(dta,min.size=44,R=60),title="With Breakouts")
+#' if (requireNamespace("ecp", quietly = TRUE)) {
+#' dta <- tail(eqtypx[,.(date,QQQ,TLT)],2*260)
+#' fgts_dygraph(dta,event_ds=fg_addbreakouts(dta,min.size=66,R=40),title="With Breakouts")
+#' }
 #' @import data.table
-#' @import ecp
 #' @export
 fg_addbreakouts<-function(indta,annotationstyle="singleasdate",...) {
   indt2 <- indta[stats::complete.cases(indta)]
@@ -49,9 +49,6 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate",...) {
 #' @examples
 #' dta <-eqtypx[,.(date,QQQ,TLT)]
 #' fgts_dygraph(dta,event_ds=fg_findTurningPoints(dta),title="With turningPoints")
-#' require(prophet)
-#' fc_prophet = eqtypx[,.(ds=date,y=QQQ)] |> prophet::prophet()
-#' fgts_dygraph(dta,event_ds=fg_findTurningPoints(fc_prophet),title="With Prophet turningPoints")
 #' @import data.table
 #' @export
 fg_findTurningPoints<-function(indta,rtn="dates",
@@ -106,7 +103,6 @@ fg_findTurningPoints<-function(indta,rtn="dates",
   tortn$DT_ENTRY=as.Date(tortn$DT_ENTRY)
   return(tortn)
 }
-
 
 #' Event Helpers : fg_ratingsEvents
 #'
@@ -248,7 +244,6 @@ fg_signal_to_events<-function(signal_df,colormap) {
 #'   fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
 #' }
 #' @import data.table
-#' @import tidyquant
 #' @rdname Event_Helpers
 #' @export
 fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
