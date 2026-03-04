@@ -20,6 +20,7 @@ Sets, gets, or resets default ggplot themes to be used.
 \examples{
 require(ggplot2)
 fg_replace_theme(ggplot2::theme_dark(),persist=FALSE)
+fg_reset_to_default_state()
 }
 \seealso{
 \code{\link[=fgts_dygraph]{fgts_dygraph()}}, \code{\link[=fg_scatplot]{fg_scatplot()}}

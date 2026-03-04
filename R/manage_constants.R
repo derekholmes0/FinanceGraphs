@@ -375,6 +375,7 @@ fg_sync_group <- function(gpname="") {
 #' @examples
 #' require(ggplot2)
 #' fg_replace_theme(ggplot2::theme_dark(),persist=FALSE)
+#' fg_reset_to_default_state()
 #' @export
 fg_replace_theme <- function(newTheme,persist=TRUE) {
   stopifnot("ggplot2::theme" %in% class(newTheme))

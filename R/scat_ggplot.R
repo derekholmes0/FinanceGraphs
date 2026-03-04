@@ -93,6 +93,7 @@
 #' @examples
 #' # Simple text examples
 #' require(data.table)
+#' fg_reset_to_default_state()
 #' dt_mtcars=data.table(datasets::mtcars)
 #' dt_mtcars$id=lapply(rownames(datasets::mtcars),\(x) last(strsplit(x," ")[[1]]))
 #' fg_scatplot(dt_mtcars,"disp ~ hp + color:am + text:id","scatter",title="text basic")
