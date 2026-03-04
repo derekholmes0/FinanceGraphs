@@ -168,5 +168,10 @@ want save changes, then call `fg_update_aes()` and `fg_replace_theme()` with `pe
 To reset all parameters back to the package defaults, run `fg_reset_to_default_state()`
 
 
+```{r}
+fg_reset_to_default_state()
+fg_scatplot(exampledta,"y ~ x + color:id",title="Back to old colors",psize=6)
+```
+
 
 

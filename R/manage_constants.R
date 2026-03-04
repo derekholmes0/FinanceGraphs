@@ -374,7 +374,7 @@ fg_sync_group <- function(gpname="") {
 #' @seealso [fgts_dygraph()], [fg_scatplot()]
 #' @examples
 #' require(ggplot2)
-#' fg_replace_theme(ggplot2::theme_dark())
+#' fg_replace_theme(ggplot2::theme_dark(),persist=FALSE)
 #' @export
 fg_replace_theme <- function(newTheme,persist=TRUE) {
   stopifnot("ggplot2::theme" %in% class(newTheme))
