@@ -45,8 +45,8 @@
 #' examples for specification.
 #' @param annotations string with annotations on individual series or along `y` axes.  Options can be added
 #' together with `;`  and can include
-#' * `lastvalue`  : Value of latest observation for each series, placed at the end of the series
-#' * `lastlabel`  : Name of each series, placed at the end of the series.
+#' * `last,[value|label]` : Value or name of latest observation for each series, placed at the end of the series
+#' * `last,[linevalue|linelabel]`  : Value or name of latest observation for each series, placed at the end of the seriesName of each series, placed at the end of the series.
 #' * `hline,y : Horizontal line at `y`
 #' * `range,ybeg,yend` : Band placed between `ybeg` and `yend`
 #' @param annotation_ds `data.frame` of annotations added to graph. See details for specification.
@@ -340,11 +340,6 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
         add_titles("title","(Winsored@",qlimit,")")
       }
     }
-    else if (dtstartfrac>0 | nchar(dtwindow)>1) {  # FOcus y axis if x is
-      focusdta <- narrowbydtstr(indtnew,paste0(dtsrange_todisplay,collapse="::"))
-      yrangetmp <-  range(focusdta[,2:ncol(focusdta)])
-      yRange <- c(yrangetmp[1]*0.8,yrangetmp[2]*1.05)
-    }
 
     if(verbose) { print(series_dets) }
     # Only way to take a series out is to take the data out.
@@ -490,7 +485,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
             stop("fgts_dygraph: >>>>>>>>>>> ERROR: Event data set with end < start")
           }
           setkeyv(event_ds,c("DT_ENTRY","END_DT_ENTRY"))
-          event_ds <- foverlaps(indtnew[,.(DT_ENTRY=min(date),END_DT_ENTRY=max(date))],event_ds)
+          event_ds <- foverlaps(data.table(DT_ENTRY=dtlimits[1],END_DT_ENTRY=dtlimits[2]), event_ds)
           event_ds <- event_ds[,let(DT_ENTRY=pmax(DT_ENTRY,i.DT_ENTRY),END_DT_ENTRY=pmin(END_DT_ENTRY,i.END_DT_ENTRY))]
           event_ds <- event_ds[,.SD,.SDcols=!patterns('^i.')]
         }
@@ -518,7 +513,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     }
 
     if(nrow( trow<-get_fromlist(alist,"^(hline)"))>0) { #hline,no
-        thiscolor <-  fg_get_aesstring("hline")
+      thiscolor <-  fg_get_aesstring("hline")
         h_annos <- data.table(trow)[,let(text=fcoal(a2,""),value=as.numeric(a1),color=fcoal(a3,thiscolor))]
         h_annos <- h_annos[,.(category="hline",color,text,value,DT_ENTRY=dtlimits[2],axis="y")]
         tevents <- DTappend(tevents,h_annos)
@@ -542,7 +537,6 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
         message("fgts_dygraph problem: annotation_ds no in format (date,series,text)")
       }
     }
-
     if(nrow(tevents)>0) {
        tevents <- coalesce_DT_byentry(tevents,the$tevents_defaults)
        tevents <- tevents[, let(END_DT_ENTRY=as.Date(fcoal(as.integer(END_DT_ENTRY),as.integer(DT_ENTRY))))]  # What is NA?
@@ -580,7 +574,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     if( nrow(y2dta <- series_dets[axis=="y2",])>0 ) {
       g1 = g1 |> dygraphs::dyAxis('y2',independentTicks=TRUE, label=paste(y2dta$seriesnm,collapse=","),
                                   axisLineColor=y2dta[1,]$color, axisLabelColor = y2dta[1,]$color,
-                                  drawGrid=FALSE, # grepl("y|both",gridopts) Too much noise
+                                  drawGrid=FALSE # grepl("y|both",gridopts) Too much noise
                                   )
     }
 

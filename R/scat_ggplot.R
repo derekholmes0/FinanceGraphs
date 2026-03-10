@@ -11,7 +11,7 @@
 #'                title="",subtitle="",caption="",axislabels="",
 #'                boundbox=c(),boundboxtype="",gridstyle=NA_character_,legendinside=FALSE,
 #'                tformula=formula("y~x"),returnregresults=FALSE,
-#'                keepcols="", meltvar="variable")
+#'                keepcols="", meltvar="variable",melted=NULL)
 #' @param indata `data.frame` with columns for (x,y) coordinates and possibly other categorical data or a date column. Alternatively,
 #' `indata` can be in long format with `meltvar` present.  Note that aesthetic characteristics (if used) must be present for both
 #' long and wide input formats.
@@ -49,6 +49,8 @@
 #'
 #'  * `ellipse` adds an ellipse around the points using [ggplot2::stat_ellipse()]
 #'  * `hull<:quantile>` draws a convext hull around points with `<quantile>` (default 0) points removed. (See details)
+#'  * `xline<:level=0>` draws a vertical line  at `level`
+#'  * `yline<:level=0>` draws a horizontal line  at `level`
 #'  * `grid:<dotted|dotted_x|dotted_y|none>` formats background grids
 #' @param type character string for the type of graph to plot:
 #'  * `scat` plots points, text or labels
@@ -89,6 +91,7 @@
 #' options `c("color","symbol","size","alpha")` as grouping variables
 #' @param keepcols list of `indata` columns to be kept with the graph data, useful for further faceting using [ggplot2::facet_wrap()]
 #' @param meltvar (Default `"variable"`) If `indata` is melted, then this is used to create `x` and `y` categories.
+#' @param melted (Default:NULL) If `FALSE` forces data not to be melted if `meltvar` in `indata`
 #' @returns A [ggplot2::ggplot()] object
 #' @examples
 #' # Simple text examples
@@ -157,7 +160,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
                 boundbox=c(),boundboxtype="",
                 gridstyle=NA_character_,legendinside=FALSE,
                 tformula=formula("y~x"),returnregresults=FALSE,
-                keepcols="", meltvar="variable") {
+                keepcols="", meltvar="variable",melted=NULL) {
 
     if(nrow(indata)<=0) { return(ggplot()) }
     regres <- data.table()
@@ -173,10 +176,12 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
       a2<-a2[!is.na(a2$dt)]
     }
 
+    # Cast molten data, if meltvar in data UNLESS melted=FALSE
     if(meltvar %in% colnamesnodate) {
-      nonmeltcols <-  paste(setdiff(colnames(a2),c("variable","value")),collapse="+")
-      a2 <- dcast(a2,formula(paste(nonmeltcols,"~ variable")))
-      # Where most things go wrong
+      if( is.null(melted) || melted==FALSE ) {
+        nonmeltcols <-  paste(setdiff(colnames(a2),c(meltvar,"value")),collapse="+")
+        a2 <- dcast(a2,formula(paste(nonmeltcols,"~ ",meltvar)))
+      }
     }
     # Keep DT of all possible column elements of the graph
     grparts <- data.table(nm=s("xx;yy;colfactor;labels;text;symbolfactor;labelhilight;tooltips;sizefactor;alphafactor;fill;doi"),
@@ -214,16 +219,18 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
     # Miscellaneous fixes; Color style
     grparts[item=="color",let(style=fcoalesce(style,fifelse(ncnt>n_color_switch,"linebrewer","lines")))]
     # Keep DT of all possible other elements/options of the graph
-    gropts <- data.table(item=s("ellipse;hull;grid;doi;point"),include=c(FALSE,FALSE,TRUE,FALSE,FALSE))
+    gropts <- data.table(item=s("ellipse;hull;grid;doi;point;xline;yline"),
+                         include=c(FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE))
     gropts <- scatform_to_df(plotform)[,xinclude:=TRUE][gropts,on=.(item)]
-    gropts <- gropts[,let(xinclude=fcoalesce(xinclude,FALSE),opt=colnm)]
-    gropts <- gropts[,include := include | xinclude][,.SD,.SDcols=s("item;include;opt")]
+    gropts <- gropts[,let(xinclude=fcoalesce(xinclude,FALSE),opt=colnm,opt2=style,opt3=order)]
+    gropts <- gropts[,include := include | xinclude][,.SD,.SDcols=s("item;include;opt;opt2;opt3")]
 
     # Le Grande Reorganziation
     a2[,grparts[coltodo=="copy"]$nm := .SD,.SDcols=grparts[coltodo=="copy"]$colnm] # Copy dups
     setnames(a2,grparts[coltodo=="rename"]$colnm,grparts[coltodo=="rename"]$nm)  # rename rest
     a2[,grparts[coltodo=="makenull"]$nm := "1"] # Set rest to one element factors
-    # Debug only: cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts",dbg=the$cassign)
+    # Debug only:
+    #cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts",dbg=get("cassign",envir=the))
     # SHould be able to do group reset and DTmerge rest
     # Helper functions
     use_col <- function(what) { grparts[item==what]$indta }
@@ -232,24 +239,30 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
       alldts=sort(unique(a2$dt))
       if(grepl("recent",doi)) {
         break_set <- form_breakset(alldts,datecuts)
-        grparts[item=="size",let(style="doisizemult",colnm="doi",indta=FALSE)]
+        doi_aesname <- "sizefactor"
+        grparts[item=="size",let(style="doisizemult",colnm="histcat",indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
       }
       else { # Must be from dates_of_interest
         break_set <- form_breakset(alldts,doi)
-        message_if(use_col("color"),"scat_ggplot, replacing color categories with dates of interest categories")
-        grparts[item=="color",let(style="lines")]
+        if(use_col("color")) { # Use color first, then symbol
+          doi_aesname <- "symbolfactor"
+          grparts[item=="symbol",let(style="scatshape",colnm="histcat",indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
+          message_if(the$verbose, "scat_ggplot using symbols to denote date of interest categories")
+        }
+        else {
+          doi_aesname <- "colfactor"
+          grparts[item=="color",let(style="lines",colnm="histcat",indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
+          message_if(the$verbose, "scat_ggplot using colors to denote date of interest categories")
+        }
       }
       if(nrow(break_set)>0) {
-        grupdate <- grparts[item=="size",][,let(colnm=doi,indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
-        grparts <- DTUpsert(grparts,grupdate,"item")
-        break_set <- break_set[,.(BEG_DT_ENTRY,END_DT_ENTRY,sizefactor=histcat)]
+        break_set <- break_set[,{doi_aesname}:=histcat][,.SD,.SDcols=c("BEG_DT_ENTRY","END_DT_ENTRY",doi_aesname)]
         tcollist <- union(names(a2),names(break_set))
         a2 <- break_set[a2,on=.(BEG_DT_ENTRY<=dt,END_DT_ENTRY>dt)][,dt:=BEG_DT_ENTRY][,.SD,.SDcols=tcollist]
         n_hex_switch <- +Inf
       }
       # This is the only place where we want to make factors
     }
-
     mycols_to_keep <- s("xx;yy;colfactor;text;labels;sizefactor;alphafactor;symbolfactor;dt;tooltips;labelhilight")
     cols_to_toss <- setdiff(colnames(a2),c(mycols_to_keep,s(keepcols)))
     a3<-a2[,.SD,.SDcols=!cols_to_toss]
@@ -310,12 +323,15 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
       a3 <- a3[inbox==TRUE,]  # Take out
     }
     # Set viewing area
-    bbox[,let(xx=c(0.98,1.02)*xx,yy=c(0.98,1.02)*yy)]
+    pct_x <- as.numeric(fg_get_aesstring("expand_x"))
+    pct_y <- as.numeric(fg_get_aesstring("expand_y"))
+    bbox[,let(xx=c((1-pct_x),(1+pct_x))*xx,yy=c((1-pct_y),(1+pct_y))*yy)]
 
    # Actual Plot
     tsizes <- as.numeric(fg_get_aesstring("scattextsize"))
     # DO later: colno a new color
     # Separate hex determination by group
+
     p<-ggplot(a3,aes(x=xx,y=yy))
 
     # Text -----------------------------------
@@ -394,7 +410,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         if(!("usehex" %in% names(a3))){
           a3 <- a3[,usehex:=FALSE]
         }
-        p<-p + pts_aes + layer(geom="point",stat="identity",position="identity",params=size_default)
+        p<-p + pts_aes + layer(geom="point",stat="identity",position="identity",params=size_default,data=a3[usehex==FALSE])
       }
     }
 
@@ -441,22 +457,35 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
       }
     }
 
-    # Additional figures
-    if(gropts[item=="ellipse"]$include) {
+    # Additional figures and lines
+    olist <- split(gropts,by=c("item"))
+    if(olist$ellipse$include)  {
       lm_aes <- collect_aes(data.table(nm=firstcat,ggaes=c("color"),indta=TRUE))
       p<-p+stat_ellipse(lm_aes)
     }
-    if(gropts[item=="hull"]$include) {
-      winsorfac <- fcoalesce(as.numeric(gropts[item=="hull",]$opt),0)
+    if(olist$hull$include) {
+      winsorfac <- fcoalesce(as.numeric(olist$hull$opt),0)
       lm_aes <- collect_aes(data.table(nm=rep(firstcat,2),ggaes=c("color","fill"),indta=rep(TRUE,2)))
       p <- p + stat_chull(lm_aes,alpha=0.1,percentile=winsorfac)
     }
+    if(olist$xline$include) {
+      thisintercept <- fcoalesce(as.numeric(olist$xline$opt), bbox[[2,1]])
+      thiscolor <- fcoalesce(olist$xline$opt2,fg_get_aesstring("xlinecolor"))
+      p<-p+geom_vline(xintercept=thisintercept,color=thiscolor)
+    }
+    if(olist$yline$include) {
+      thisintercept <- fcoalesce(as.numeric(olist$yline$opt), bbox[[2,1]])
+      thiscolor <- fcoalesce(olist$yline$opt2,fg_get_aesstring("ylinecolor"))
+      p<-p+geom_hline(yintercept=thisintercept,color=thiscolor)
+    }
 
     # Viewing Area, need before glein_identify
-    p<-p+coord_cartesian(xlim=round(bbox$xx,0),ylim =round(bbox$yy,0))
+    if(nchar(boundboxtype)>0) {  # Dont do this unless ncressary
+      p<-p+coord_cartesian(xlim=bbox$xx,ylim =bbox$yy)
+    }
 
-    if(gropts[item=="point",]$include==TRUE) {
-      pointopts <- gropts[item=="point",]$opt
+    if(olist$point$include) {
+      pointopts <- olist$point$opt
       todo <- fifelse(grepl("all",pointopts), "group","date")
       firstcat <- first_category_nm(grparts,ifnone="dt")
       lastdta <- rbindlist(list(a3[dt==max(dt),][,let(var="date")],a3[,.SD[.N],by=c(firstcat)][,let(var="group")]),fill=TRUE)
@@ -488,11 +517,8 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
     }
 
     # Deal with titles
-    titledefs <- data.table(axis=s("x;y"),note=c(grparts[item=="x",]$colnm,grparts[item=="y",]$colnm))
-    if(nchar(axislabels)<=0) {
-      titleadds <- rbind(titleadds,titledefs)[order(axis)][!is.na(note)]
-    }
-    titleadds <- titleadds[,.(note=paste0(.SD$note,collapse=",")),by=.(axis)]
+    titleadds[axis=="x",note:=fcoalesce(note,grparts[item=="x",]$colnm)]
+    titleadds[axis=="y",note:=fcoalesce(note,grparts[item=="y",]$colnm)]
     if(length(xlabdec<-s(xdecoration))==2) {
       titleadds[axis=="x",note:=paste0(xlabdec[1]," <-- ",note," --> ",xlabdec[2])]
     }

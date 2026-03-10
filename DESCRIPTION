@@ -1,6 +1,6 @@
 Package: FinanceGraphs
 Title: Flexible Graphs for Analysis of Financial Data and Time Series
-Version: 0.7.9
+Version: 0.8.0
 Authors@R: 
     person("Derek", "Holmes", , "derek@derekholmes.com", role = c("aut", "cre", "cph"))
 Description: Flexible wrappers around R graphics modules 'dygraphs' <https://dygraphs.com/> and 'ggplot2' <https://ggplot2.tidyverse.org/> to visualize data commonly found in Financial Studies, with an emphasis on time series.
@@ -24,6 +24,7 @@ Imports:
     utils (>= 4.0.0),
     tidyr (>= 0.6.3),
     xts (>= 0.10.0),
+    hexbin (>= 1.0.0),
     ggtext (>= 0.1.0),
     graphics (>= 4.0.0),
     grDevices (>= 4.5.0),

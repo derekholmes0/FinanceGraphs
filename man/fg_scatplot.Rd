@@ -10,7 +10,7 @@ fg_scatplot(indata,plotform,type="scatter",datecuts=c(7,66),
                title="",subtitle="",caption="",axislabels="",
                boundbox=c(),boundboxtype="",gridstyle=NA_character_,legendinside=FALSE,
                tformula=formula("y~x"),returnregresults=FALSE,
-               keepcols="", meltvar="variable")
+               keepcols="", meltvar="variable",melted=NULL)
 }
 \arguments{
 \item{indata}{\code{data.frame} with columns for (x,y) coordinates and possibly other categorical data or a date column. Alternatively,
@@ -52,6 +52,8 @@ Other annotations:
 \itemize{
 \item \code{ellipse} adds an ellipse around the points using \code{\link[ggplot2:stat_ellipse]{ggplot2::stat_ellipse()}}
 \item \verb{hull<:quantile>} draws a convext hull around points with \verb{<quantile>} (default 0) points removed. (See details)
+\item \verb{xline<:level=0>} draws a vertical line  at \code{level}
+\item \verb{yline<:level=0>} draws a horizontal line  at \code{level}
 \item \verb{grid:<dotted|dotted_x|dotted_y|none>} formats background grids
 }}
 
@@ -117,6 +119,8 @@ options \code{c("color","symbol","size","alpha")} as grouping variables}
 \item{keepcols}{list of \code{indata} columns to be kept with the graph data, useful for further faceting using \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}}
 
 \item{meltvar}{(Default \code{"variable"}) If \code{indata} is melted, then this is used to create \code{x} and \code{y} categories.}
+
+\item{melted}{(Default:NULL) If \code{FALSE} forces data not to be melted if \code{meltvar} in \code{indata}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

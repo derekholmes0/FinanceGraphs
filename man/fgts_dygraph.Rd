@@ -65,8 +65,8 @@ examples for specification.}
 \item{annotations}{string with annotations on individual series or along \code{y} axes.  Options can be added
 together with \verb{;}  and can include
 \itemize{
-\item \code{lastvalue}  : Value of latest observation for each series, placed at the end of the series
-\item \code{lastlabel}  : Name of each series, placed at the end of the series.
+\item \verb{last,[value|label]} : Value or name of latest observation for each series, placed at the end of the series
+\item \verb{last,[linevalue|linelabel]}  : Value or name of latest observation for each series, placed at the end of the seriesName of each series, placed at the end of the series.
 \item \verb{hline,y : Horizontal line at }y`
 \item \verb{range,ybeg,yend} : Band placed between \code{ybeg} and \code{yend}
 }}

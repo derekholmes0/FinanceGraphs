@@ -501,4 +501,14 @@ make_dtmap <- function(yrs_ahead=5) {
 # mktregimes	=	white
 # mktregimes	default	white
 
+fg_setdbg <- function() {
+  assign("cassign",TRUE,envir=the)
+  assign("verbose",TRUE,envir=the)
+}
+
+dump_the <- function() {
+  obset = s("cachedir;doifn;aesfn;themefn;doi_dates;aesset;gpname;verbose;cassign")
+  u1 = lapply(obset, function(x) { print(paste(x,"-----------------------"));print(get(x,envir=the))})
+}
+
 

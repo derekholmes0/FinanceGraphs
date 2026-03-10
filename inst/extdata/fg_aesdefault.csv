@@ -127,3 +127,7 @@ sizedefault,D01,size,2.5,,fg_scatplot,Default Point sizes
 sizedefault,D02,size,1.5,,fg_scatplot,Default Point sizes
 sizedefault,D03,size,1,,fg_scatplot,Default Point sizes
 sizedefault,D04,size,0.7,,fg_scatplot,Default Point sizes
+xlinecolor,,color,blue,,fg_scatplot,xline color
+ylinecolor,,color,blue,,fg_scatplot,yline color
+expand_x,,misc,0.01,,fg_scatplot,Pct expansion in x viewport
+expand_y,,misc,0.01,,fg_scatplot,Pct expansion in y viewport

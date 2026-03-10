@@ -143,7 +143,9 @@ All of the equation terms applicable to data sets with dates are:
 |Term|Parameters|Description|
 |:-----|:----------|:------------------|
 |`ellipse`||Add a equal bivariate frequency ellipse|
-|`hull`|`<,quantile>`|Add the convex hull of points after taking out `quantile` points from center|
+|`hull`|`<:quantile>`|Add the convex hull of points after taking out `quantile` points from center|
+|`xline`|`<:x><,color>`|Adds a vertical line to graph at `x`|
+|`yline`|`<:y><,color>`|Adds a horizontal line to graph at `y`|
 |`grid`|`<dotted|dotted_x|dotted_y|none>`|Style of background grids|
 
 ## Graph types
@@ -179,10 +181,11 @@ As a more complex example of how these can be put together, suppose we want to f
 have different non-linear betas to `QQQ`.  First we use a poor-man's pivot, then
 
 ```{r}
-dtrtn<- rbind(eqtyrtn[,.(date,r_eq=EEM,r_idx=QQQ,ticker="EEM")],
-                    eqtyrtn[,.(date,r_eq=IBM,r_idx=QQQ,ticker="IBM")]) |>
+dtrtn<- rbind(eqtyrtn[,.(date,r_eq=100*EEM,r_idx=100*QQQ,ticker="EEM")],
+                    eqtyrtn[,.(date,r_eq=100*IBM,r_idx=100*QQQ,ticker="IBM")]) |>
                     narrowbydtstr("-1y::")
-fg_scatplot(dtrtn,"r_eq ~ r_idx + color:ticker","densitylm",tformula="y~0+x:(x>0)",title="pcwise linear")
+fg_scatplot(dtrtn,"r_eq ~ r_idx + color:ticker + xline:0 + yline:0","densitylm",
+            tformula="y~0+x:(x>0)",title="piecewise linear")
 ```
 
 The `path` type is useful to understand the evolution of two time series.  For example, the past year
