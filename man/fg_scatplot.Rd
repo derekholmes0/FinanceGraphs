@@ -123,7 +123,7 @@ options \code{c("color","symbol","size","alpha")} as grouping variables}
 \item{melted}{(Default:NULL) If \code{FALSE} forces data not to be melted if \code{meltvar} in \code{indata}}
 }
 \value{
-A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object with desired graph, or a \code{\link[ggiraph:girafe]{ggiraph::girafe()}} object if \code{tooltips} is in the \code{plotform} string.
 }
 \description{
 Plots bivariate plots with some time-series specific enhancements.  Rather than programmatically describing

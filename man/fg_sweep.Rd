@@ -22,7 +22,7 @@ fg_sweep(swept_data, confidence = 80)
 Forecast Helpers
 }
 \examples{
-\dontrun{
+\donttest{
 if (
     requireNamespace("forecast", quietly = TRUE) &
     requireNamespace("timetk", quietly = TRUE) &

@@ -5,14 +5,11 @@
 #' @description
 #' `fg_sweep` Augments a [sweep::sw_sweep()] output into [fgts_dygraph()] `forecastdataset` format.  See
 #' [Introduction to Sweep](https://business-science.github.io/sweep/articles/SW00_Introduction_to_sweep.html)
-#'
 #' @param swept_data Data resulting from a [sweep::sw_sweep()] call
 #' @param confidence (Default: 80) Confidence interval (in percent) to display
-#'
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `forecastdataset` parameter
-#'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' if (
 #'     requireNamespace("forecast", quietly = TRUE) &
 #'     requireNamespace("timetk", quietly = TRUE) &
@@ -48,7 +45,6 @@ fg_sweep <- function(swept_data,confidence=80)  {
 #' @name fg_prophet
 #' @description
 #' `fg_prophet` Augments a [prophet::predict.prophet()]  output into [fgts_dygraph()] `forecastdataset` format.
-#'
 #' @param prophet_data Data resulting from a [prophet::predict.prophet()]  call
 #' @param seriesname (Default: `"y"`) Series name to attach forecast to
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `forecastdataset` parameter

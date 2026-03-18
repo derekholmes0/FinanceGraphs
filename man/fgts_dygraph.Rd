@@ -107,7 +107,7 @@ as of the given date.  See examples.}
 \item{extraoptions}{Additional options passed to \code{\link[dygraphs:dyOptions]{dygraphs::dyOptions()}}}
 }
 \value{
-Dygraph \href{https://rstudio.github.io/dygraphs/}{dygraphs} of input data, with annotations and other customizations.
+Dygraph \href{https://rstudio.github.io/dygraphs/}{dygraphs} plotting input data, with annotations and other customizations.
 }
 \description{
 Plots interactive time series graphs with many options for highlighting key events, regions and customizations.
@@ -212,7 +212,6 @@ fgts_dygraph(smalldta,title="W dividends",event_ds=fg_tq_divs(c("IBM","QQQ")))
 # Other helpers for use with credit ratings, breakouts, and earnings data are available.
 
 # use with forecasts
-\dontrun{
 require(forecast)
 require(timetk)
 require(sweep)
@@ -223,5 +222,4 @@ fcst_one <- function(ticker) {
   }
 fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,rebase=",100",forecast_ds=fpred)
-}
 }

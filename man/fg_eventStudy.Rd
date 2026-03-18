@@ -42,6 +42,9 @@ or statistics relative to a crossing of events and assets.
 
 \item{verbose}{(Default \code{FALSE})  Print Progress of calculations.}
 }
+\value{
+a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object with the  events analysis requested by \code{output} parameter, or a \code{data.frame} with statistics if \code{output} in \verb{c("data"","summary","stats")}
+}
 \description{
 Summarizes and plots moves in data from a given set of event dates. Plots are designed to maintain reasonable aesthetics with as
 either time series or event dates increase.

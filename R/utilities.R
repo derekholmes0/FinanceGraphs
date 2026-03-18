@@ -1,14 +1,17 @@
-#' Form exact datestring from relative datestring
+# =======================================================================================================
+#' Date Utilities
 #'
+#' @name gendtstr
+#' @rdname fg_date_utilities
+#' @description COnverts a generic relative string defining one or two endpoints to exact dates or datestrings
 #' @param x String describing generalized date as of today
 #' @param today Default `Sys.Date()`
-#' @param rtn What to return, Default is string of form `yyyy-mm-dd::yyyy-mm-dd`.  Can also be list`, `first`, `days`
-#'
-#' @returns depends on value of `rtn`
-#'
+#' @param rtn What to return, Default is string of form `yyyy-mm-dd::yyyy-mm-dd`.  Can also be `list`, `first`, `days`
+#' @returns an exact start date `startdt` and an exact end date `enddt`, in the following forms:
+#'    If `rtn="list"` returns `c(startdt,enddt)`, if `rtn="first"` then `startdt`, if `rtn="days` then an integer number of days from `startdt` to `today`  otherwise (by default) `"startdt::enddt"`
 #' @examples
 #' gendtstr("-3m::")
-#'
+#' gendtstr("-2y::-3m",today=as.Date("2025-03-15"))
 #' @export
 gendtstr<-function(x,today=Sys.Date(),rtn="dtstr") {
   if(is.numeric(x)) { return(paste0(today-lubridate::ddays(x),"::")) }
@@ -31,19 +34,17 @@ gendtstr<-function(x,today=Sys.Date(),rtn="dtstr") {
 }
 
 #' Narrow dataset by date string
-#'
+#' @name narrowbydtstr
+#' @rdname fg_date_utilities
 #' @param xin  Input `data.frame` or `data.table` with a Date column
 #' @param dtstr Generalized Date string of the form `<yyyy-mm-dd>::<yyyy-mm-dd>` or e.g. `-3m::`
 #' @param includetoday (Default: TRUE) pass either today `Sys.Date()` or `Sys.Date()-1` to `gendtstr`
 #' @param windowdays (Default: 0)Number of additional days to add at beginning of series
 #' @param invert  (Default: FALSE) Return dates not in `dtstr`
 #' @param addindicator (Default: FALSE) Returns original dataset with logical variable `inrange` if date is in desired range.
-#'
-#' @returns dataset in same form as `xin`
-#'
+#' @returns Same form as `xin`, i.e. a `data.table` or `data.frame`
 #' @examples
 #' narrowbydtstr(eqtypx,"-2m::-1m")
-#'
 #' @export
 narrowbydtstr<-function(xin,dtstr="",includetoday=TRUE, windowdays=0, invert=FALSE, addindicator=FALSE) {
   dtname <- find_col_bytype(xin,lubridate::is.instant)
@@ -64,7 +65,8 @@ narrowbydtstr<-function(xin,dtstr="",includetoday=TRUE, windowdays=0, invert=FAL
 }
 
 #' Extend a generic date string in varioud ways
-#'
+#' @name extenddtstr
+#' @rdname fg_date_utilities
 #' @param instr Input generalized date string, `data.table` or `xts` dataset
 #' @param begchg (Default: 0) Number of calendar days to extend beginning
 #' @param endchg (Default: 0) Number of calendar days to extend end
@@ -72,13 +74,10 @@ narrowbydtstr<-function(xin,dtstr="",includetoday=TRUE, windowdays=0, invert=FAL
 #' @param maxdt Maximum date to return
 #' @param rtn string describing what to do: (`list`,`datelist`,`fromtoday`,`totoday`)
 #' @param rtnstyle REturn datestring or list
-#'
-#' @returns String or list with new dates
-#'
+#' @returns `character` string or `list` with new dates
 #' @examples
 #' extenddtstr("-2m::-1m")
-#' extenddtstr("-2m::-1m",begchg=10,endchg=5)
-#'
+#' extenddtstr("-2m::-1m",begchg=-10,endchg=5)
 #' @export
 extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtnstyle="string") {
   index=NULL
@@ -110,7 +109,9 @@ extenddtstr <- function(instr,begchg=0,endchg=0,mindt=NULL,maxdt=NULL,rtn="",rtn
   return(paste0(as.character(spl[1]),'::',data.table::fcoalesce(as.character(spl[2]),"")))
 }
 
-
+# =======================================================================================================
+#' Other utititlies internal to this package
+#'@noRd
 optString_parse <-function(x,item,default="TRUE") {
     ops<-beg<-end<-NULL
     x1=tibble::tibble(ops=s(x)) |>
@@ -123,8 +124,6 @@ optString_parse <-function(x,item,default="TRUE") {
       return( dplyr::coalesce(x1,default) )
     }
 }
-
-
 # s(plit) converts string to list, but passes logical
 s<-function(x,sep=";",fixed=TRUE,rtn=NULL) {
     if(is.logical(x)) { return(x) }
@@ -179,7 +178,9 @@ xts2df <- function(x) {
   return(rtna)
 }
 
-
+# =======================================================================================================
+#' data table utilities
+#' @noRd
 DTappend <- function(indta,newdta) { data.table::rbindlist(list(indta,newdta),use.names=TRUE,fill=TRUE) }
 DTUpsert<-function(a,b,keys, fill=FALSE,verbose="") { # DT kind of tough to use this replaces old data
   if(!data.table::is.data.table(b)) {
@@ -332,7 +333,6 @@ form_breakset <- function(alldts,breaks,dropset="") {
 
 # ---------------------------------------------------------------
 # GGPLot utilities
-
 lm_eqn = function(df,ynm,xnm,tformula=formula("y~x"),rtnstyle=""){
   df2<-dplyr::select(df,x=!!{xnm},y=!!{ynm})
   m = lm(tformula, df2);

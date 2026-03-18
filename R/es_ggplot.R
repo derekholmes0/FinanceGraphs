@@ -29,7 +29,6 @@
 #' @param maxdelta (Default `+Inf`) Integer to cut off the number of days forward shown, useful if you want to calculate full period statistics.
 #' @param meltvar (Default `variable`)  Name of column describing distinct time series if `indata` is in long (melted) format,
 #' @param verbose (Default `FALSE`)  Print Progress of calculations.
-#'
 #' @examples
 #' dtset <- fg_get_dates_of_interest("fedmoves",startdt="2024-01-01")[,.(DT_ENTRY,text=eventid2)]
 #' fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="stats")
@@ -39,6 +38,7 @@
 #' fg_eventStudy(yc_CMSUST,dtset,nbd_back=3,nbd_fwd=10,title="Fed Cuts",output="boxbyvar")
 #' fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="scatter")
 #'
+#' @returns a [ggplot()] object with the  events analysis requested by `output` parameter, or a `data.frame` with statistics if `output` in `c("data"","summary","stats")`
 #' @import data.table
 #' @export
 fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",

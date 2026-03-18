@@ -119,12 +119,9 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 #' | `DT_ENTRY`  | Date which ratings or ratings change was issued | `Date` |
 
 #' @param agency String (default 'S.P') with 'AGENCY to look up in 'ratings_db'
-#'
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
-#'
 #' @details
 #' Investment grade ratings are shaded in blue, High Yield are in red. Darker areas are closest to the cutoff between the two.
-#'
 #' @examples
 #' data("nomfxdta")
 #' copdta <- nomfxdta |> dplyr::filter(variable=="COP")
@@ -238,7 +235,6 @@ fg_signal_to_events<-function(signal_df,colormap) {
 #' @param divs_ds Alternatively a `data.frame` previously obtained using [tidyquant::tq_get()] with columns (`symbol`,`date`,`value`)
 #' @param ticker_in_label (Default: TRUE) Make label ticker and the dividend.
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
-#'
 #' @examples
 #' if (requireNamespace("tidyquant", quietly = TRUE)) {
 #'   fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
@@ -273,7 +269,6 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' @param field (Default: `reportedEPS`) String in (`reportedEPS`,`estimatedEPS`,`surprise`,`surprisePercentage`)
 #' @param ticker_in_label (Default: TRUE) Make label ticker and the earnings
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
-#'
 #' @examples
 #' if (requireNamespace("alphavantagepf", quietly = TRUE)) {
 #' earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>

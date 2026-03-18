@@ -92,7 +92,7 @@
 #' @param keepcols list of `indata` columns to be kept with the graph data, useful for further faceting using [ggplot2::facet_wrap()]
 #' @param meltvar (Default `"variable"`) If `indata` is melted, then this is used to create `x` and `y` categories.
 #' @param melted (Default:NULL) If `FALSE` forces data not to be melted if `meltvar` in `indata`
-#' @returns A [ggplot2::ggplot()] object
+#' @returns A [ggplot2::ggplot()] object with desired graph, or a [ggiraph::girafe()] object if `tooltips` is in the `plotform` string.
 #' @examples
 #' # Simple text examples
 #' require(data.table)
@@ -178,7 +178,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
 
     # Cast molten data, if meltvar in data UNLESS melted=FALSE
     if(meltvar %in% colnamesnodate) {
-      if( is.null(melted) || melted==FALSE ) {
+      if( is.null(melted) || melted==TRUE ) {
         nonmeltcols <-  paste(setdiff(colnames(a2),c(meltvar,"value")),collapse="+")
         a2 <- dcast(a2,formula(paste(nonmeltcols,"~ ",meltvar)))
       }

@@ -32,7 +32,6 @@ Imports:
     ggrepel (>= 0.9.0),
     ggiraph (>= 0.9.0),
     knitr (>= 1.45),
-    ecp (>= 3.1.0),
     cpm (>= 2.0.0),
     scales (>= 1.1.0),
     stats (>= 4.5.0),
@@ -40,6 +39,7 @@ Imports:
     data.table (>= 1.9.8),
     dygraphs (>= 1.1.0)
 Suggests:
+    ecp (>= 3.1.0),
     RColorBrewer (>= 1.0.0),
     prophet (>= 1.1.0),
     forecast (>= 9.0.0),

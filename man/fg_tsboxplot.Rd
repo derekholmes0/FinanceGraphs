@@ -84,5 +84,4 @@ fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",
         boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
 fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",
         addline="last",boxtype="violin",title="Real Eff. Exch Rates (Violin)")
-
 }

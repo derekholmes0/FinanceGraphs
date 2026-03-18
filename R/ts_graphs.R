@@ -70,7 +70,7 @@
 #' @param groupnm  (Default: NULL, unless set via [fg_sync_group()] )  Group name used in `shiny` or `RMarkdown` to synchronize graphs. See [fg_sync_group()] for details.
 #' @param verbose (Default: FALSE) Print extra details about what will be graphed.
 #' @param extraoptions Additional options passed to [dygraphs::dyOptions()]
-#' @returns Dygraph [dygraphs](https://rstudio.github.io/dygraphs/) of input data, with annotations and other customizations.
+#' @returns Dygraph [dygraphs](https://rstudio.github.io/dygraphs/) plotting input data, with annotations and other customizations.
 #'
 #' @details
 #'  Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
@@ -169,7 +169,6 @@
 #' # Other helpers for use with credit ratings, breakouts, and earnings data are available.
 #'
 #' # use with forecasts
-#' \dontrun{
 #' require(forecast)
 #' require(timetk)
 #' require(sweep)
@@ -180,7 +179,6 @@
 #'   }
 #' fpred <- merge(fcst_one("QQQ"),fcst_one("IBM"),by="date")
 #' fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,rebase=",100",forecast_ds=fpred)
-#'}
 #' @import data.table
 #' @export
 fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts="hair,both;grid,both",

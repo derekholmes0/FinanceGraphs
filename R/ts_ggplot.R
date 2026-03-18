@@ -43,9 +43,7 @@
 #' @param meltvar (Default: `"variable"` Name of variable with unit category.
 #' @param flip (Default `FALSE`) If `TRUE` then categories are arranged vertically
 #' @param ptsize (Default: 3) Size of points for `doi` parmeter
-#'
 #' @returns A [ggplot2::ggplot()] object
-#'
 #' @examples
 #' fg_tsboxplot(eqtypx,breaks=c(7,30,360),normalize="byvar",hilightcats="QQQ",
 #'        title="Equity prices, within ranges")
@@ -55,11 +53,9 @@
 #'         boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
 #' fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",
 #'         addline="last",boxtype="violin",title="Real Eff. Exch Rates (Violin)")
-#'
 #' @import data.table
 #' @importFrom forcats fct_reorder
 #' @importFrom ggtext element_markdown
-#'
 #' @export
 fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
                       breaks=c(7,30,90,360), doi="last", normalize="", orderby="",
