@@ -8,7 +8,7 @@
 <!-- badges: end -->
 
 A flexible wrapper around [dygraphs](https://dygraphs.com/) and
-[ggplot2](https://ggplot2.tidyverse.org/) to graph and annototate
+[ggplot2](https://ggplot2.tidyverse.org/) to graph and annotate
 financial time series data.  
 The package provides several ways to add additional information to a
 simple series vs time data, including horizontal annotations (events
@@ -179,9 +179,9 @@ to show the transition.
 
 ``` r
 head(example_fcst_set,2)
-#>          date    QQQ.f  QQQ.flo  QQQ.fhi    IBM.f  IBM.flo  IBM.fhi
-#> 1: 2026-02-14 601.8882 593.7090 610.0673 262.3268 256.2824 268.3712
-#> 2: 2026-02-15 601.8882 590.6732 613.1032 262.3268 253.8659 270.7877
+#>          date    QQQ.f  QQQ.flo  QQQ.fhi   IBM.f  IBM.flo  IBM.fhi
+#> 1: 2026-03-21 582.8459 574.5719 591.1199 241.965 236.1769 247.7531
+#> 2: 2026-03-22 582.8459 571.5502 594.1416 241.965 233.8706 250.0593
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 ```
 
@@ -211,7 +211,7 @@ fg_get_aes("lines",n_max=2)
 #> 1:    lines      D01 color black        all Low cardinality line colors
 #> 2:    lines      D02 color   red        all Low cardinality line colors
 fg_update_line_colors( rev(RColorBrewer::brewer.pal(8,"GnBu"))[1:2] )
-#> Saved updates to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_aes.RD
+#> Saved aesthetic updates to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_aes.RD
 fg_get_aes("lines",n_max=3)
 #>    category variable  type   value const used                     helpstr
 #> 1:    lines      D01 color #08589E        all Low cardinality line colors
@@ -228,14 +228,16 @@ Resetting the lists (and colors) can also be done.
 newdoi <-data.frame(category="fedmoves",eventid="F:-50",DT_ENTRY=as.Date("6/16/2026",format="%m/%d/%Y"))
 fg_update_dates_of_interest(newdoi)
 #> Saved dates of interest file to C:\Users\DFH\AppData\Local/R/cache/R/FinanceGraphs/fg_doi.RD
+#> NULL
 tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 #>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
 #> 1 fedmoves   F:-25     rt:4 2025-10-29   2025-10-29  <NA>          <NA> <NA>
 #> 2 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
-fg_reset_to_default_state()
+fg_reset_to_default_state("all")
 #> Removing dates file and reverting to defaults of package
 #> Removing Aesthetics file and reverting to defaults of package
 #> Removing User-made Themes and reverting to defaults of package
+#> Removing cache Directory
 #> fg_reset_to_default_state(all) completed
 ```
 

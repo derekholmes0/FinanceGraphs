@@ -18,13 +18,11 @@ Imports:
     broom (>= 1.0.0),
     stringr (>= 1.2.0),
     forcats (>= 1.0.0),
-    tidyquant (>= 1.0.0),
     lubridate (>= 1.7.0),
     timeDate (>= 4000.0),
     utils (>= 4.0.0),
     tidyr (>= 0.6.3),
     xts (>= 0.10.0),
-    hexbin (>= 1.0.0),
     ggtext (>= 0.1.0),
     graphics (>= 4.0.0),
     grDevices (>= 4.5.0),
@@ -40,6 +38,7 @@ Imports:
     dygraphs (>= 1.1.0)
 Suggests:
     ecp (>= 3.1.0),
+    tidyquant (>= 1.0.0),
     RColorBrewer (>= 1.0.0),
     prophet (>= 1.1.0),
     forecast (>= 9.0.0),

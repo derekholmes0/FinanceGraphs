@@ -282,6 +282,9 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' @export
 fg_av_earnings<-function(indt,field="reportedEPS",ticker_in_label=FALSE) {
   reportedDate=NULL
+  if(!requireNamespace("alphavantagepf",quietly=TRUE)) {
+    stop("alphavantagepf not installed, cannot use fg_av_earnings")
+  }
   rtn <- data.table(indt)[,.(DT_ENTRY=reportedDate,text=paste0("E:",format(get(field),digits=2)),
                               color=symbol,loc="top",category="series_color")]
   if(ticker_in_label==TRUE) {

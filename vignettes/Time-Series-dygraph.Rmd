@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 suppressPackageStartupMessages(require(dplyr))
+suppressPackageStartupMessages(require(tidyquant))
 suppressPackageStartupMessages(require(FinanceGraphs))
 ```
 
@@ -207,7 +208,6 @@ the package has the rolling 66 day `p.value` of regressing returns of `TLT`
 against `QQQ`:
 
 ```{r}
-suppressMessages(require(dplyr))
 toplot <- eqtypx |> left_join(select(eqtyrtn,date,p_TLT_QQQ), by="date") |>
                     filter(!is.na(p_TLT_QQQ)) |>
                     transmute(date,TLT, TLT.lo=TLT * case_when( p_TLT_QQQ<0.04 ~ 0.9,.default=1) )
@@ -329,7 +329,6 @@ are designed to map exogenous univariate series to colored regions.
     Note that we use a long/melted format for the data.
 
 ```{r}
-suppressPackageStartupMessages(require(dplyr))
 toplot <- rbind(eqtypx_melt |> filter(variable=="QQQ"), 
                 consumer_sent |> transmute(date,variable=symbol,value=price))
 fgts_dygraph(toplot,title="With consumer sentiment",splitcols="UMCSENT",stepcols="UMCSENT",roller=5,
@@ -502,11 +501,9 @@ has a monthly probability of recession indicator. Mapping that indicator to a ye
 a 7pct threhold, we can add recession events using the event helper `fg_signal_to_events()`:
 
 ```{r}
-suppressPackageStartupMessages(require(tidyquant))
-suppressPackageStartupMessages(require(dplyr))
-recindic <- tq_get("RECPROUSM156N", get="economic.data") |> transmute(date,isrec=(price>7))
+recindic <- recession_indic |> transmute(date,isrec=(price>7))
 colormap <- data.frame(isrec=c(FALSE,TRUE),color=c("white","pink"),eventid=c("","Recession"))
-newevents <- fg_signal_to_events( recindic,colormap |> mutate(category="FREDPREC"))
+newevents <- fg_signal_to_events( recindic, colormap |> mutate(category="FREDPREC"))
 fg_update_dates_of_interest(newevents)
 fgts_dygraph(eqtypx, title="Stock Prices, w/ Recession Events", events="doi,FREDPREC",rebase=",100",bg_opts="grid,none")
 ```
@@ -524,9 +521,11 @@ newevents <- selic[,.(category="COPOM",eventid=format(tgt,digits=2), DT_ENTRY,co
 fg_update_dates_of_interest(newevents[!color=="grey"]) # Only add real moves
 tail(newevents,2)
 ```
-
-and use it easily 
-with 
+and use it easily with just a text argument to `events`.
 ```{r}
 fgts_dygraph(filter(nomfxdta,variable=="BRL"),title="BRL w/ COPOM",dtstartfrac=0.6,events="doi,COPOM")
+```
+Cleaning up any persistent event additions can be accomplished with
+```{r}
+fg_reset_to_default_state("all")
 ```

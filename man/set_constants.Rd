@@ -74,10 +74,10 @@ newcolors <- data.frame(category=rep("mylines",3),variable=c("D01","D02","D03"),
                 value=c("red","black","green"))
 fg_update_aes( newcolors, aestype="color")
 fg_get_aesstring("mylines")
-THeme replacement
+#Theme replacement
 require(ggplot2)
 fg_replace_theme(ggplot2::theme_dark(),persist=FALSE)
-fg_reset_to_default_state()
+fg_reset_to_default_state("all")
 
 }
 \seealso{

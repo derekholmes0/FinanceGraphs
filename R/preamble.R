@@ -2,10 +2,6 @@
 
 the <- new.env(parent = emptyenv())
 the$cachedir <- tools::R_user_dir("FinanceGraphs", which = "cache")
-if(!dir.exists(the$cachedir)) {
-  newd <- dir.create(the$cachedir)
-}
-
 load("./R/sysdata.rda",envir=the)
 #  loads tevents_defaults and ratingsmapmelt
 the$doifn <- paste0( the$cachedir, "/fg_doi.RD")

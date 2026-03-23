@@ -49,10 +49,10 @@
 #'                 value=c("red","black","green"))
 #' fg_update_aes( newcolors, aestype="color")
 #' fg_get_aesstring("mylines")
-#' THeme replacement
+#' #Theme replacement
 #' require(ggplot2)
 #' fg_replace_theme(ggplot2::theme_dark(),persist=FALSE)
-#' fg_reset_to_default_state()
+#' fg_reset_to_default_state("all")
 #'
 #' @import data.table
 #' @export
@@ -81,8 +81,11 @@ fg_update_aes <- function(indta,aestype=NA_character_,persist=TRUE,replace=FALSE
   newaes <- newaes[order(type,category,variable)]
   assign("aesset",newaes,envir=the)
   if(persist==TRUE) {
+    if(!dir.exists(the$cachedir)) {
+      newd <- dir.create(the$cachedir)
+    }
     save(newaes,file=the$aesfn)
-    message("Saved updates to ",the$aesfn)
+    message("Saved aesthetic updates to ",the$aesfn)
   }
   invisible(newaes)
 }
@@ -108,8 +111,11 @@ fg_replace_theme <- function(newTheme,persist=TRUE) {
   stopifnot("ggplot2::theme" %in% class(newTheme))
   assign("curr_theme",newTheme,envir=the)
   if(persist==TRUE) {
+    if(!dir.exists(the$cachedir)) {
+      newd <- dir.create(the$cachedir)
+    }
     save(newTheme,file=the$themefn)
-    message("Saved Theme to ",the$themefn)
+    message("Saved Default Theme to ",the$themefn)
   }
 }
 
@@ -144,6 +150,10 @@ fg_reset_to_default_state <- function(reset="all") {
 
   }
   the$tevents_defaults <- copy(tevents_defaults)
+  if(reset %in% c("all")) {
+    unlink(the$cachedir, force=TRUE,recursive=TRUE)
+    message("Removing cache Directory")
+  }
   message("fg_reset_to_default_state(",reset,") completed")
 }
 

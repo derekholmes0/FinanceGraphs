@@ -29,6 +29,7 @@
 #' @seealso [fgts_dygraph()]
 #' @examples
 #' require(utils)
+#' require(data.table)
 #' tail(fg_get_dates_of_interest("fedmoves"),2)
 #' # To add (for example) a new FOMC cut of 50bps on 6/16/2026:
 #' newdoi <-data.table(category="fedmoves",eventid="F:-50",
@@ -37,6 +38,7 @@
 #' # Since this is in the future, we have to make the future now.
 #' fg_get_dates_of_interest("fedmoves",totoday=as.Date("2026-12-31"))
 #' fg_reset_to_default_state("doi")
+#' fg_reset_to_default_state("all")
 #'
 #' @import data.table
 #' @export
@@ -82,6 +84,9 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
   }
   else {
     newdoi <- DTUpsert(the$doi_dates,indta,c("category","DT_ENTRY"),fill=TRUE)
+  }
+  if(!dir.exists(the$cachedir)) {
+    newd <- dir.create(the$cachedir)
   }
   save(newdoi,file=the$doifn)
   assign("doi_dates",newdoi,envir=the)

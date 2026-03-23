@@ -49,6 +49,7 @@ New doi \code{data.frames} must have at least three columns:\tabular{ll}{
 }
 \examples{
 require(utils)
+require(data.table)
 tail(fg_get_dates_of_interest("fedmoves"),2)
 # To add (for example) a new FOMC cut of 50bps on 6/16/2026:
 newdoi <-data.table(category="fedmoves",eventid="F:-50",
@@ -57,6 +58,7 @@ fg_update_dates_of_interest(newdoi)
 # Since this is in the future, we have to make the future now.
 fg_get_dates_of_interest("fedmoves",totoday=as.Date("2026-12-31"))
 fg_reset_to_default_state("doi")
+fg_reset_to_default_state("all")
 
 }
 \seealso{

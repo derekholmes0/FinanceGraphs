@@ -27,7 +27,7 @@ reerdta <- reerdta[!is.na(OBS_VALUE),][,.(date=lubridate::as_date(TIME_PERIOD,fo
 reerdta <- reerdta[date>=as.Date("2005-01-01")]
 
 consumer_sent <- tq_get("UMCSENT",get="economic.data")
-
+recession_indic <-  tq_get("RECPROUSM156N", get="economic.data")
 
 smalldta <- tail(eqtypx[,.(date,IBM,QQQ)],2*262)
 fcst_one <- function(ticker) {
@@ -45,7 +45,7 @@ yc_CMSUST <- tq_get(fredset$symbol,get="economic.data") |> data.table(keyby=c("s
 yc_CMSUST <- fredset[yc_CMSUST,on=.(symbol)][,.(variable,date,value=price)][!is.na(value)]
 #yc_CMSUST[,.(min(date),max(date),.N), by=.(variable)]
 
-usethis::use_data(eqtypx,eqtypx_melt,eqtyrtn,nomfxdta,reerdta,consumer_sent,
+usethis::use_data(eqtypx,eqtypx_melt,eqtyrtn,nomfxdta,reerdta,consumer_sent,recession_indic,
                   ratings_db, example_fcst_set,earnings_ibm, yc_CMSUST,overwrite = TRUE)
 
 creditstoget=s("COLOM;BRAZIL;MEX;PERU;INDON;PHILIP;DBR;OAT;BTP;CHINA;REPHUN;POLAND")

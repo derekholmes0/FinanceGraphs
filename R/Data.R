@@ -1,6 +1,6 @@
 #' Consumer Sentiment Data
 #'
-#' University of Michigan Consumer Sentiment Data
+#' University of Michigan Consumer Sentiment Data, FRED code UMCSENT
 #'
 #' @format ## `consumer_sent`
 #' A data frame with 120 rows and 3 columns
@@ -12,6 +12,19 @@
 #'
 #' @source <https://fred.stlouisfed.org/>
 "consumer_sent"
+
+#' Monthly recession indicator, FRED code RECPROUSM156N
+#'
+#' @format ## `recession_indic `
+#' A data frame with 120 rows and 3 columns
+#' \describe{
+#'   \item{symbol}{FRED identifier}
+#'   \item{date}{Date of report}
+#'   \item{pricce}{Observation}
+#' }
+#'
+#' @source <https://fred.stlouisfed.org/>
+"recession_indic"
 
 
 #' Equity Prices
