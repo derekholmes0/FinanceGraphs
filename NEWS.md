@@ -8,7 +8,7 @@
 * fg_scatplot: Added parameter `melted` to override casting process if needed
 * fg_scatplot: Generalized `doi` parameter to use more sensible aesthetics
 * Added Iran War to Dates of Interest
-* Added hexbin to Imports
+* Proper cleanup of cache directories
 
 # FinanceGraphs 0.7.9
 
