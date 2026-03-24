@@ -26,6 +26,7 @@ Imports:
     ggtext (>= 0.1.0),
     graphics (>= 4.0.0),
     grDevices (>= 4.5.0),
+    hexbin (>= 1.28.0),
     ggplot2 (>= 4.0.0),
     ggrepel (>= 0.9.0),
     ggiraph (>= 0.9.0),

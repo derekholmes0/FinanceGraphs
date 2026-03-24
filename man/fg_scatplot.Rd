@@ -153,7 +153,6 @@ Captions are added if data is truncated or omitted by the bounding box procedure
 \examples{
 # Simple text examples
 require(data.table)
-fg_reset_to_default_state()
 dt_mtcars=data.table(datasets::mtcars)
 dt_mtcars$id=lapply(rownames(datasets::mtcars),\(x) last(strsplit(x," ")[[1]]))
 fg_scatplot(dt_mtcars,"disp ~ hp + color:am + text:id","scatter",title="text basic")
@@ -164,11 +163,11 @@ set.seed(1); ndates <- 400;  dlyvol <- 0.2/sqrt(260)
 rtns <- cbind(cumsum(rnorm(ndates,sd=dlyvol)),cumsum(rnorm(ndates,sd=dlyvol)))
 dttest <- data.table(date=seq(as.Date("2021-01-01"),as.Date("2021-01-01")+ndates-1),
             xtest=100*(1+rtns[,1]),ytest=100*(1+rtns[,2]),
-            ccat=fifelse(runif(ndates)<=0.2,"Rare","--"))
+            ccat=fifelse(runif(ndates)<=0.2,"Rare","mkt"))
 # Making categories out of recent data
 fg_scatplot(dttest,"ytest ~ xtest + doi:recent","scatter",datecuts=c(66,122),title="from recent")
 fg_scatplot(dttest ,"ytest ~ xtest + color:ccat + doi:recent + point:label","scat",
-              datecuts=c(7,66),title="from recent")
+              datecuts=c(7,66),title="recent w label")
 # Makes categories out of event sets from [fg_get_dates_of_interest()]
 fg_scatplot(dttest,"ytest ~ xtest + doi:regm","scatter",title="from a regime")
 # Point graphing switches.
