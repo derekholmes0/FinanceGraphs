@@ -38,7 +38,7 @@ change pointer option and grids options.
 }}
 
 \item{splitcols, stepcols, hidecols}{String or list of data series to show on a second y axis, to be shown as step plots, or to be hidden.
-Can also be \code{TRUE} in which case first series in the data is affected. Can also be a semicolon separated single string with mutiple series.}
+Can also be \code{TRUE} in which case first series in the data is used Can also be a semicolon separated single string with mutiple series.}
 
 \item{hilightcols}{String or list of data series to plot in different style than other series.}
 

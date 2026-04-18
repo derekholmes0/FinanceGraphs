@@ -1,3 +1,9 @@
+# FinanceGraphs 0.9.0
+
+* fgts_dygraphs: Added fg_RegimeChange event handler
+* fgts_dygraphs: Work around for not yet fixed https://github.com/Rdatatable/data.table/pull/7667
+* fg_eventStudy: Holidays are either NYSE or US Bond market holidays, not just NYSE
+
 # FinanceGraphs 0.8.0
 
 * fgts_dygraphs: y Scaling corrected to include all data

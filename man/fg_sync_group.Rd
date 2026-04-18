@@ -9,7 +9,7 @@ fg_sync_group(gpname = "")
 \arguments{
 \item{gpname}{A string or NULL
 \itemize{
-\item \code{gpname=NULL} turns of dygraphs synchronization.
+\item \code{gpname=NULL} turns off dygraphs synchronization.
 \item \verb{gpname=<string>} set the common group to \verb{<string>}
 \item \code{gpname=""} (Default), just returns the current common group name.
 }}

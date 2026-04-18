@@ -1,3 +1,45 @@
+#' Event Helpers : fg_RegimeChange
+#'https://cran.r-project.org/web/packages/RegimeChange/vignettes/introduction.html
+#' @title Event_Helpers
+#' @name fg_RegimeChange
+#' @description Wrapper around the function [RegimeChange::detect_regimes()()] to create events for [fgts_dygraph()]
+#' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
+#' @series Which series in `indta` to find changepoints on
+#' @param usereturns (default TRUE) LOgical to take log returns before changepoint calculations.
+#' @param ... Parameters passed to [RegimeChange::detect_regimes()]
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
+#' @examples
+#' if (requireNamespace("RegimeChange", quietly = TRUE)) {
+#' dta <- tail(eqtypx[,.(date,QQQ,TLT)],260)
+#' eventdt = fg_RegimeChange(dta)
+#' fgts_dygraph(dta,event_ds=eventdt,title="With Breakouts")
+#' }
+#' @import data.table
+#' @import RegimeChange
+#' @export
+fg_RegimeChange<-function(indta,usereturns=TRUE,series=NULL,...) {
+  estimate<-irow<-icol<-NULL
+  setnames(dts <- indta[,1][,value:=.I], c("DT_ENTRY","value"))
+  icol <-  ifelse(is.null(series),1,which(names(indta)==series))
+  if(usereturns) {
+    indta <- indta[,lapply(.SD, \(x) c(0,diff(log(x),1))), .SDcols=!1]
+  }
+  onereg <- function(icol) {
+    result <- RegimeChange::detect_regimes(indta[[icol]],...)
+    confi<-rbindlist(lapply(result$confidence_intervals,as.data.table))[,let(text=names(indta)[[icol]],irow=.I,estimate=as.numeric(estimate))]
+    #  confi<- cbind(indta[confi$estimate,.SD,.SDcols=names(indta)[c(1,icol)]],  confi)
+    confimelt <- melt(confi,id.vars=c("text","irow"))[,let(value=as.integer(round(value,1)))]
+    confimelt <- dts[confimelt,on=.(value)][order(irow,variable)]
+    thiscolor <- fg_get_aesstring("lines")[[icol]]
+    eset <- confimelt[,.(text,DT_ENTRY=.SD[variable=="lower",]$DT_ENTRY,END_DT_ENTRY=.SD[variable=="upper",]$DT_ENTRY, color=alpha(thiscolor,0.2)), by=.(irow)]
+    eset <- eset[,.SD[1],by=.(irow)][,irow:=NULL]
+    eset <- rbindlist(list( confimelt[variable=="estimate"][,.(text=paste(text,format(DT_ENTRY,"%m-%d")),DT_ENTRY,END_DT_ENTRY=DT_ENTRY,
+                                                               color=thiscolor,loc="bottom")], eset),use.names=TRUE,fill=TRUE)
+    return(eset[])
+  }
+  return(onereg(icol))
+}
+
 #' Event Helpers : fg_addbreakouts
 #'
 #' @title Event_Helpers

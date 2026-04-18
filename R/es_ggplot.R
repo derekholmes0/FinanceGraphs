@@ -236,7 +236,7 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
 #Assumes eventname is "text"
 es_dtset_to_dtds<- function(indtset,nbd_back,nbd_fwd, orderby="EVENT_DT",mindt=0,
                             group_match_var=NA_character_, orderdesc=FALSE) {
-  isday=mergecd=offset=id=EVENT_ORDER=N=NULL
+  isbday=mergecd=offset=id=EVENT_ORDER=N=NULL
   if(is.data.frame(indtset)) { # Rename to my conventions
     list2env(generic_to_melt(indtset,"dtset;dt_colnames",meltvar=group_match_var),envir=environment(NULL))
     #setnames(dtset,c("DT_ENTRY","text"),c("EVENT_DT_ENTRY","eventid"),skip_absent=TRUE)  # includes cvar, eventid
@@ -264,7 +264,7 @@ es_dtset_to_dtds<- function(indtset,nbd_back,nbd_fwd, orderby="EVENT_DT",mindt=0
     group_match_var="NGP"
     dtset <- dtset[,NGP:=1]
   }
-  dttmp <- dtmap[isday==TRUE,.(DT_ENTRY,isday)][,rno:=.I] # Bdays only
+  dttmp <- dtmap[isbday==TRUE,.(DT_ENTRY,isbday)][,rno:=.I] # Bdays only
   dtset <- dttmp[dtset,on=.(DT_ENTRY)][,let(DT_ENTRY=NULL)]
   dt_off <- data.table(offset=c(-nbd_back,0,nbd_fwd),id=c("BEG_DT","DT","END_DT"),mergecd=1)
   dtset_2 <- merge(dt_off,dtset[,mergecd:=1],by="mergecd",all=TRUE,allow.cartesian=TRUE)

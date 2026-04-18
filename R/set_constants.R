@@ -163,7 +163,7 @@ fg_reset_to_default_state <- function(reset="all") {
 #' @name fg_sync_group
 #' @description  Sets, gets, or resets a common name to be passed into  [fgts_dygraph()] for synchronization.
 #' @param gpname A string or NULL
-#' * `gpname=NULL` turns of dygraphs synchronization.
+#' * `gpname=NULL` turns off dygraphs synchronization.
 #' * `gpname=<string>` set the common group to `<string>`
 #' * `gpname=""` (Default), just returns the current common group name.
 #' @returns current groupname
@@ -199,7 +199,7 @@ fg_create_defaults <- function() {
   aes_default <- fread("./inst/extdata/fg_aesdefault.csv")[order(type,category,variable)]
   the$aesset <- aes_default
   theme_default <-fgts_BaseTheme()
-  #usethis::use_data(doi_default,aes_default,theme_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
+  usethis::use_data(doi_default,aes_default,theme_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
 }
 
 # ----------------------- Dates
@@ -228,33 +228,41 @@ fg_create_defaults <- function() {
 # Make datemap, very helpuful for narrowing dates.
 #
 #' @import data.table
-make_dtmap <- function(yrs_ahead=5) {
+make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
   # All Dates
-  `.`<-DT_ENTRY<-isday<-rolldt<-isholiday<-yr<-yrmo<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-NULL
-  dtmap <- data.table::data.table(DT_ENTRY=seq(from =as.Date("1970-03-20"), to = Sys.Date()+yrs_ahead*365, by = "day")) |> .addseasonaldates()
-  dtmap <- dtmap[,':='(isholiday=!timeDate::isBizday(timeDate::as.timeDate(DT_ENTRY), holidays =  timeDate::holidayNYSE(1970:2060), wday = 1:5))]
+  `.`<-DT_ENTRY<-isbday<-rolldt<-isholiday<-yr<-yrmo<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-NULL
+  ishol_nyse<-ishol_bond<-NULL
+  dtmap <- data.table::data.table(DT_ENTRY=seq(from =begDate, to = Sys.Date()+yrs_ahead*365, by = "day")) |> .addseasonaldates()
+  allhols <- rbindlist(list(
+    data.table(DT_ENTRY=qlcal::getHolidays(begDate, Sys.Date()+yrs_ahead*365,xp=qlcal::getCalendar("UnitedStates/NYSE")),calnm="ishol_nyse",ishol=TRUE),
+    data.table(DT_ENTRY=qlcal::getHolidays(begDate, Sys.Date()+yrs_ahead*365,xp=qlcal::getCalendar("UnitedStates/GovernmentBond")),calnm="ishol_bond",ishol=TRUE),
+    data.table(DT_ENTRY=qlcal::getHolidays(begDate, Sys.Date()+yrs_ahead*365,xp=qlcal::getCalendar( "UnitedKingdom/Exchange")),calnm="ishol_uk",ishol=TRUE)
+  ))
+  allholstr<- dcast(allhols,DT_ENTRY ~ calnm, value.var="ishol",fill=FALSE)
+  dtmap_hol<-allholstr[dtmap,on=.(DT_ENTRY)][,lapply(.SD,\(x) fcoalesce(x, FALSE)), .SDcols=patterns("ishol*")]
+  dtmap<- cbind(dtmap,dtmap_hol)
   cdsendpoints <-c(base::as.Date("1970-03-20"), base::as.Date(paste0(max(dtmap$yr),"-03-20")))
   u2dts <- data.table::data.table(DT_ENTRY=seq(cdsendpoints[1],cdsendpoints[2], by = '6 month'))[,':='('rolldt'=DT_ENTRY)]
   dtmap <- u2dts[dtmap,on=.(DT_ENTRY)]
   data.table::setnafill(dtmap,"locf",cols=c('rolldt'))
   data.table::setkeyv(dtmap,c("DT_ENTRY"))
   # Business days and end periods
-  dtmap <- dtmap[,'isday':=data.table::between(data.table::wday(DT_ENTRY),2,6) & !isholiday] # weekdays
+  dtmap <- dtmap[,'isbday':=data.table::between(data.table::wday(DT_ENTRY),2,6) & !(ishol_nyse | ishol_bond)] # weekdays
   dtmapc <- data.table::copy(dtmap)
-  dtmapc <- dtmapc[isday==TRUE,]
+  dtmapc <- dtmapc[isbday==TRUE,]
   dtmapc <- dtmapc[,'isweek':=(DT_ENTRY==max(DT_ENTRY)),by="yrwk"]
   dtmapc <- dtmapc[,'ismo':=(DT_ENTRY==max(DT_ENTRY)),by="yrmo"]
   dtmapc <- dtmapc[,'isqtr':=(DT_ENTRY==max(DT_ENTRY)),by="yrqtr"]
   dtmapc <- dtmapc[,'isyr':=(DT_ENTRY==max(DT_ENTRY)),by="yr"]
   dtmapc[,'daysfromroll':=.I-min(.I),by='rolldt'][,'rollpd':=format(rolldt,"%Y%m")]
-  dtmapc <- dtmapc[,':='('bdoy'=cumsum(isday==TRUE)), by=.(yr)]
+  dtmapc <- dtmapc[,':='('bdoy'=cumsum(isbday==TRUE)), by=.(yr)]
   # Roll Dates (CDS)
   dtmap <- dtmapc[,c('DT_ENTRY','isweek','ismo','isqtr','isyr','daysfromroll','rollpd','bdoy')][dtmap,on=.(DT_ENTRY)]
   data.table::setnafill(dtmap,"locf",cols=c("daysfromroll"))
   dtmap <- dtmap |> tidyr::fill('rollpd') # tidyr bc of character
   # Option Expirations (Equities)
   moexp <- dtmap[data.table::wday(DT_ENTRY)==6,][,':='('frino'=.I-min(.I)),by=.(yrmo)][frino==2,][,.(DT_ENTRY,optexp="mo")]
-  qexp <- dtmap[isholiday==FALSE & isday==TRUE,][,.SD[.N],by=.(yrqtr)][,.(DT_ENTRY,xoptexp="qtr")]
+  qexp <- dtmap[isholiday==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrqtr)][,.(DT_ENTRY,xoptexp="qtr")]
   dtmap <- moexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=data.table::fcoalesce(optexp,""))]
   dtmap <- qexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=paste0(optexp,data.table::fcoalesce(xoptexp,"")))][,':='(xoptexp=NULL)]
   dtmap <- dtmap[,':='('isweek'=data.table::fcoalesce(isweek,FALSE),'ismo'=data.table::fcoalesce(ismo,FALSE),
