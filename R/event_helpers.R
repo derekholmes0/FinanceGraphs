@@ -4,7 +4,7 @@
 #' @name fg_RegimeChange
 #' @description Wrapper around the function [RegimeChange::detect_regimes()()] to create events for [fgts_dygraph()]
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
-#' @series Which series in `indta` to find changepoints on
+#' @param series Which series in `indta` to apply changepoints to
 #' @param usereturns (default TRUE) LOgical to take log returns before changepoint calculations.
 #' @param ... Parameters passed to [RegimeChange::detect_regimes()]
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
