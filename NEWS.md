@@ -3,6 +3,8 @@
 * fgts_dygraphs: Added fg_RegimeChange event handler
 * fgts_dygraphs: Work around for not yet fixed https://github.com/Rdatatable/data.table/pull/7667
 * fg_eventStudy: Holidays are either NYSE or US Bond market holidays, not just NYSE
+* fg_scatplot: Fixed error with single date breakset
+* fg_scatplot: Fixed aesthetic confusion when both `doi` and `lm` are used
 
 # FinanceGraphs 0.8.0
 

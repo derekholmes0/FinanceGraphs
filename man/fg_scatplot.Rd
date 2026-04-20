@@ -113,7 +113,7 @@ If \code{boundbox} is a list of 4 numbers \code{c(xmin,xmax,ymin,ymax)} data is 
 
 \item{tformula}{(Default \code{y~x}) Formula used within \code{lm} or \code{loess} stats .}
 
-\item{returnregresults}{Return a two elemet list c(plot,regression \code{data.frame}). Only available for linear models, and uses the first amoung
+\item{returnregresults}{Return a two element list c(plot,regression \code{data.frame}). Only available for linear models, and uses the first amoung
 options \code{c("color","symbol","size","alpha")} as grouping variables}
 
 \item{keepcols}{list of \code{indata} columns to be kept with the graph data, useful for further faceting using \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}}

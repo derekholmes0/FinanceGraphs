@@ -308,7 +308,7 @@ form_breakset <- function(alldts,breaks,dropset="") {
   dtlimits <- range(alldts)
   if (is.character(breaks) && nrow( bktmp <- fg_get_dates_of_interest(breaks,totoday=dtlimits[2]) )>0 ) {
     break_set <- bktmp[END_DT_ENTRY>=dtlimits[1],.(BEG_DT_ENTRY=DT_ENTRY,END_DT_ENTRY,daysback=dtlimits[2]-DT_ENTRY,histcat=eventid)] }
-  else if (length(breaks)>1) {
+  else if (length(breaks)>0) {
     if(all(range(breaks)==c(0,1))) {
       breaks <- sort(breaks[which(breaks>0.001)])
       bks <- alldts[pmax(1,floor(length(alldts)*(1-breaks)))] |> rev()
@@ -328,7 +328,7 @@ form_breakset <- function(alldts,breaks,dropset="") {
     message_if( length(tlevels<-intersect(s(dropset),break_set$histcat))>0, "Dropping level(s) ",tlevels)
     break_set <- break_set[!data.table(histcat=s(dropset)),on=.(histcat)]
   }
-  return(break_set)
+  return(break_set[])
 }
 
 # ---------------------------------------------------------------

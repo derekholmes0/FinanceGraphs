@@ -87,7 +87,7 @@
 #' @param gridstyle String in `<dotted|dotted_x|dotted_y|none>` to contol grids as in `grid` option above.
 #' @param legendinside (Default: TRUE) Put all guides inside the graph.
 #' @param tformula (Default `y~x`) Formula used within `lm` or `loess` stats .
-#' @param returnregresults Return a two elemet list c(plot,regression `data.frame`). Only available for linear models, and uses the first amoung
+#' @param returnregresults Return a two element list c(plot,regression `data.frame`). Only available for linear models, and uses the first amoung
 #' options `c("color","symbol","size","alpha")` as grouping variables
 #' @param keepcols list of `indata` columns to be kept with the graph data, useful for further faceting using [ggplot2::facet_wrap()]
 #' @param meltvar (Default `"variable"`) If `indata` is melted, then this is used to create `x` and `y` categories.
@@ -432,14 +432,15 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         grparts[item=="alpha",addscales:=FALSE]
         p<-p+geom_smooth(aes(x=xx,y=yy),method=actmethod,formula=tformula,colour="black",alpha=talpha,show.legend=FALSE,inherit.aes=FALSE)
         if(!grepl("noeq",type) & grepl("lm",type)) {
-          legx <- a3[,.(xx=quantile(xx,probs=c(0.1)),yy=quantile(yy,probs=c(0.1+.GRP/10)),labels=lm_eqn(.SD,"xx","yy",
-                            tformula=tformula,rtnstyle=regform))]
+          legx <- a3[,.(xx=quantile(xx,probs=c(0.1),na.rm=T),
+                        yy=quantile(yy,probs=c(0.1+.GRP/10),na.rm=T),
+                        labels=lm_eqn(.SD,"xx","yy",tformula=tformula,rtnstyle=regform))]
           p<-p+geom_label(aes(x=xx,y=yy,label=labels),data=legx,color="black",size=tsize*0.8)
         }
       }
       else {
-        lm_aes <- collect_aes(data.table(nm=rep(firstcat,2),ggaes=c("color","fill"),indta=rep(TRUE,2)))
-        p<-p+lm_aes+geom_smooth(method=actmethod,formula=tformula,alpha=talpha,show.legend=FALSE,data=a3)
+        lm_aes <- collect_aes(data.table(nm=c("xx","yy",rep(firstcat,2)),ggaes=c("x","y","color","fill"),indta=rep(TRUE,4)),exclude="")
+        p<-p+geom_smooth(lm_aes,method=actmethod,formula=tformula,alpha=talpha,show.legend=FALSE,data=a3,inherit.aes = FALSE)
         if(!grepl("noeq",type) & grepl("lm",type)) {
           firstcat <- first_category_nm(grparts)
           legx_x <- 0.2*bbox[[2,1]]+0.8*(bbox[[1,1]])
@@ -616,8 +617,8 @@ make_datecutlabels=function(dta, dtsback=c(7,22),lastonly=FALSE,maxdate=NA_real_
     paste0(as.character(dta$colfactor),",",as.character(tortn))
 }
 
-collect_aes <- function(grparts) {
-  aes_sets <- grparts[!(ggaes=="x") & indta==TRUE]
+collect_aes <- function(grparts,exclude="x") {
+  aes_sets <- grparts[!(ggaes==exclude) & indta==TRUE]
   aes_vals <- lapply(aes_sets$nm, sym)
   names(aes_vals) <-aes_sets$ggaes
   return(eval(as.call(c(quote(aes),aes_vals))))

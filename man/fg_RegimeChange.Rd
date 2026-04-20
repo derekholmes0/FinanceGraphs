@@ -11,6 +11,8 @@ fg_RegimeChange(indta, usereturns = TRUE, series = NULL, ...)
 
 \item{usereturns}{(default TRUE) LOgical to take log returns before changepoint calculations.}
 
+\item{series}{Which series in \code{indta} to apply changepoints to}
+
 \item{...}{Parameters passed to \code{\link[RegimeChange:detect_regimes]{RegimeChange::detect_regimes()}}}
 }
 \value{
