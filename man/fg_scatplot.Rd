@@ -83,11 +83,11 @@ removes confidence bands.}
 \item{n_color_switch}{(Default 7): Number of distint color categories beyond which colors are taken from gradient scales,
 unless a color set is specified in a \code{color} part of \code{plotform}}
 
-\item{n_hex_switch}{(Default 400): Number of data points beyond which points are replaced with binned hexagons (see \code{\link[ggplot2:geom_hex]{ggplot2::geom_hex()}})}
+\item{n_hex_switch}{(Default 400): Number of data points beyond which points are replaced with binned hexagons (see \code{\link[ggplot2:geom_hex]{geom_hex()}})}
 
-\item{repel}{(Default TRUE) Text and labels are plotted using \code{\link[ggrepel:ggrepel]{ggrepel::ggrepel()}}}
+\item{repel}{(Default TRUE) Text and labels are plotted using \code{\link[ggrepel:ggrepel]{ggrepel()}}}
 
-\item{jitter}{Jitter parameters used by \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}} or \code{\link[ggplot2:geom_text]{ggplot2::geom_label()}} if \code{repel=FALSE}. Default is no jitter.}
+\item{jitter}{Jitter parameters used by \code{\link[ggplot2:geom_text]{geom_text()}} or \code{\link[ggplot2:geom_label]{geom_label()}} if \code{repel=FALSE}. Default is no jitter.}
 
 \item{title}{Title to add to graph}
 

@@ -19,5 +19,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Derek Holmes \email{derek@derekholmes.com} [copyright holder]
 
+Authors:
+\itemize{
+  \item Derek Holmes \email{derek@derekholmes.com} [copyright holder]
+}
+
 }
 \keyword{internal}

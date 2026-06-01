@@ -59,7 +59,7 @@ New color datasets must have at least three columns:\tabular{ll}{
 
 \code{variable} is used to prioritize colors, so (e.g. \code{D01} will be the color of the first series in an input dataset)
 
-If \code{aestype=="colorrange"} then a sequential scale of size \code{n_max} will be returned using details saved from  \code{\link[=fg_update_aes]{fg_update_aes()}}. See \link[scales:pal_brewer]{scales::brewer_pal}
+If \code{aestype=="colorrange"} then a sequential scale of size \code{n_max} will be returned using details saved from  \code{\link[=fg_update_aes]{fg_update_aes()}}. See \link[scales:brewer_pal]{scales::brewer_pal}
 and \href{https://colorbrewer2.org/#type=sequential&scheme=Greens&n=7}{colorbrewer}
 }
 \examples{

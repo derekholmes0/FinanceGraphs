@@ -26,7 +26,7 @@ or a \code{\link[prophet:prophet]{prophet::prophet()}} object}
 \item{method}{string describing method of finding Turning Points
 \itemize{
 \item \code{"pctchg"} : (Default) Find \code{npts} largest percentage changes with a miniumum window between them
-\item \code{"cpm"} : Uaw \link[cpm:cpmPackage]{cpm::cpm-package} to find change points
+\item \code{"cpm"} : Uaw \link[cpm:cpm-package]{cpm-package} to find change points
 }}
 
 \item{npts}{Number of change points to find}
@@ -41,7 +41,7 @@ or a \code{\link[prophet:prophet]{prophet::prophet()}} object}
 
 \item{cpmmethod}{String (default: "GLM") passed to \code{\link[cpm:processStream]{cpm::processStream()}}}
 
-\item{...}{Additional parameters passed to \link[cpm:cpmPackage]{cpm::cpm-package}}
+\item{...}{Additional parameters passed to \link[cpm:cpm-package]{cpm-package}}
 }
 \value{
 \code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
