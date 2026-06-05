@@ -29,7 +29,7 @@ legd_guide <- function(legendstr,guidetype="legend",title=waiver(),pctin=0.9,nca
   ppos <- ppos_map[xleg==legendstr,]
   ppos <- fifelse(nrow(ppos)<=0,"inside",ppos[1,]$ppos)
   ncols <- floor((ncats-1)/5)+1
-  message_if(the$verbose,"legd_guide(",legendstr, ",title: ",title,")")
+  message_if(the_fg$verbose,"legd_guide(",legendstr, ",title: ",title,")")
   if (grepl("loc:",legendstr)) {
     ll=as.numeric(s(gsub("loc:","",legendstr)));
     p<-theme(legend.position.inside=c(ll[1],ll[2]),legend.justification=c(ll[3],ll[4])) }

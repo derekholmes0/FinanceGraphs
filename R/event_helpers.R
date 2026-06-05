@@ -2,7 +2,7 @@
 #'https://cran.r-project.org/web/packages/RegimeChange/vignettes/introduction.html
 #' @title Event_Helpers
 #' @name fg_RegimeChange
-#' @description Wrapper around the function [RegimeChange::detect_regimes()()] to create events for [fgts_dygraph()]
+#' @description Wrapper around the function [RegimeChange::detect_regimes()] to create events for [fgts_dygraph()]
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
 #' @param series Which series in `indta` to apply changepoints to
 #' @param usereturns (default TRUE) LOgical to take log returns before changepoint calculations.

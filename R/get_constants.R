@@ -36,9 +36,9 @@
 #' @import scales
 #' @export
 fg_get_aes <- function(item="",n_max=NA_integer_,asdataframe=FALSE) {
-  if(item=="") { return(the$aesset) }
-  message_if(the$verbose,"fg_get_aes(",item,ifelse(is.na(n_max),"",paste0(", n_max=",n_max)),")")
-  rtn <- the$aesset[category==item,]
+  if(item=="") { return(the_fg$aesset) }
+  message_if(the_fg$verbose,"fg_get_aes(",item,ifelse(is.na(n_max),"",paste0(", n_max=",n_max)),")")
+  rtn <- the_fg$aesset[category==item,]
   if(nrow(rtn)<=0) {
     message(paste("fg_get_aes Cannot find (",item,") in aesthetics db"))
     stopifnot(sys.nframe()>0)
@@ -72,7 +72,7 @@ fg_get_aes <- function(item="",n_max=NA_integer_,asdataframe=FALSE) {
 #' @rdname get_constants
 #' @export
 fg_get_aesstring <- function(item="",n_max=NA_integer_,toget="value",rtnifnotfound=FALSE) {
-  if(rtnifnotfound==TRUE & nrow(the$aesset[category==item,])<=0) {
+  if(rtnifnotfound==TRUE & nrow(the_fg$aesset[category==item,])<=0) {
     return(NA_character_)
   }
   else {
@@ -100,7 +100,7 @@ fg_display_colors <- function(item="") {
 fg_print_aes_list <- function(grepstr="") {
   used=NULL
   grepstr <- paste0(grepstr,"|all")
-  rtn <- the$aesset[grepl(grepstr,used),]
+  rtn <- the_fg$aesset[grepl(grepstr,used),]
   rtn <- rtn[,.(helpstr=.SD[1][["helpstr"]],default=.SD[1][["value"]],N=.N),by=.(used,category)]
   rtn <- rtn[order(used,category)][,used:=NULL]
   return(kable(rtn))
@@ -109,7 +109,7 @@ fg_print_aes_list <- function(grepstr="") {
 # Unexported helpers
 
 fg_current_theme <- function() {
-  return(the$curr_theme)
+  return(the_fg$curr_theme)
 }
 
 fg_get_aeslist <- function(item="",toget="value") {
@@ -119,7 +119,7 @@ fg_get_aeslist <- function(item="",toget="value") {
 
 dump_the <- function() {
   obset = s("cachedir;doifn;aesfn;themefn;doi_dates;aesset;gpname;verbose;cassign")
-  nullres <- lapply(obset, function(x) { print(paste(x,"-----------------------"));print(get(x,envir=the))})
+  nullres <- lapply(obset, function(x) { print(paste(x,"-----------------------"));print(get(x,envir=the_fg))})
 }
 
 

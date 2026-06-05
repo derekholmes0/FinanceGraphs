@@ -64,8 +64,8 @@ fg_update_aes <- function(indta,aestype=NA_character_,persist=TRUE,replace=FALSE
     stop("fg_create_colors: Need to have (category,variable,value) at minimmum")
   }
   if( !("type" %in% colnames(indta))) {  # Infer from whats there
-    oldaestypes = the$aesset[,.N,by=.(category,type)][indta,on=.(category)]
-    indta <- the$aesset[,.N,by=.(category,type)][indta,on=.(category)][,let(N=NULL)]
+    oldaestypes = the_fg$aesset[,.N,by=.(category,type)][indta,on=.(category)]
+    indta <- the_fg$aesset[,.N,by=.(category,type)][indta,on=.(category)][,let(N=NULL)]
     if(is.na(aestype) & nrow(indta[is.na(type)])>0) {
       stop(" fg_update_aes.  Cannot infer aesthetic type from either data or input parameter, speciffy `aestype=..`")
     }
@@ -76,16 +76,16 @@ fg_update_aes <- function(indta,aestype=NA_character_,persist=TRUE,replace=FALSE
   if(replace==TRUE) {
     newaes <- indta
   } else {
-    newaes <- DTUpsert(the$aesset,indta,c("type","category","variable"),fill=TRUE)
+    newaes <- DTUpsert(the_fg$aesset,indta,c("type","category","variable"),fill=TRUE)
   }
   newaes <- newaes[order(type,category,variable)]
-  assign("aesset",newaes,envir=the)
+  assign("aesset",newaes,envir=the_fg)
   if(persist==TRUE) {
-    if(!dir.exists(the$cachedir)) {
-      newd <- dir.create(the$cachedir)
+    if(!dir.exists(the_fg$cachedir)) {
+      newd <- dir.create(the_fg$cachedir)
     }
-    save(newaes,file=the$aesfn)
-    message("Saved aesthetic updates to ",the$aesfn)
+    save(newaes,file=the_fg$aesfn)
+    message("Saved aesthetic updates to ",the_fg$aesfn)
   }
   invisible(newaes)
 }
@@ -109,22 +109,22 @@ fg_update_line_colors <- function(colorlist,replace=FALSE,persist=TRUE) {
 #' @export
 fg_replace_theme <- function(newTheme,persist=TRUE) {
   stopifnot("ggplot2::theme" %in% class(newTheme))
-  assign("curr_theme",newTheme,envir=the)
+  assign("curr_theme",newTheme,envir=the_fg)
   if(persist==TRUE) {
-    if(!dir.exists(the$cachedir)) {
-      newd <- dir.create(the$cachedir)
+    if(!dir.exists(the_fg$cachedir)) {
+      newd <- dir.create(the_fg$cachedir)
     }
-    save(newTheme,file=the$themefn)
-    message("Saved Default Theme to ",the$themefn)
+    save(newTheme,file=the_fg$themefn)
+    message("Saved Default Theme to ",the_fg$themefn)
   }
 }
 
 #' @rdname set_constants
 #' @export
 fg_verbose<- function(item="") {
-  the$verbose <- !the$verbose
+  the_fg$verbose <- !the_fg$verbose
   if(item=="all") {
-    the$cassign <- !the$cassign
+    the_fg$cassign <- !the_fg$cassign
   }
 }
 
@@ -133,25 +133,25 @@ fg_verbose<- function(item="") {
 #' @export
 fg_reset_to_default_state <- function(reset="all") {
   if(reset %in% c("all","doi","dates")) {
-    suppressWarnings(file.remove(the$doifn))
+    suppressWarnings(file.remove(the_fg$doifn))
     message("Removing dates file and reverting to defaults of package")
-    the$doi_dates <- copy(the$doi_default)
+    the_fg$doi_dates <- copy(the_fg$doi_default)
   }
   if(reset %in% c("all","aes","color")) {
-    suppressWarnings(file.remove(the$aesfn))
+    suppressWarnings(file.remove(the_fg$aesfn))
     message("Removing Aesthetics file and reverting to defaults of package")
-    the$aesset <- copy(the$aes_default)
+    the_fg$aesset <- copy(the_fg$aes_default)
   }
   if(reset %in% c("all","aes","theme")) {
-    suppressWarnings(file.remove(the$themefn))
+    suppressWarnings(file.remove(the_fg$themefn))
     message("Removing User-made Themes and reverting to defaults of package")
-    the$curr_theme <-fgts_BaseTheme()
-    the$theme_default <-fgts_BaseTheme()
+    the_fg$curr_theme <-fgts_BaseTheme()
+    the_fg$theme_default <-fgts_BaseTheme()
 
   }
-  the$tevents_defaults <- copy(tevents_defaults)
+  the_fg$tevents_defaults <- copy(tevents_defaults)
   if(reset %in% c("all")) {
-    unlink(the$cachedir, force=TRUE,recursive=TRUE)
+    unlink(the_fg$cachedir, force=TRUE,recursive=TRUE)
     message("Removing cache Directory")
   }
   message("fg_reset_to_default_state(",reset,") completed")
@@ -179,8 +179,8 @@ fg_reset_to_default_state <- function(reset="all") {
 #'
 #' @export
 fg_sync_group <- function(gpname="") {
-  if(!is.null(gpname) && gpname=="") { return(the$gpname) }
-  the$gpname <- gpname
+  if(!is.null(gpname) && gpname=="") { return(the_fg$gpname) }
+  the_fg$gpname <- gpname
 }
 
 
@@ -188,6 +188,7 @@ fg_sync_group <- function(gpname="") {
 #' UNexported helpers
 #
 #' @import data.table
+#' @import usethis
 fg_create_defaults <- function() {
   category <- variable <- NULL
   dtmap  <- make_dtmap(yrs_ahead=10)
@@ -197,7 +198,7 @@ fg_create_defaults <- function() {
                                               axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
   ratingsmapmelt <- fread("./inst/extdata/ratingsmapmelt.csv")
   aes_default <- fread("./inst/extdata/fg_aesdefault.csv")[order(type,category,variable)]
-  the$aesset <- aes_default
+  the_fg$aesset <- aes_default
   theme_default <-fgts_BaseTheme()
   usethis::use_data(doi_default,aes_default,theme_default,dtmap,tevents_defaults,ratingsmapmelt, internal=TRUE,overwrite=TRUE)
 }
@@ -228,9 +229,10 @@ fg_create_defaults <- function() {
 # Make datemap, very helpuful for narrowing dates.
 #
 #' @import data.table
+#' @import qlcal
 make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
   # All Dates
-  `.`<-DT_ENTRY<-isbday<-rolldt<-isholiday<-yr<-yrmo<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-NULL
+  `.`<-DT_ENTRY<-isbday<-rolldt<-isholiday<-yr<-yrmo<-yrwk<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-NULL
   ishol_nyse<-ishol_bond<-NULL
   dtmap <- data.table::data.table(DT_ENTRY=seq(from =begDate, to = Sys.Date()+yrs_ahead*365, by = "day")) |> .addseasonaldates()
   allhols <- rbindlist(list(
@@ -261,7 +263,8 @@ make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
   data.table::setnafill(dtmap,"locf",cols=c("daysfromroll"))
   dtmap <- dtmap |> tidyr::fill('rollpd') # tidyr bc of character
   # Option Expirations (Equities)
-  moexp <- dtmap[data.table::wday(DT_ENTRY)==6,][,':='('frino'=.I-min(.I)),by=.(yrmo)][frino==2,][,.(DT_ENTRY,optexp="mo")]
+  moexp <- dtmap[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrwk)]
+  moexp <-  moexp[,':='('frino'=.I-min(.I)),by=.(yrmo)][frino==2,][,.(DT_ENTRY,optexp="mo")]
   qexp <- dtmap[isholiday==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrqtr)][,.(DT_ENTRY,xoptexp="qtr")]
   dtmap <- moexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=data.table::fcoalesce(optexp,""))]
   dtmap <- qexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=paste0(optexp,data.table::fcoalesce(xoptexp,"")))][,':='(xoptexp=NULL)]
@@ -271,8 +274,8 @@ make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
 }
 
 fg_setdbg <- function() {
-  assign("cassign",TRUE,envir=the)
-  assign("verbose",TRUE,envir=the)
+  assign("cassign",TRUE,envir=the_fg)
+  assign("verbose",TRUE,envir=the_fg)
 }
 
 

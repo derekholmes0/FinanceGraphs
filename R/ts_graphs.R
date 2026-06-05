@@ -536,7 +536,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
       }
     }
     if(nrow(tevents)>0) {
-       tevents <- coalesce_DT_byentry(tevents,the$tevents_defaults)
+       tevents <- coalesce_DT_byentry(tevents,the_fg$tevents_defaults)
        tevents <- tevents[, let(END_DT_ENTRY=as.Date(fcoal(as.integer(END_DT_ENTRY),as.integer(DT_ENTRY))))]  # What is NA?
        for(irow in 1:nrow(tevents)) {
         trw<-tevents[irow,]

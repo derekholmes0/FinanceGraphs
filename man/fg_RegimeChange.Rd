@@ -19,7 +19,7 @@ fg_RegimeChange(indta, usereturns = TRUE, series = NULL, ...)
 \code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
 }
 \description{
-Wrapper around the function \code{\link[RegimeChange:detect_regimes()]{RegimeChange::detect_regimes()()}} to create events for \code{\link[=fgts_dygraph]{fgts_dygraph()}}
+Wrapper around the function \code{\link[RegimeChange:detect_regimes]{RegimeChange::detect_regimes()}} to create events for \code{\link[=fgts_dygraph]{fgts_dygraph()}}
 }
 \details{
 Event Helpers : fg_RegimeChange

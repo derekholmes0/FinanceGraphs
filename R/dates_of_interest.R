@@ -44,8 +44,8 @@
 #' @export
 fg_get_dates_of_interest <- function(search_categories="",use_default=TRUE,startdt=NULL,totoday=FALSE) {
   DT_ENTRY<-NULL
-  message_if(the$verbose,"fg_get_dates_of_interest(",search_categories,")")
-  rtn <- the$doi_dates[grepl(search_categories,the$doi_dates$category,ignore.case=TRUE),][order(DT_ENTRY)]
+  message_if(the_fg$verbose,"fg_get_dates_of_interest(",search_categories,")")
+  rtn <- the_fg$doi_dates[grepl(search_categories,the_fg$doi_dates$category,ignore.case=TRUE),][order(DT_ENTRY)]
   enddt <- ifelse(is.logical(totoday), Sys.Date(),lubridate::as_date(totoday))
   if(!is.null(startdt)) {
     rtn <- rtn[END_DT_ENTRY>=as.Date(startdt),]
@@ -78,19 +78,19 @@ fg_update_dates_of_interest <- function(indta,replace=FALSE) {
     indta <- indta[,':='(END_DT_ENTRY=DT_ENTRY)]
   }
   indta <- indta[,.SD[1],by=.(category,DT_ENTRY,END_DT_ENTRY)]
-  indta <- indta[,.SD,.SDcols=intersect(colnames(indta),colnames(the$doi_dates))]
+  indta <- indta[,.SD,.SDcols=intersect(colnames(indta),colnames(the_fg$doi_dates))]
   if(replace==TRUE) {
     newdoi <- indta
   }
   else {
-    newdoi <- DTUpsert(the$doi_dates,indta,c("category","DT_ENTRY"),fill=TRUE)
+    newdoi <- DTUpsert(the_fg$doi_dates,indta,c("category","DT_ENTRY"),fill=TRUE)
   }
-  if(!dir.exists(the$cachedir)) {
-    newd <- dir.create(the$cachedir)
+  if(!dir.exists(the_fg$cachedir)) {
+    newd <- dir.create(the_fg$cachedir)
   }
-  save(newdoi,file=the$doifn)
-  assign("doi_dates",newdoi,envir=the)
-  assign("doi_dates_update",Sys.Date(),envir=the)
-  message("Saved dates of interest file to ",the$doifn)
+  save(newdoi,file=the_fg$doifn)
+  assign("doi_dates",newdoi,envir=the_fg)
+  assign("doi_dates_update",Sys.Date(),envir=the_fg)
+  message("Saved dates of interest file to ",the_fg$doifn)
   return(NULL)
 }

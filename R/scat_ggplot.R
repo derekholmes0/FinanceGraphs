@@ -229,7 +229,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
     setnames(a2,grparts[coltodo=="rename"]$colnm,grparts[coltodo=="rename"]$nm)  # rename rest
     a2[,grparts[coltodo=="makenull"]$nm := "1"] # Set rest to one element factors
     # Debug only:
-    #cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts",dbg=get("cassign",envir=the))
+    #cAssign("a2;grparts;gropts;boundbox;boundboxtype;colcounts",dbg=get("cassign",envir=the_fg))
     # SHould be able to do group reset and DTmerge rest
     # Helper functions
     use_col <- function(what) { grparts[item==what]$indta }
@@ -246,12 +246,12 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         if(use_col("color")) { # Use color first, then symbol
           doi_aesname <- "symbolfactor"
           grparts[item=="symbol",let(style="scatshape",colnm="histcat",indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
-          message_if(the$verbose, "scat_ggplot using symbols to denote date of interest categories")
+          message_if(the_fg$verbose, "scat_ggplot using symbols to denote date of interest categories")
         }
         else {
           doi_aesname <- "colfactor"
           grparts[item=="color",let(style="lines",colnm="histcat",indta=TRUE,addscales=TRUE,ncnt=nrow(break_set))]
-          message_if(the$verbose, "scat_ggplot using colors to denote date of interest categories")
+          message_if(the_fg$verbose, "scat_ggplot using colors to denote date of interest categories")
         }
       }
       if(nrow(break_set)>0) {
@@ -293,7 +293,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         bbox <- as.data.table(bbox)
       }
     }
-    if(length(boundbox)>1 & the$verbose==TRUE) {
+    if(length(boundbox)>1 & the_fg$verbose==TRUE) {
       message("Bounding Boxes ",boundboxtype," gives (x,y)=",paste(round(bbox,4),collapse=" "))}
 
     a3[,inbox:=(between(xx,bbox[[1,1]],bbox[[2,1]]) & between(yy,bbox[[1,2]],bbox[[2,2]]))]
@@ -427,7 +427,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
         regres <-regres[,p.value:=round(p.value,5)][]
       }
       talpha    = ifelse(do_not_fill,0,0.2)
-      if(the$verbose) {   print(summary(lm(tformula,data=a3[,.(x=xx,y=yy)]))) }
+      if(the_fg$verbose) {   print(summary(lm(tformula,data=a3[,.(x=xx,y=yy)]))) }
       if( grepl("one",type)) {
         grparts[item=="alpha",addscales:=FALSE]
         p<-p+geom_smooth(aes(x=xx,y=yy),method=actmethod,formula=tformula,colour="black",alpha=talpha,show.legend=FALSE,inherit.aes=FALSE)
