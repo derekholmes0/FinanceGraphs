@@ -232,7 +232,7 @@ fg_create_defaults <- function() {
 #' @import qlcal
 make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
   # All Dates
-  `.`<-DT_ENTRY<-isbday<-rolldt<-isholiday<-yr<-yrmo<-yrwk<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-NULL
+  `.`<-DT_ENTRY<-isbday<-rolldt<-yr<-yrmo<-yrwk<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-NULL
   ishol_nyse<-ishol_bond<-NULL
   dtmap <- data.table::data.table(DT_ENTRY=seq(from =begDate, to = Sys.Date()+yrs_ahead*365, by = "day")) |> .addseasonaldates()
   allhols <- rbindlist(list(
@@ -265,7 +265,7 @@ make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
   # Option Expirations (Equities)
   moexp <- dtmap[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrwk)]
   moexp <-  moexp[,':='('frino'=.I-min(.I)),by=.(yrmo)][frino==2,][,.(DT_ENTRY,optexp="mo")]
-  qexp <- dtmap[isholiday==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrqtr)][,.(DT_ENTRY,xoptexp="qtr")]
+  qexp <- dtmap[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrqtr)][,.(DT_ENTRY,xoptexp="qtr")]
   dtmap <- moexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=data.table::fcoalesce(optexp,""))]
   dtmap <- qexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=paste0(optexp,data.table::fcoalesce(xoptexp,"")))][,':='(xoptexp=NULL)]
   dtmap <- dtmap[,':='('isweek'=data.table::fcoalesce(isweek,FALSE),'ismo'=data.table::fcoalesce(ismo,FALSE),
