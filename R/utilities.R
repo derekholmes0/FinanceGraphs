@@ -227,7 +227,7 @@ coalesce_DT_byentry<-function(DT1,DT2) { # Adds columns as necessary, either row
   DTfinalcols <- setdiff(union(DT1cols,DT2cols),c("jrep"))
   DT1copy <- data.table::copy(DT1)
   DT3 <-  data.table::merge.data.table(DT1copy[,let(jrep=seq(1,nrow(DT2)))],DT2[,let(jrep=.I)],by=c("jrep"))
-  DT3 <- DT3[,(DTcommoncols):=lapply(DTcommoncols, \(x) data.table::fcoalesce(.SD[[paste0(x,".x")]],.SD[[paste0(x,".y")]])), by=.(jrep)] # Common columns
+  DT3 <- DT3[,(DTcommoncols):=lapply(DTcommoncols, \(x) data.table::fcoalesce(.SD[[paste0(x,".x")]],.SD[[paste0(x,".y")]]) ), by=.(jrep)] # Common columns
   DT3 <- DT3[,.SD,.SDcols=DTfinalcols]
   return(DT3[])
 }

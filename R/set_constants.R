@@ -194,7 +194,7 @@ fg_create_defaults <- function() {
   dtmap  <- make_dtmap(yrs_ahead=10)
   datecols <- c("DT_ENTRY","END_DT_ENTRY")
   doi_default <- fread("./inst/extdata/doidates.csv",na.strings="")[,(datecols):=lapply(.SD,\(x) as.Date(x,"%m/%d/%Y")), .SDcols=datecols][]
-  tevents_defaults <- data.table(END_DT_ENTRY=as.Date(NA_real_),eventonly=FALSE,
+  tevents_defaults <- data.table(END_DT_ENTRY=as.Date(NA_integer_),eventonly=FALSE,
                                               axis="x",color="#00cc99",strokePattern="dashed",loc="bottom",series=NA_character_)
   ratingsmapmelt <- fread("./inst/extdata/ratingsmapmelt.csv")
   aes_default <- fread("./inst/extdata/fg_aesdefault.csv")[order(type,category,variable)]
