@@ -217,7 +217,7 @@ coalesce_DT<-function(DT1,DT2) { # Adds columns as necessary, either row by row 
 
 
 coalesce_DT_byentry<-function(DT1,DT2) { # Adds columns as necessary, either row by row or single row
-  `.` <- jrep <- NULL
+  `.` <- jrep <- y <- NULL
   if (!(nrow(DT2)==1 | nrow(DT1)==nrow(DT2))) {
     stop("coalesce_DT_byentry incompatible sizes, either DT2 must be 1 row or nrow(DT1) rows")
   }
@@ -227,7 +227,11 @@ coalesce_DT_byentry<-function(DT1,DT2) { # Adds columns as necessary, either row
   DTfinalcols <- setdiff(union(DT1cols,DT2cols),c("jrep"))
   DT1copy <- data.table::copy(DT1)
   DT3 <-  data.table::merge.data.table(DT1copy[,let(jrep=seq(1,nrow(DT2)))],DT2[,let(jrep=.I)],by=c("jrep"))
-  DT3 <- DT3[,(DTcommoncols):=lapply(DTcommoncols, \(x) data.table::fcoalesce(.SD[[paste0(x,".x")]],.SD[[paste0(x,".y")]]) ), by=.(jrep)] # Common columns
+  # new 6/7/26: Date can come in many forms
+  DT3 <- DT3[,(DTcommoncols):=lapply(DTcommoncols,  function(x) {
+    y <- .SD[[paste0(x,".y")]]
+    storage.mode(y) <- storage.mode(.SD[[paste0(x,".x")]])
+    data.table::fcoalesce(.SD[[paste0(x,".x")]],y) } ), by=.(jrep)] # Common columns
   DT3 <- DT3[,.SD,.SDcols=DTfinalcols]
   return(DT3[])
 }
