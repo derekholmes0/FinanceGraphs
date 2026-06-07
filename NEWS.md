@@ -6,6 +6,7 @@
 * fg_eventStudy: Holidays are either NYSE or US Bond market holidays, not just NYSE
 * fg_scatplot: Fixed error with single date breakset
 * fg_scatplot: Fixed aesthetic confusion when both `doi` and `lm` are used
+* Fixed error with integer date classes.
 
 # FinanceGraphs 0.8.0
 
