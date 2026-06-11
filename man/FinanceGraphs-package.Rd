@@ -12,6 +12,7 @@ Flexible wrappers around R graphics modules 'dygraphs' \url{https://dygraphs.com
 Useful links:
 \itemize{
   \item \url{https://github.com/derekholmes0/FinanceGraphs}
+  \item \url{https://derekholmes0.github.io/FinanceGraphs/}
   \item Report bugs at \url{https://github.com/derekholmes0/FinanceGraphs/issues}
 }
 
