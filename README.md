@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# FinanceGraphs
+# [FinanceGraphs](https://derekholmes0.github.io/FinanceGraphs/index.html)
 
 <!-- badges: start -->
 
