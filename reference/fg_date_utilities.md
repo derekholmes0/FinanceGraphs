@@ -110,14 +110,14 @@ Same form as `xin`, i.e. a `data.table` or `data.frame`
 
 ``` r
 gendtstr("-3m::")
-#> [1] "2026-03-11::2026-06-11"
+#> [1] "2026-03-12::2026-06-12"
 gendtstr("-2y::-3m",today=as.Date("2025-03-15"))
 #> [1] "2023-03-15::2024-12-15"
 narrowbydtstr(eqtypx,"-2m::-1m")
 #> Key: <date>
 #> Empty data.table (0 rows and 5 cols): date,EEM,IBM,QQQ,TLT
 extenddtstr("-2m::-1m")
-#> [1] "2026-04-11::2026-05-11"
+#> [1] "2026-04-12::2026-05-12"
 extenddtstr("-2m::-1m",begchg=-10,endchg=5)
-#> [1] "2026-04-01::2026-05-16"
+#> [1] "2026-04-02::2026-05-17"
 ```
