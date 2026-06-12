@@ -48,14 +48,10 @@ changed (again persistently) using the `fg_update_aes()` function.
 ## Simple Examples
 
 ``` r
-fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close") -> p
+fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
 ```
 
-\` tmp_html \<- tempfile(fileext = “.html”) tmp_png \<-
-“man/figures/simple_example1.png” saveWidget(p, tmp_html, selfcontained
-= TRUE) webshot(tmp_html, file = tmp_png, vwidth = 900, vheight = 900)
-
-![](man/figures/simple_example1.png) \`
+<img src="man/figures/README-simple_example1-1.png" alt="Simple Graph of a few Equity Prices" width="100%" />
 
 - All of the data is displayed on the graph by default, but nost of the
   time, we want to focus on recent periods and have the option of
@@ -87,10 +83,10 @@ fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close") -> p
 
 ``` r
 fgts_dygraph(eqtypx, title="W/ Focused range, highlights, rebasing",
-             dtstartfrac=0.6,hilightcols="QQQ",hilightwidth=4,rebase="2024-01-01,100",roller=3) -> p
+             dtstartfrac=0.6,hilightcols="QQQ",hilightwidth=4,rebase="2024-01-01,100",roller=3)
 ```
 
-\`
+<img src="man/figures/README-simple_example2-1.png" alt="Graph of Equity Prices showing highlights and date selection methods" width="100%" />
 
 - Series can be grouped together into bands by adding new columns in the
   data with names ending in ‘`.lo`’ and ‘`.hi`’ for lower and upper
