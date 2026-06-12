@@ -1,4 +1,4 @@
-# FinanceGraphs
+# [FinanceGraphs](https://derekholmes0.github.io/FinanceGraphs/index.html)
 
 A flexible wrapper around [dygraphs](https://dygraphs.com/) and
 [ggplot2](https://ggplot2.tidyverse.org/) to graph and annotate
