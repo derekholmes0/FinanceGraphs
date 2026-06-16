@@ -358,7 +358,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
           serset <- serset[order(series_no)]$seriesnm
         }
         trw <- trw[gpnm==seriesnm,]
-        ## message(">>         group: ",seriesgp," Series Set: ",paste(serset,sep=","))
+        #message(">>         group: ",seriesgp," Series Set: ",paste(serset,sep=","))
         g1 = g1 |> dygraphs::dySeries(serset,color=trw[1,]$color,axis=trw[1,]$axis,stepPlot=trw[1,]$stepplot,strokeWidth=trw[1,]$width,
                         strokePattern=trw[1,]$style,fillGraph=FALSE)
     }
