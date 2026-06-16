@@ -12,6 +12,7 @@
 - fg_scatplot: Fixed aesthetic confusion when both `doi` and `lm` are
   used
 - Fixed error with integer date classes.
+- Updates dates of interest, including VIX events
 
 ## FinanceGraphs 0.8.0
 

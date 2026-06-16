@@ -256,12 +256,12 @@ information. In some cases the formatting is inferred from the label
 fg_get_dates_of_interest("fedmoves|regm") |> group_by(category) |> slice_tail(n=2)
 #> # A tibble: 4 × 8
 #> # Groups:   category [2]
-#>   category eventid  eventid2 DT_ENTRY   END_DT_ENTRY color strokePattern loc  
-#>   <chr>    <chr>    <chr>    <date>     <date>       <chr> <chr>         <chr>
-#> 1 fedmoves F:-25    rt:4     2025-10-29 2025-10-29   NA    NA            NA   
-#> 2 fedmoves F:-25    rt:3.75  2025-12-10 2025-12-10   NA    NA            NA   
-#> 3 regm     GoodX25+ NA       2025-04-22 2026-01-01   NA    NA            NA   
-#> 4 regm     IranWar- NA       2026-02-28 2026-03-09   NA    NA            NA
+#>   category eventid   eventid2 DT_ENTRY   END_DT_ENTRY color strokePattern loc  
+#>   <chr>    <chr>     <chr>    <date>     <date>       <chr> <chr>         <chr>
+#> 1 fedmoves F:-25     rt:4     2025-10-29 2025-10-29   NA    NA            NA   
+#> 2 fedmoves F:-25     rt:3.75  2025-12-10 2025-12-10   NA    NA            NA   
+#> 3 regm     InfPrint- NA       2026-06-04 2026-06-10   NA    NA            NA   
+#> 4 regm     Peace+    NA       2026-06-11 2026-06-15   NA    NA            NA
 ```
 
 New data can be added easily. We can add new events (e.g a FOMC move in
@@ -277,8 +277,8 @@ fg_update_dates_of_interest(newdoi)
 #> NULL
 fg_get_dates_of_interest("fedmoves") |> dplyr::slice_tail(n=2) |> as.data.frame()
 #>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
-#> 1 fedmoves   F:-25     rt:4 2025-10-29   2025-10-29  <NA>          <NA> <NA>
-#> 2 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
+#> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
+#> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
 ```
 
 - **Seasonal factors** : Regularly recurring dates can also be added.
@@ -573,8 +573,8 @@ fg_update_dates_of_interest(newdoi)
 #> NULL
 tail(fg_get_dates_of_interest("fedmoves"),2)  |> as.data.frame()
 #>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
-#> 1 fedmoves   F:-25     rt:4 2025-10-29   2025-10-29  <NA>          <NA> <NA>
-#> 2 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
+#> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
+#> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
 ```
 
 Entire new categories can be added. Here are a few examples:
