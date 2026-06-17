@@ -233,8 +233,8 @@ fg_update_dates_of_interest(newdoi)
 #> NULL
 tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 #>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
-#> 1 fedmoves   F:-25     rt:4 2025-10-29   2025-10-29  <NA>          <NA> <NA>
-#> 2 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
+#> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
+#> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
 fg_reset_to_default_state("all")
 #> Removing dates file and reverting to defaults of package
 #> Removing Aesthetics file and reverting to defaults of package

@@ -10,7 +10,8 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Flexible Graphs for Analysis of Financial Data and Time Series">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Flexible Graphs for Analysis of Financial Data and Time Series">
 <meta name="description" content="Flexible wrappers around R graphics modules dygraphs &lt;https://dygraphs.com/&gt; and ggplot2 &lt;https://ggplot2.tidyverse.org/&gt; to visualize data commonly found in Financial Studies, with an emphasis on time series. Interactive time series plots include multiple options for incorporating external data such as forecasts and events. Other static plots useful for time series data include an intuitive and generic scatter plotter, a boxplot generator suitable for multiple time series, and event study plotters for time series analysis around sets of dates.">
 <meta property="og:description" content="Flexible wrappers around R graphics modules dygraphs &lt;https://dygraphs.com/&gt; and ggplot2 &lt;https://ggplot2.tidyverse.org/&gt; to visualize data commonly found in Financial Studies, with an emphasis on time series. Interactive time series plots include multiple options for incorporating external data such as forecasts and events. Other static plots useful for time series data include an intuitive and generic scatter plotter, a boxplot generator suitable for multiple time series, and event study plotters for time series analysis around sets of dates.">
 </head>
@@ -22,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">FinanceGraphs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.75</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +56,8 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="financegraphs">FinanceGraphs<a class="anchor" aria-label="anchor" href="#financegraphs"></a>
+<div class="page-header"><h1 id="financegraphs">
+<a href="https://derekholmes0.github.io/FinanceGraphs/index.html">FinanceGraphs</a><a class="anchor" aria-label="anchor" href="#financegraphs"></a>
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
@@ -80,9 +82,8 @@ The <code>date</code> column can be called anything or be anywhere in the input 
 <h2 id="simple-examples">Simple Examples<a class="anchor" aria-label="anchor" href="#simple-examples"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/fgts_dygraph.html">fgts_dygraph</a></span><span class="op">(</span><span class="va">eqtypx</span>, title<span class="op">=</span><span class="st">"Stock Prices"</span>, ylab<span class="op">=</span><span class="st">"Adjusted Close"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">p</span></span></code></pre></div>
-<p>` tmp_html &lt;- tempfile(fileext = “.html”) tmp_png &lt;- “man/figures/simple_example1.png” saveWidget(p, tmp_html, selfcontained = TRUE) webshot(tmp_html, file = tmp_png, vwidth = 900, vheight = 900)</p>
-<p><img src="reference/figures/simple_example1.png"> `</p>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/fgts_dygraph.html">fgts_dygraph</a></span><span class="op">(</span><span class="va">eqtypx</span>, title<span class="op">=</span><span class="st">"Stock Prices"</span>, ylab<span class="op">=</span><span class="st">"Adjusted Close"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-simple_example1-1.png" alt="Simple Graph of a few Equity Prices" width="100%"></p>
 <ul>
 <li><p>All of the data is displayed on the graph by default, but nost of the time, we want to focus on recent periods and have the option of backing up to all history. The <code>dtstartfrac</code> parameter shows just the last (1-<code>dtstartfrac</code>) percent of the data. Alternatively, a <em>generic date window</em> of the form “start::end” can be used in the <code>dtwindow</code> parameter. Each end of the window can be a full date (e.g. “2022-01-01”) or a relative date string (e.g. “-6m” for 6 months ago.</p></li>
 <li><p>One of the most appealing features of <a href="https://dygraphs.com/" class="external-link">dygraphs</a> is the ability to smooth series interactively. The <code>roller</code> parameter adds a rolling average smootherof the specified width (in data points). A default smoothing parameter is chosen depending on the length of the underlying data, but can be overridden using the <code>roller</code> parameter.</p></li>
@@ -98,8 +99,8 @@ The <code>date</code> column can be called anything or be anywhere in the input 
 </ul>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/fgts_dygraph.html">fgts_dygraph</a></span><span class="op">(</span><span class="va">eqtypx</span>, title<span class="op">=</span><span class="st">"W/ Focused range, highlights, rebasing"</span>,</span>
-<span>             dtstartfrac<span class="op">=</span><span class="fl">0.6</span>,hilightcols<span class="op">=</span><span class="st">"QQQ"</span>,hilightwidth<span class="op">=</span><span class="fl">4</span>,rebase<span class="op">=</span><span class="st">"2024-01-01,100"</span>,roller<span class="op">=</span><span class="fl">3</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">p</span></span></code></pre></div>
-<p>`</p>
+<span>             dtstartfrac<span class="op">=</span><span class="fl">0.6</span>,hilightcols<span class="op">=</span><span class="st">"QQQ"</span>,hilightwidth<span class="op">=</span><span class="fl">4</span>,rebase<span class="op">=</span><span class="st">"2024-01-01,100"</span>,roller<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-simple_example2-1.png" alt="Graph of Equity Prices showing highlights and date selection methods" width="100%"></p>
 <ul>
 <li><p>Series can be grouped together into bands by adding new columns in the data with names ending in ‘<code>.lo</code>’ and ‘<code>.hi</code>’ for lower and upper bounds. Those additional series can represent many things, such as statistical extremes, rolling correlations to other variables (see vignette), or (as a special case) forecast confidence intervals.</p></li>
 <li><p>Horizontal annotations can also be added using the <code>annotations</code> parameter. The most common example is a horizontal line at the last observations of each series.</p></li>
@@ -233,8 +234,8 @@ The <code>events</code> parameter is a string with one or more (separated by sem
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="fu"><a href="reference/fg_dates_of_interest.html">fg_get_dates_of_interest</a></span><span class="op">(</span><span class="st">"fedmoves"</span><span class="op">)</span>,<span class="fl">2</span><span class="op">)</span>  <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc</span></span>
-<span><span class="co">#&gt; 1 fedmoves   F:-25     rt:4 2025-10-29   2025-10-29  &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2 fedmoves   F:-50     &lt;NA&gt; 2026-06-16   2026-06-16  &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;</span></span>
 <span><span class="fu"><a href="reference/set_constants.html">fg_reset_to_default_state</a></span><span class="op">(</span><span class="st">"all"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Removing dates file and reverting to defaults of package</span></span>
 <span><span class="co">#&gt; Removing Aesthetics file and reverting to defaults of package</span></span>
