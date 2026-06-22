@@ -18,7 +18,7 @@ A data table with 2529 obersavatin and 5 variables
 }
 }
 \source{
-\url{https://finance.yahoo.com}
+\url{https://business-science.github.io/tidyquant/}
 }
 \usage{
 eqtypx

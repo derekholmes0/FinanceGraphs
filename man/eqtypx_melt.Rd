@@ -16,7 +16,7 @@ A tibble with 10116 observations and 3 columns
 }
 }
 \source{
-\url{https://finance.yahoo.com}
+\url{https://business-science.github.io/tidyquant/}
 }
 \usage{
 eqtypx_melt

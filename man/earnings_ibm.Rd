@@ -16,7 +16,7 @@ A \code{data.table} with 120 observations and e columns
 }
 }
 \source{
-\url{https://finance.yahoo.com}
+\url{https://business-science.github.io/tidyquant/}
 }
 \usage{
 earnings_ibm

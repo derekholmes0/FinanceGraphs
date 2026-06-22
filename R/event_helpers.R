@@ -11,7 +11,7 @@
 #' @examples
 #' if (requireNamespace("RegimeChange", quietly = TRUE)) {
 #' dta <- tail(eqtypx[,.(date,QQQ,TLT)],260)
-#' eventdt = fg_RegimeChange(dta)
+#' eventdt = fg_RegimeChange(dta,bootstrap_reps=50)
 #' fgts_dygraph(dta,event_ds=eventdt,title="With Breakouts")
 #' }
 #' @import data.table

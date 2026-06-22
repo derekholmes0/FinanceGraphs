@@ -20,7 +20,7 @@ A data table with forecasts for two equities
 }
 }
 \source{
-\url{https://finance.yahoo.com}
+\url{https://business-science.github.io/tidyquant/}
 }
 \usage{
 example_fcst_set

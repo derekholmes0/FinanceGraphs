@@ -41,7 +41,7 @@
 #'  \item{TLT}{TLT Closing Price}
 #' }
 #'
-#' @source <https://finance.yahoo.com>
+#' @source <https://business-science.github.io/tidyquant/>
 "eqtypx"
 
 #' Equity Prices
@@ -56,7 +56,7 @@
 #'  \item{value}{Closing Price}
 #' }
 #'
-#' @source <https://finance.yahoo.com>
+#' @source <https://business-science.github.io/tidyquant/>
 "eqtypx_melt"
 
 #' Equity returns
@@ -74,7 +74,7 @@
 #'  \item{p_TLT_QQQ}{ROlling 66 business day regression of TLT on QQQ p.value}
 #' }
 #'
-#' @source <https://finance.yahoo.com>
+#' @source <https://business-science.github.io/tidyquant/>
 "eqtyrtn"
 
 #' Nominal FX levels
@@ -89,7 +89,7 @@
 #'  \item{value}{Currency/USD}
 #' }
 #'
-#' @source <https://finance.yahoo.com>
+#' @source <https://business-science.github.io/tidyquant/>
 "nomfxdta"
 
 #' Nominal FX levels
@@ -137,7 +137,7 @@
 #'  \item{symbol}{Company}
 #' }
 #'
-#' @source <https://finance.yahoo.com>
+#' @source <https://business-science.github.io/tidyquant/>
 "earnings_ibm"
 
 #' Example forecasts
@@ -156,7 +156,7 @@
 #'  \item{IBM.fhi}{20th percentile in Forecast CI for IBM}
 #' }
 #'
-#' @source <https://finance.yahoo.com>
+#' @source <https://business-science.github.io/tidyquant/>
 "example_fcst_set"
 
 

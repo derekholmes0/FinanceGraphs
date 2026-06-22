@@ -19,7 +19,7 @@ A tibble with 2529 observations and 6 columns
 }
 }
 \source{
-\url{https://finance.yahoo.com}
+\url{https://business-science.github.io/tidyquant/}
 }
 \usage{
 eqtyrtn
