@@ -182,12 +182,14 @@ xts2df <- function(x) {
 #' data table utilities
 #' @noRd
 DTappend <- function(indta,newdta) { data.table::rbindlist(list(indta,newdta),use.names=TRUE,fill=TRUE) }
-DTUpsert<-function(a,b,keys, fill=FALSE,verbose="") { # DT kind of tough to use this replaces old data
-  if(!data.table::is.data.table(b)) {
-    b<- data.table::data.table(b) }
+DTUpsert<-function(a,b,keys, fill=FALSE,verbose="",replaceifbempty=NULL) {
+  if(!data.table::is.data.table(b)) {   b<- data.table::data.table(b) }
   if (is.character(a)) { aandb <- b }
-  else if(nrow(a)<=0) { aandb <-b }
-  else if(nrow(b)<=0 | length(setdiff(keys,colnames(b)))>0) { aandb <-a }
+  else if(nrow(a)<=0) { aandb <- b }
+  else if(nrow(b)<=0 | length(setdiff(keys,colnames(b)))>0) {
+    if( is.data.table(replaceifbempty) ) { aandb <- replaceifbempty }
+    else { aandb <-a }
+  }
   else {
     data.table::setkeyv(a,keys)
     data.table::setkeyv(b,keys)

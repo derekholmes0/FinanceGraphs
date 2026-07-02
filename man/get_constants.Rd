@@ -5,6 +5,7 @@
 \alias{fg_get_aesstring}
 \alias{fg_display_colors}
 \alias{fg_print_aes_list}
+\alias{fg_get_datemap}
 \title{Maintain Colors}
 \usage{
 fg_get_aes(item = "", n_max = NA_integer_, asdataframe = FALSE)
@@ -19,6 +20,8 @@ fg_get_aesstring(
 fg_display_colors(item = "")
 
 fg_print_aes_list(grepstr = "")
+
+fg_get_datemap()
 }
 \arguments{
 \item{item}{(Default: "") A grep string for categories desired.}
@@ -44,6 +47,7 @@ fg_print_aes_list(grepstr = "")
 \code{fg_get_aesstring()} takes a column from the \code{data.frame} retrieved by \code{fg_get_aes()}
 \code{fg_print_aes_list()} prints names of aesthetics used internally in FinanceGraph functions.
 \code{fg_display_colors()} Shows a plot with current colors.
+\code{fg_get_datemap()} returns a data.table of all dates and date mappings
 }
 \examples{
 # Data set, String

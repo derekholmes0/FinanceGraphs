@@ -8,6 +8,7 @@
 #' `fg_get_aesstring()` takes a column from the `data.frame` retrieved by `fg_get_aes()`
 #' `fg_print_aes_list()` prints names of aesthetics used internally in FinanceGraph functions.
 #' `fg_display_colors()` Shows a plot with current colors.
+#' `fg_get_datemap()` returns a data.table of all dates and date mappings
 #'
 #' @param item (Default: "") A grep string for categories desired.
 #' @param n_max Maximum number of rows or entries to return.  Required for `Rcolorbrewer` color aesthetics
@@ -104,6 +105,12 @@ fg_print_aes_list <- function(grepstr="") {
   rtn <- rtn[,.(helpstr=.SD[1][["helpstr"]],default=.SD[1][["value"]],N=.N),by=.(used,category)]
   rtn <- rtn[order(used,category)][,used:=NULL]
   return(kable(rtn))
+}
+
+#' @rdname get_constants
+#' @export
+fg_get_datemap <- function() {
+  return(dtmap)
 }
 
 # Unexported helpers

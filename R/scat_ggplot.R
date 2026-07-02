@@ -171,6 +171,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
     dtcolno <- purrr::detect_index(a2,lubridate::is.instant)[[1]]
     colnamesnodate <- colnames(a2)[setdiff(1:ncol(a2),dtcolno)]
     if(dtcolno>0) {
+      plotform <- gsub(names(a2)[dtcolno],"dt",plotform)
       setnames(a2,dtcolno,"dt")
       a2<-a2[!is.na(a2$dt)]
     }
@@ -187,7 +188,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
                          item = s("x;y;color;label;text;symbol;labelhilight;tooltip;size;alpha;fill;doi"),
                          ggaes = s("x;x;color;label;label;shape;label;label;size;alpha;x;fill"),
                          required=c(rep(TRUE,2),rep(FALSE,10)))
-    # Use read.table to parse compoents neatly
+    # Use read.table to parse componnts neatly
     grparts <- scatform_to_df(plotform)[grparts,on=.(item)][,let(indta=colnm %in% colnames(a2)),by=.I][]
 
     # Mapping what to to do to what we need
@@ -324,7 +325,7 @@ fg_scatplot<-function(indata,plotform,type="scatter",datecuts=c(7,66),
     # Set viewing area
     pct_x <- as.numeric(fg_get_aesstring("expand_x"))
     pct_y <- as.numeric(fg_get_aesstring("expand_y"))
-    bbox[,let(xx=c((1-pct_x),(1+pct_x))*xx,yy=c((1-pct_y),(1+pct_y))*yy)]
+    bbox[,let(xx=c((1-pct_x),(1+pct_x))*as.numeric(xx),yy=c((1-pct_y),(1+pct_y))*as.numeric(yy))]
 
    # Actual Plot
     tsizes <- as.numeric(fg_get_aesstring("scattextsize"))

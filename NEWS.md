@@ -1,3 +1,9 @@
+# FinanceGraphs 0.9.1
+
+* Cache created with .onLoad error
+* Fixed crash when the date column is part of the plot formula
+* New function `fg_get_datemap()`
+
 # FinanceGraphs 0.9.0
 
 * fgts_dygraphs: Fixed Juneteenth option expiration

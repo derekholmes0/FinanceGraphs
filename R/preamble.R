@@ -1,7 +1,10 @@
 #Preamble
 
 the_fg <- new.env(parent = emptyenv())
-the_fg$cachedir <- tools::R_user_dir("FinanceGraphs", which = "cache")
+#.onLoad <- function(libname, pkgname) {
+  the_fg$cachedir <- tools::R_user_dir("FinanceGraphs", which = "cache")
+  if(!dir.exists(the_fg$cachedir)) dir.create(the_fg$cachedir,recursive=TRUE)
+#}
 load("./R/sysdata.rda",envir=the_fg)
 #  loads tevents_defaults and ratingsmapmelt
 the_fg$doifn <- paste0( the_fg$cachedir, "/fg_doi.RD")
