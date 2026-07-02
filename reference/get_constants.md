@@ -4,7 +4,8 @@
 `fg_get_aesstring()` takes a column from the `data.frame` retrieved by
 `fg_get_aes()` `fg_print_aes_list()` prints names of aesthetics used
 internally in FinanceGraph functions. `fg_display_colors()` Shows a plot
-with current colors.
+with current colors. `fg_get_datemap()` returns a data.table of all
+dates and date mappings
 
 ## Usage
 
@@ -21,6 +22,8 @@ fg_get_aesstring(
 fg_display_colors(item = "")
 
 fg_print_aes_list(grepstr = "")
+
+fg_get_datemap()
 ```
 
 ## Arguments

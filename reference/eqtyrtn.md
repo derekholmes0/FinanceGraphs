@@ -40,4 +40,4 @@ A tibble with 2529 observations and 6 columns
 
 ## Source
 
-<https://finance.yahoo.com>
+<https://business-science.github.io/tidyquant/>

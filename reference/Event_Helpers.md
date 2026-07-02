@@ -6,7 +6,7 @@ to get dividends for a given set of tickers. A previously created
 `data.frame` can also be input.
 
 Created `event_ds` from
-[alphavantagepf::av_get_pf](https://rdrr.io/pkg/alphavantagepf/man/av_get_pf.html)
+[alphavantagepf::av_get_pf](https://derekholmes0.github.io/alphavantagepf/reference/av_get_pf.html)
 quarterly earnings data.
 
 ## Usage

@@ -28,4 +28,4 @@ A `data.table` with 120 observations and e columns
 
 ## Source
 
-<https://finance.yahoo.com>
+<https://business-science.github.io/tidyquant/>

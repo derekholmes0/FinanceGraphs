@@ -1,6 +1,15 @@
 # Changelog
 
+## FinanceGraphs 0.9.1
+
+- Cache created with .onLoad error
+- Fixed crash when the date column is part of the plot formula
+- New function
+  [`fg_get_datemap()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
+
 ## FinanceGraphs 0.9.0
+
+CRAN release: 2026-06-22
 
 - fgts_dygraphs: Fixed Juneteenth option expiration
 - fgts_dygraphs: Added fg_RegimeChange event handler
