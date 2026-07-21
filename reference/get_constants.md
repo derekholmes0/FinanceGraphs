@@ -5,7 +5,8 @@
 `fg_get_aes()` `fg_print_aes_list()` prints names of aesthetics used
 internally in FinanceGraph functions. `fg_display_colors()` Shows a plot
 with current colors. `fg_get_datemap()` returns a data.table of all
-dates and date mappings
+dates and date mappings `fg_current_theme()` returns the current
+`ggplot2` theme used for scatter plots.
 
 ## Usage
 
@@ -24,6 +25,8 @@ fg_display_colors(item = "")
 fg_print_aes_list(grepstr = "")
 
 fg_get_datemap()
+
+fg_current_theme()
 ```
 
 ## Arguments

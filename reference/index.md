@@ -57,6 +57,7 @@
   [`fg_display_colors()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
   [`fg_print_aes_list()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
   [`fg_get_datemap()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
+  [`fg_current_theme()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
   : Maintain Colors
 - [`imfdta`](https://derekholmes0.github.io/FinanceGraphs/reference/imfdta.md)
   : IMF Economic FOrecasts
