@@ -27,7 +27,7 @@
 #' * `grid,<x,y,both>` specifies which gri lines to show.  Default is "both"
 #' * `norange` turns off date range selector.
 #' @param splitcols,stepcols,hidecols  String or list of data series to show on a second y axis, to be shown as step plots, or to be hidden.
-#' Can also be `TRUE` in which case first series in the data is used Can also be a semicolon separated single string with mutiple series.
+#' Can also be `TRUE` in which case first series in the data is used Can also be a semicolon separated single string with mutiple series. `splitcols` is ignored if only one series is plotted.
 #' @param hilightcols String or list of data series to plot in different style than other series.
 #' @param hilightwidth (Default: 2) relative width of series specified in `hilightcols`
 #' @param hilightstyle (Default: solid).  Line style of series specified in `hilightcols`.
@@ -278,7 +278,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
       series_dets[t_colnos]$display <- FALSE
     }
 
-    if(!(splitcols[1]==FALSE)) {
+    if(!(splitcols[1]==FALSE) & nrow(series_dets)>1) {
       t_colnos <- match(s(splitcols),series_dets$gpnm,nomatch=1) # Can match more than one
       series_dets[t_colnos]$axis <- "y2"
     }

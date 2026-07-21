@@ -9,6 +9,7 @@
 #' `fg_print_aes_list()` prints names of aesthetics used internally in FinanceGraph functions.
 #' `fg_display_colors()` Shows a plot with current colors.
 #' `fg_get_datemap()` returns a data.table of all dates and date mappings
+#' `fg_current_theme()` returns the current `ggplot2` theme used for scatter plots.
 #'
 #' @param item (Default: "") A grep string for categories desired.
 #' @param n_max Maximum number of rows or entries to return.  Required for `Rcolorbrewer` color aesthetics
@@ -113,12 +114,13 @@ fg_get_datemap <- function() {
   return(dtmap)
 }
 
-# Unexported helpers
-
+#' @rdname get_constants
+#' @export
 fg_current_theme <- function() {
   return(the_fg$curr_theme)
 }
 
+# Unexported helpers
 fg_get_aeslist <- function(item="",toget="value") {
   fgtmp <-fg_get_aes(item)
   return( setNames(fgtmp[[toget]],fgtmp$type) )
