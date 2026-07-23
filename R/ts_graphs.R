@@ -297,7 +297,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
     }
 
     # Now forecasts
-    if(is.data.frame(forecast_ds)) {
+    if(is.data.frame(forecast_ds) && nrow(forecast_ds)>0) {
         dt_colnames['fdate'] <- find_col_bytype(forecast_ds,lubridate::is.instant)
         setcolorder(forecast_ds, dt_colnames[['fdate']])
         fcst_series <- rbindlist(lapply(colnames(forecast_ds),
@@ -471,7 +471,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
 
     # Events: df (DT_ENTRY,END_DT_ENTRY,text,loc,color,strokePattern)
 
-    if(is.data.frame(event_ds)) {
+    if(is.data.frame(event_ds) && nrow(event_ds)>0) {
         event_ds <- data.table(event_ds)
         # Rename columns smartly, only first two date columns taken
         dtcols <- utils::head(find_col_bytype(event_ds,lubridate::is.instant,firstonly=FALSE),2)
@@ -524,7 +524,7 @@ fgts_dygraph<-function(indata,title="",xlab="",ylab="",roller="default",bg_opts=
       tevents <- DTappend(tevents,h_annos)
     }
 
-    if (is.data.frame(annotation_ds)) { # date,series,text
+    if (is.data.frame(annotation_ds) && nrow(annotation_ds)>0) { # date,series,text
       ds_signature <- sapply(annotation_ds,class)[1:3] == c("Date","character","character")
       annotation_ds <- data.table(annotation_ds)
       if( all(ds_signature)==TRUE ) {

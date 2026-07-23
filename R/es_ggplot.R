@@ -237,7 +237,7 @@ fg_eventStudy<-function(indata,dtset,output="path",changeas="diff",
 es_dtset_to_dtds<- function(indtset,nbd_back,nbd_fwd, orderby="EVENT_DT",mindt=0,
                             group_match_var=NA_character_, orderdesc=FALSE) {
   isbday=mergecd=offset=id=EVENT_ORDER=N=NULL
-  if(is.data.frame(indtset)) { # Rename to my conventions
+  if(is.data.frame(indtset) && nrow(indtset)>0) { # Rename to my conventions
     list2env(generic_to_melt(indtset,"dtset;dt_colnames",meltvar=group_match_var),envir=environment(NULL))
     #setnames(dtset,c("DT_ENTRY","text"),c("EVENT_DT_ENTRY","eventid"),skip_absent=TRUE)  # includes cvar, eventid
     setnames(dtset,dt_colnames[["cvar"]][1],c("eventid"),skip_absent=TRUE)  # includes cvar, eventid, ok if eventid already thre
