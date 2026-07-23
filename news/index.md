@@ -5,13 +5,17 @@
 - [`fgts_dygraph()`](https://derekholmes0.github.io/FinanceGraphs/reference/fgts_dygraph.md)
   ignores `splitcols` argument if only one series is plotted.
 - Cache created with .onLoad error
-- Fixed crash when the date column is part of the plot formula
 - New function
   [`fg_get_datemap()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
   gets current date map used.
 - New function
   [`fg_current_theme()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
   gets current `ggplot2` theme used.
+
+### Bug fixes
+
+- Fixed crash when the date column is part of the plot formula
+- Fixed crash when `event_ds` is an empty data.table
 
 ## FinanceGraphs 0.9.0
 
