@@ -2,6 +2,7 @@
 #' Maintain Colors
 #'
 #' @name fg_update_aes
+#' @title Add aesthetic parameter sets to internal store.
 #' @rdname set_constants
 #' @description
 #' `fg_update_aes()` updates or replaces default aesthestics (e.g. colors, linestyles, etc).
@@ -161,6 +162,7 @@ fg_reset_to_default_state <- function(reset="all") {
 #' Group Synchronization
 #'
 #' @name fg_sync_group
+#' @title Add a synchronizing identifier for dygraphs used in Shiny or Markdown contexts
 #' @description  Sets, gets, or resets a common name to be passed into  [fgts_dygraph()] for synchronization.
 #' @param gpname A string or NULL
 #' * `gpname=NULL` turns off dygraphs synchronization.
@@ -184,9 +186,8 @@ fg_sync_group <- function(gpname="") {
 }
 
 
-# =======================================================================================================
-#' UNexported helpers
-#
+
+
 #' @import data.table
 #' @import usethis
 fg_create_defaults <- function() {

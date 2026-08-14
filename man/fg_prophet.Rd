@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast_helpers.R
 \name{fg_prophet}
 \alias{fg_prophet}
-\title{Forecast_Helpers}
+\title{Add forecasts from the prophet package}
 \usage{
 fg_prophet(prophet_data, seriesname = "y")
 }

@@ -6,7 +6,7 @@
 \alias{fg_replace_theme}
 \alias{fg_verbose}
 \alias{fg_reset_to_default_state}
-\title{Maintain Colors}
+\title{Add aesthetic parameter sets to internal store.}
 \usage{
 fg_update_aes(indta, aestype = NA_character_, persist = TRUE, replace = FALSE)
 
@@ -46,6 +46,8 @@ No return value, as these are called for the side effects of adding to or replac
 \code{fg_verbose()} Toggles printing of aesthetics
 }
 \details{
+Maintain Colors
+
 For colors,
 New data passed into \code{\link[=fg_update_aes]{fg_update_aes()}} persists across future loads of the package unless \code{persist=FALSE}.
 New color datasets must have at least three columns:\tabular{ll}{

@@ -72,6 +72,7 @@
 #'  \item{QQQ}{QQQ Log daily return}
 #'  \item{TLT}{TLT Log daily return}
 #'  \item{p_TLT_QQQ}{ROlling 66 business day regression of TLT on QQQ p.value}
+#'  \item{ibmdiv}{Dividends reported for IBM}
 #' }
 #'
 #' @source <https://business-science.github.io/tidyquant/>
@@ -92,7 +93,7 @@
 #' @source <https://business-science.github.io/tidyquant/>
 "nomfxdta"
 
-#' Nominal FX levels
+#' Real FX levels
 #'
 #' Real Effective Exchange Rates
 #'

@@ -6,6 +6,7 @@ require(imfapi)
 require(tidyquant)
 require(forecast)
 require(timetk)
+require(alphavantagepf)
 
 ratings_db <- fread("./inst/extdata/some_ratings_history.csv",na.strings="")[,let(DT_ENTRY=as.Date(DT_ENTRY,format="%m/%d/%Y"))]
 
@@ -16,7 +17,9 @@ eqtypx <- data.table::dcast(rtndta,date ~ variable, value.var="value")
 rtndta_tr <- data.table::dcast(rtndta,date ~ variable, value.var="rtn")
 regfn <- function(x) { broom::glance(lm(TLT ~ QQQ, data=x))[[1,"p.value"]]}
 regpvalue <- data.table::data.table(rtndta_tr)[,.(date,p_TLT_QQQ= data.table::frollapply(.SD, 66,  regfn , by.column=FALSE))]
+ibmdivs <-  data.table(tq_get("IBM",get="dividends"))[,.(date,ibmdiv=value)]
 eqtyrtn <- rtndta_tr[regpvalue,on=.(date)]
+eqtyrtn <- ibmdivs[eqtyrtn,on=.(date)]
 
 nomfxdta = tidyquant::tq_get(c("COP=X","BRL=X","CNY=X","MXN=X","EUR=X"),from="2016-01-01") |> dplyr::transmute(date, variable=gsub("=X","",symbol),value=adjusted)
 

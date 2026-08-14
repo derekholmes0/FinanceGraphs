@@ -15,6 +15,7 @@ A tibble with 2529 observations and 6 columns
 \item{QQQ}{QQQ Log daily return}
 \item{TLT}{TLT Log daily return}
 \item{p_TLT_QQQ}{ROlling 66 business day regression of TLT on QQQ p.value}
+\item{ibmdiv}{Dividends reported for IBM}
 }
 }
 }

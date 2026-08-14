@@ -2,7 +2,7 @@
 % Please edit documentation in R/ts_ggplot.R
 \name{fg_tsboxplot}
 \alias{fg_tsboxplot}
-\title{fg_tsboxplot:  Boxplots of time series}
+\title{Boxplots to summarize time series}
 \usage{
 fg_tsboxplot(indt,title="",xlab="",ylab="",
      breaks=c(7,30,90,360), doi="last", normalize="", orderby="",
@@ -74,6 +74,9 @@ A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
 Plots static summaries of time series in boxplot form.
+}
+\details{
+fg_tsboxplot:  Boxplots of time series
 }
 \examples{
 fg_tsboxplot(eqtypx,breaks=c(7,30,360),normalize="byvar",hilightcats="QQQ",

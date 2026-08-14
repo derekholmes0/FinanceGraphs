@@ -2,6 +2,7 @@
 #' Maintain Colors
 #'
 #' @name fg_get_aes
+#' @title Get aesthetic sets used in graphs
 #' @rdname get_constants
 #' @description
 #' `fg_get_aes()` gets aethestic  `data.frame` for use in graphs.

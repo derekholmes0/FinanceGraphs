@@ -1,5 +1,5 @@
 #' Event Studies
-#' @title Event Studies
+#' @title Event Studies graphs
 #' @name fg_eventStudy
 #' @description
 #' Summarizes and plots moves in data from a given set of event dates. Plots are designed to maintain reasonable aesthetics with as

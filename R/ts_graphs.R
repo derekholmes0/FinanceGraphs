@@ -1,6 +1,7 @@
 #' TIme series in Dygraph form
 #'
 #' @name fgts_dygraph
+#' @title Time series graphs using `dygraphs` package
 #' @description
 #' Plots interactive time series graphs with many options for highlighting key events, regions and customizations.
 #' @usage  fgts_dygraph( indata,

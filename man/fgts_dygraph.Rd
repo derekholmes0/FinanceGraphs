@@ -2,7 +2,7 @@
 % Please edit documentation in R/ts_graphs.R
 \name{fgts_dygraph}
 \alias{fgts_dygraph}
-\title{TIme series in Dygraph form}
+\title{Time series graphs using \code{dygraphs} package}
 \usage{
 fgts_dygraph( indata,
  title = "",  xlab="", ylab = "",  roller = "default",  bg_opts = "hair,both;grid,both",
@@ -113,6 +113,8 @@ Dygraph \href{https://rstudio.github.io/dygraphs/}{dygraphs} plotting input data
 Plots interactive time series graphs with many options for highlighting key events, regions and customizations.
 }
 \details{
+TIme series in Dygraph form
+
 Input data can either be in wide ('date' ,'series1',...) format or normalized (long) format
 ('date','variable','value') format.  This package infers date columns names from column types and seeks to be as agnostic
 as possible as to column names.

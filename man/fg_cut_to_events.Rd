@@ -2,7 +2,7 @@
 % Please edit documentation in R/event_helpers.R
 \name{fg_cut_to_events}
 \alias{fg_cut_to_events}
-\title{Event Helpers: fg_cut_to_events}
+\title{Cut a univariate time series into colored event bars.}
 \usage{
 fg_cut_to_events(
   indta,

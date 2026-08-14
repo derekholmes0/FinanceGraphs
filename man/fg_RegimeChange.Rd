@@ -2,7 +2,7 @@
 % Please edit documentation in R/event_helpers.R
 \name{fg_RegimeChange}
 \alias{fg_RegimeChange}
-\title{Event_Helpers}
+\title{Add Regime change events to time series graphs}
 \usage{
 fg_RegimeChange(indta, usereturns = TRUE, series = NULL, ...)
 }
@@ -20,10 +20,6 @@ fg_RegimeChange(indta, usereturns = TRUE, series = NULL, ...)
 }
 \description{
 Wrapper around the function \code{\link[RegimeChange:detect_regimes]{RegimeChange::detect_regimes()}} to create events for \code{\link[=fgts_dygraph]{fgts_dygraph()}}
-}
-\details{
-Event Helpers : fg_RegimeChange
-https://cran.r-project.org/web/packages/RegimeChange/vignettes/introduction.html
 }
 \examples{
 if (requireNamespace("RegimeChange", quietly = TRUE)) {

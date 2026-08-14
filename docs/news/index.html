@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FinanceGraphs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.75</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,25 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.9.0" id="financegraphs-090">FinanceGraphs 0.9.0<a class="anchor" aria-label="anchor" href="#financegraphs-090"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.9.2" id="financegraphs-092">FinanceGraphs 0.9.2<a class="anchor" aria-label="anchor" href="#financegraphs-092"></a></h2>
+<div class="section level3">
+<h3 id="new-functionality-0-9-2">New Functionality<a class="anchor" aria-label="anchor" href="#new-functionality-0-9-2"></a></h3>
+<ul><li>New graph type <code><a href="../reference/fg_seasonalstudy.html">fg_seasonalstudy()</a></code>
+</li>
+<li>
+<code><a href="../reference/fgts_dygraph.html">fgts_dygraph()</a></code> ignores <code>splitcols</code> argument if only one series is plotted.</li>
+<li>Cache created with .onLoad error</li>
+<li>New function <code><a href="../reference/get_constants.html">fg_get_datemap()</a></code> gets current date map used.</li>
+<li>New function <code><a href="../reference/get_constants.html">fg_current_theme()</a></code> gets current <code>ggplot2</code> theme used.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-9-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-9-2"></a></h3>
+<ul><li>Fixed crash when the date column is part of the plot formula</li>
+<li>Fixed crash when <code>event_ds</code> is an empty data.table</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.9.0" id="financegraphs-090">FinanceGraphs 0.9.0<a class="anchor" aria-label="anchor" href="#financegraphs-090"></a></h2><p class="text-muted">CRAN release: 2026-06-22</p>
 <ul><li>fgts_dygraphs: Fixed Juneteenth option expiration</li>
 <li>fgts_dygraphs: Added fg_RegimeChange event handler</li>
 <li>fgts_dygraphs: Work around for not yet fixed <a href="https://github.com/Rdatatable/data.table/pull/7667" class="external-link uri">https://github.com/Rdatatable/data.table/pull/7667</a>
@@ -84,7 +102,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

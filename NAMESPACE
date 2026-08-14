@@ -19,6 +19,7 @@ export(fg_ratingsEvents)
 export(fg_replace_theme)
 export(fg_reset_to_default_state)
 export(fg_scatplot)
+export(fg_seasonalstudy)
 export(fg_signal_to_events)
 export(fg_sweep)
 export(fg_sync_group)
@@ -43,21 +44,28 @@ importFrom(broom,tidy)
 importFrom(forcats,fct_reorder)
 importFrom(ggtext,element_markdown)
 importFrom(graphics,axis)
-importFrom(purrr,map2)
-importFrom(purrr,map_dbl)
-importFrom(stats,coef)
-importFrom(stats,dist)
-importFrom(stats,formula)
-importFrom(stats,lm)
-importFrom(stats,na.omit)
-importFrom(stats,quantile)
-importFrom(stats,resid)
-importFrom(stats,rnorm)
-importFrom(stats,rstandard)
-importFrom(stats,runif)
-importFrom(stats,setNames)
-importFrom(stats,var)
-importFrom(stringr,str_extract)
-importFrom(stringr,str_replace_all)
-importFrom(stringr,str_split_1)
+importFrom(purrr,
+  map2,
+  map_dbl
+)
+importFrom(stats,
+  coef,
+  dist,
+  formula,
+  lm,
+  na.omit,
+  quantile,
+  resid,
+  rnorm,
+  rstandard,
+  runif,
+  setNames,
+  var,
+  weighted.mean
+)
+importFrom(stringr,
+  str_extract,
+  str_replace_all,
+  str_split_1
+)
 importFrom(utils,read.table)

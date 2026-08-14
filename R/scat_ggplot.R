@@ -1,5 +1,6 @@
 #' fg_scatplot:  Easy scatterplot generator, with time specific enhancements
 #' @name fg_scatplot
+#' @title Flexible and easy  scatterplot generator, with time specific enhancements
 #' @description
 #' Plots bivariate plots with some time-series specific enhancements.  Rather than programmatically describing
 #' graph aesthetics, a simple formula-based approach is used.  This approach allows quick specification of

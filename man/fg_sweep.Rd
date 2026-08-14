@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast_helpers.R
 \name{fg_sweep}
 \alias{fg_sweep}
-\title{Forecast_Helpers}
+\title{Add forecasts from the sweep package}
 \usage{
 fg_sweep(swept_data, confidence = 80)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_constants.R
 \name{fg_sync_group}
 \alias{fg_sync_group}
-\title{Group Synchronization}
+\title{Add a synchronizing identifier for dygraphs used in Shiny or Markdown contexts}
 \usage{
 fg_sync_group(gpname = "")
 }
@@ -21,6 +21,8 @@ current groupname
 Sets, gets, or resets a common name to be passed into  \code{\link[=fgts_dygraph]{fgts_dygraph()}} for synchronization.
 }
 \details{
+Group Synchronization
+
 Use thie to set a common groupname for time scale synchronization (for Markdown or shiny apps),  Only set it in the beginning,
 or when needed, and call with NULL to turn synchronization off.
 }

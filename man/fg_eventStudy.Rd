@@ -2,7 +2,7 @@
 % Please edit documentation in R/es_ggplot.R
 \name{fg_eventStudy}
 \alias{fg_eventStudy}
-\title{Event Studies}
+\title{Event Studies graphs}
 \usage{
 fg_eventStudy(indata,dtset,output="path",changeas="diff",
              nbd_back=10,nbd_fwd=20,n_color_switch=5,

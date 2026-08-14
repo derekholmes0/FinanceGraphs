@@ -7,7 +7,7 @@
 \alias{fg_print_aes_list}
 \alias{fg_get_datemap}
 \alias{fg_current_theme}
-\title{Maintain Colors}
+\title{Get aesthetic sets used in graphs}
 \usage{
 fg_get_aes(item = "", n_max = NA_integer_, asdataframe = FALSE)
 
@@ -52,6 +52,9 @@ fg_current_theme()
 \code{fg_display_colors()} Shows a plot with current colors.
 \code{fg_get_datemap()} returns a data.table of all dates and date mappings
 \code{fg_current_theme()} returns the current \code{ggplot2} theme used for scatter plots.
+}
+\details{
+Maintain Colors
 }
 \examples{
 # Data set, String

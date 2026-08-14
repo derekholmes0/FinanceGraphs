@@ -2,7 +2,7 @@
 % Please edit documentation in R/event_helpers.R
 \name{fg_findTurningPoints}
 \alias{fg_findTurningPoints}
-\title{Event Helpers : fg_findTurningPoints}
+\title{Add turning points to time series graphs}
 \usage{
 fg_findTurningPoints(
   indta,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/scat_ggplot.R
 \name{fg_scatplot}
 \alias{fg_scatplot}
-\title{fg_scatplot:  Easy scatterplot generator, with time specific enhancements}
+\title{Flexible and easy  scatterplot generator, with time specific enhancements}
 \usage{
 fg_scatplot(indata,plotform,type="scatter",datecuts=c(7,66),
                noscales="",xdecoration="",ydecoration="",annotatecorners="",
@@ -131,6 +131,8 @@ graph aesthetics, a simple formula-based approach is used.  This approach allows
 many customizaton options.
 }
 \details{
+fg_scatplot:  Easy scatterplot generator, with time specific enhancements
+
 \code{indata} can either be in wide ('date' ,'series1',...) format or normalized (long) format
 ('date','variable','value',...) format.  This package infers date columns names from column types and casts or
 pivot_wider to get \code{x} and \code{y} columns.  Note that aesthetic characteristics (if used) must be present for both

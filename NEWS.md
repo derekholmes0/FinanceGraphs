@@ -1,5 +1,8 @@
-# FinanceGraphs 0.9.12
+# FinanceGraphs 0.9.2
 
+## New Functionality
+
+* New graph type `fg_seasonalstudy()`
 * `fgts_dygraph()` ignores `splitcols` argument if only one series is plotted.
 * Cache created with .onLoad error
 * New function `fg_get_datemap()` gets current date map used.

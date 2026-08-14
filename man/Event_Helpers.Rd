@@ -4,7 +4,7 @@
 \alias{fg_ratingsEvents}
 \alias{fg_tq_divs}
 \alias{fg_av_earnings}
-\title{Event Helpers : fg_ratingsEvents}
+\title{Add colored ratings levels to time series graphs.}
 \usage{
 fg_ratingsEvents(credit, ratings_db, agency = "S.P")
 
@@ -44,12 +44,18 @@ fg_av_earnings(indt, field = "reportedEPS", ticker_in_label = FALSE)
 \code{data.table} suitable for passing into \code{\link[=fgts_dygraph]{fgts_dygraph()}} via the \code{event_ds} parameter
 }
 \description{
+Event Helpers : fg_ratingsEvents
+
 Calls \code{\link[tidyquant:tq_get]{tidyquant::tq_get()}} to get dividends for a given set of tickers.  A previously created \code{data.frame} can also be input.
 
 Created \code{event_ds} from \link[alphavantagepf:av_get_pf]{alphavantagepf::av_get_pf} quarterly earnings data.
 }
 \details{
 Investment grade ratings are shaded in blue, High Yield are in red. Darker areas are closest to the cutoff between the two.
+
+Event Helpers: fg_tq_divs
+
+Event Helpers: fg_av_earnings
 }
 \examples{
 data("nomfxdta")

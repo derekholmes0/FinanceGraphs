@@ -1,6 +1,6 @@
-#' Event Helpers : fg_RegimeChange
-#'https://cran.r-project.org/web/packages/RegimeChange/vignettes/introduction.html
-#' @title Event_Helpers
+# https://cran.r-project.org/web/packages/RegimeChange/vignettes/introduction.html
+
+#' @title Add Regime change events to time series graphs
 #' @name fg_RegimeChange
 #' @description Wrapper around the function [RegimeChange::detect_regimes()] to create events for [fgts_dygraph()]
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
@@ -42,7 +42,7 @@ fg_RegimeChange<-function(indta,usereturns=TRUE,series=NULL,...) {
 
 #' Event Helpers : fg_addbreakouts
 #'
-#' @title Event_Helpers
+#' @title Add Breakout events to time series plots
 #' @name fg_addbreakouts
 #' @description Wrapper around the function [ecp::e.divisive()] to create events for [fgts_dygraph()]
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
@@ -74,6 +74,7 @@ fg_addbreakouts<-function(indta,annotationstyle="singleasdate",...) {
 #' Event Helpers : fg_findTurningPoints
 #'
 #' @name fg_findTurningPoints
+#' @title Add turning points to time series graphs
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column,
 #' or a [prophet::prophet()] object
 #' @param rtn string with what to return ('dates','data','all')
@@ -149,6 +150,7 @@ fg_findTurningPoints<-function(indta,rtn="dates",
 #' Event Helpers : fg_ratingsEvents
 #'
 #' @name fg_ratingsEvents
+#' @title Add colored ratings levels to time series graphs.
 #' @param credit String with name of credit to look up in 'ratings_db'
 #' @param ratings_db A 'data.table' or 'data.frame' with the all of the following columns:
 #'
@@ -193,6 +195,7 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 #' Event Helpers: fg_cut_to_events
 #'
 #' @name fg_cut_to_events
+#' @title Cut a univariate time series into colored event bars.
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.
 #' @param ncutsperside : Integer with number of colors to use on each side of 'center'
 #' @param center : String or Double as follows:
@@ -243,6 +246,7 @@ fg_cut_to_events<-function(indta,ncutsperside=4,center=0,extend=TRUE,invert=FALS
 #' Event Helpers: fg_signal_to_events
 #'
 #' @name fg_signal_to_events
+#' @title Add single date signals to time series graphs.
 #' @param signal_df A two-column `data.frame` with first being a date and second being any (factor-like) signal parameter.
 #' @param colormap A two column `data.frame` with the first being the possible signal (see Example) and the second a color.
 #'  description
@@ -270,6 +274,7 @@ fg_signal_to_events<-function(signal_df,colormap) {
 #' Event Helpers: fg_tq_divs
 #'
 #' @name fg_tq_divs
+#' @title Add dividend events to time series plots.
 #' @description
 #' Calls [tidyquant::tq_get()] to get dividends for a given set of tickers.  A previously created `data.frame` can also be input.
 #'
@@ -304,6 +309,7 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' Event Helpers: fg_av_earnings
 #'
 #' @name fg_av_earnings
+#' @title Add earnings events to time series plots using alphavantagepf
 #' @description
 #' Created `event_ds` from [alphavantagepf::av_get_pf] quarterly earnings data.
 #'

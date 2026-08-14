@@ -1,6 +1,6 @@
 #' Forecast Helpers
 #'
-#' @title Forecast_Helpers
+#' @title Add forecasts from the sweep package
 #' @name fg_sweep
 #' @description
 #' `fg_sweep` Augments a [sweep::sw_sweep()] output into [fgts_dygraph()] `forecastdataset` format.  See
@@ -39,7 +39,7 @@ fg_sweep <- function(swept_data,confidence=80)  {
 # fc2 = data.table(fc1)[,.(date,QQQ.f=.mean,QQQ.flo=hilo(QQQ, 95)$lower, QQQ.flo=hilo(QQQ, 95)$upper)]
 # dplr: mtcars |> mutate("{vnm}_f":=.data[[vnm]]*100000)
 
-#' @title Forecast_Helpers
+#' @title Add forecasts from the prophet package
 #' @name fg_prophet
 #' @description
 #' `fg_prophet` Augments a [prophet::predict.prophet()]  output into [fgts_dygraph()] `forecastdataset` format.

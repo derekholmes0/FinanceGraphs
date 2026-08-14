@@ -2,7 +2,7 @@
 % Please edit documentation in R/event_helpers.R
 \name{fg_addbreakouts}
 \alias{fg_addbreakouts}
-\title{Event_Helpers}
+\title{Add Breakout events to time series plots}
 \usage{
 fg_addbreakouts(indta, annotationstyle = "singleasdate", ...)
 }

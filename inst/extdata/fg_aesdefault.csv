@@ -131,3 +131,15 @@ xlinecolor,,color,blue,,fg_scatplot,xline color
 ylinecolor,,color,blue,,fg_scatplot,yline color
 expand_x,,misc,0.01,,fg_scatplot,Pct expansion in x viewport
 expand_y,,misc,0.01,,fg_scatplot,Pct expansion in y viewport
+seas_linewidth,D01,linewidth,0.5,,fg_seasonalstudy,All others
+seas_linewidth,D02,linewidth,2,,fg_seasonalstudy,Last
+seas_linewidth,D03,linewidth,1,,fg_seasonalstudy,Future Expansion
+seas_linewidth,D04,linewidth,1,,fg_seasonalstudy,Future Expansion
+seas_qt_color,D01,color,black,,fg_seasonalstudy,Last
+seas_qt_color,D02,color,blue,,fg_seasonalstudy,p10
+seas_qt_color,D03,color,red,,fg_seasonalstudy,p50
+seas_qt_color,D04,color,blue,,fg_seasonalstudy,p90
+seas_projfwd,,color,red,,fg_seasonalstudy,Projection line
+seas_label_bg,,color,lightgreen,,fg_seasonalstudy,Label Background
+seas_label_fg,,color,black,,fg_seasonalstudy,Label color
+seas_projlt,,linestyle,3131,,fg_seasonalstudy,Linestyle of projections

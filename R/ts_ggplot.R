@@ -1,8 +1,8 @@
 #' fg_tsboxplot:  Boxplots of time series
 #' @name fg_tsboxplot
+#' @title Boxplots to summarize time series
 #' @description
 #' Plots static summaries of time series in boxplot form.
-
 #' @usage
 #' fg_tsboxplot(indt,title="",xlab="",ylab="",
 #'      breaks=c(7,30,90,360), doi="last", normalize="", orderby="",

@@ -3,7 +3,7 @@
 \docType{data}
 \name{reerdta}
 \alias{reerdta}
-\title{Nominal FX levels}
+\title{Real FX levels}
 \format{
 \subsection{\code{reerdta}}{
 

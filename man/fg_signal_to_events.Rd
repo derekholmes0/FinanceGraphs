@@ -2,7 +2,7 @@
 % Please edit documentation in R/event_helpers.R
 \name{fg_signal_to_events}
 \alias{fg_signal_to_events}
-\title{Event Helpers: fg_signal_to_events}
+\title{Add single date signals to time series graphs.}
 \usage{
 fg_signal_to_events(signal_df, colormap)
 }
