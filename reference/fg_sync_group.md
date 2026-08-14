@@ -1,4 +1,4 @@
-# Add a synchronizing identifier for dygraphs used in Shiny or Markdown contexts
+# Group Synchronization
 
 Sets, gets, or resets a common name to be passed into
 [`fgts_dygraph()`](https://derekholmes0.github.io/FinanceGraphs/reference/fgts_dygraph.md)
@@ -27,8 +27,6 @@ fg_sync_group(gpname = "")
 current groupname
 
 ## Details
-
-Group Synchronization
 
 Use thie to set a common groupname for time scale synchronization (for
 Markdown or shiny apps), Only set it in the beginning, or when needed,

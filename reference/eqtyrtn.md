@@ -38,10 +38,6 @@ A tibble with 2529 observations and 6 columns
 
   ROlling 66 business day regression of TLT on QQQ p.value
 
-- ibmdiv:
-
-  Dividends reported for IBM
-
 ## Source
 
-<https://business-science.github.io/tidyquant/>
+<https://finance.yahoo.com>

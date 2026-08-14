@@ -1,4 +1,4 @@
-# Real FX levels
+# Nominal FX levels
 
 Real Effective Exchange Rates
 

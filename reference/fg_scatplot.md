@@ -1,4 +1,4 @@
-# Flexible and easy scatterplot generator, with time specific enhancements
+# fg_scatplot: Easy scatterplot generator, with time specific enhancements
 
 Plots bivariate plots with some time-series specific enhancements.
 Rather than programmatically describing graph aesthetics, a simple
@@ -230,8 +230,6 @@ object with desired graph, or a
 object if `tooltips` is in the `plotform` string.
 
 ## Details
-
-fg_scatplot: Easy scatterplot generator, with time specific enhancements
 
 `indata` can either be in wide ('date' ,'series1',...) format or
 normalized (long) format ('date','variable','value',...) format. This

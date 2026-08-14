@@ -1,12 +1,10 @@
-# Get aesthetic sets used in graphs
+# Maintain Colors
 
 `fg_get_aes()` gets aethestic `data.frame` for use in graphs.
 `fg_get_aesstring()` takes a column from the `data.frame` retrieved by
 `fg_get_aes()` `fg_print_aes_list()` prints names of aesthetics used
 internally in FinanceGraph functions. `fg_display_colors()` Shows a plot
-with current colors. `fg_get_datemap()` returns a data.table of all
-dates and date mappings `fg_current_theme()` returns the current
-`ggplot2` theme used for scatter plots.
+with current colors.
 
 ## Usage
 
@@ -23,10 +21,6 @@ fg_get_aesstring(
 fg_display_colors(item = "")
 
 fg_print_aes_list(grepstr = "")
-
-fg_get_datemap()
-
-fg_current_theme()
 ```
 
 ## Arguments
@@ -66,10 +60,6 @@ with just the character values of the requested aesthetic.
 aesthetic names used in each function `fg_display_colors()` returns a
 [`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
 object with colors and associated names for an aesthetic name
-
-## Details
-
-Maintain Colors
 
 ## See also
 

@@ -44,4 +44,4 @@ A data table with forecasts for two equities
 
 ## Source
 
-<https://business-science.github.io/tidyquant/>
+<https://finance.yahoo.com>

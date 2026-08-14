@@ -36,4 +36,4 @@ A data table with 2529 obersavatin and 5 variables
 
 ## Source
 
-<https://business-science.github.io/tidyquant/>
+<https://finance.yahoo.com>
