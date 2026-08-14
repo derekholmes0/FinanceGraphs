@@ -1,4 +1,4 @@
-# Maintain Colors
+# Get aesthetic sets used in graphs
 
 `fg_get_aes()` gets aethestic `data.frame` for use in graphs.
 `fg_get_aesstring()` takes a column from the `data.frame` retrieved by
@@ -66,6 +66,10 @@ with just the character values of the requested aesthetic.
 aesthetic names used in each function `fg_display_colors()` returns a
 [`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
 object with colors and associated names for an aesthetic name
+
+## Details
+
+Maintain Colors
 
 ## See also
 

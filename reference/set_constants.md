@@ -1,4 +1,4 @@
-# Maintain Colors
+# Add aesthetic parameter sets to internal store.
 
 `fg_update_aes()` updates or replaces default aesthestics (e.g. colors,
 linestyles, etc). `fg_update_line_colors()` replaces line colors only
@@ -63,6 +63,8 @@ No return value, as these are called for the side effects of adding to
 or replacing aesthetic sets.
 
 ## Details
+
+Maintain Colors
 
 For colors, New data passed into `fg_update_aes()` persists across
 future loads of the package unless `persist=FALSE`. New color datasets

@@ -66,7 +66,7 @@ plotting these prices can be done with just a few parameters.
 
 head(eqtypx,1)
 #>          date      EEM      IBM      QQQ      TLT
-#> 1: 2018-01-02 39.98331 103.4128 150.4116 99.85725
+#> 1: 2018-01-02 39.77656 101.9261 150.0572 97.94792
 fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
 ```
 
@@ -184,8 +184,8 @@ toplot <- reerdta[REGION=="LATAM",.(cop=sum(value*(variable=="COL")),
                peers=mean(value),peers.lo=min(value),peers.hi=max(value)),by=.(date)]
 head(toplot,2)
 #>          date      cop    peers peers.lo peers.hi
-#> 1: 2005-01-01 82.23199 87.45444 64.42042 105.4008
-#> 2: 2005-02-01 82.86437 88.32892 66.80717 107.9005
+#> 1: 2005-01-01 82.23418 87.45250 64.42092 105.3777
+#> 2: 2005-02-01 82.86514 88.32906 66.80718 107.9016
 ```
 
 Those series (`peers`, `peers.lo`, and `peers.hi`) are combined to get a
@@ -371,9 +371,9 @@ ma_signal<-eqtypx[,.(date,sig=cut(frollmean(EEM,5)-frollmean(EEM,20),
                      c(-10,-0.5,0.5,10),labels=c("long","flat","short")),EEM)]
 tail(ma_signal,3)
 #>          date  sig   EEM
-#> 1: 2026-03-18 long 57.56
-#> 2: 2026-03-19 long 57.62
-#> 3: 2026-03-20 long 55.64
+#> 1: 2026-08-10 <NA> 65.17
+#> 2: 2026-08-11 <NA> 65.43
+#> 3: 2026-08-12 <NA> 66.46
 ```
 
 ``` r
@@ -464,9 +464,9 @@ fcst_eqtypx <- tk_ts(eqtypx[,.(date,QQQ)]) |> ets() |> forecast::forecast(h=60) 
 #> Warning in .check_tzones(e1, e2): 'tzone' attributes are inconsistent
 head( fcst_in <- fg_sweep(fcst_eqtypx) ,3)
 #>          date    QQQ.f  QQQ.flo  QQQ.fhi
-#> 1: 2026-03-21 583.6937 572.5354 594.8520
-#> 2: 2026-03-22 583.8967 569.0573 598.7361
-#> 3: 2026-03-23 584.0997 566.3230 601.8764
+#> 1: 2026-08-13 723.3653 709.5226 737.2080
+#> 2: 2026-08-14 723.5901 705.1394 742.0408
+#> 3: 2026-08-15 723.8149 701.6927 745.9370
 ```
 
 ``` r

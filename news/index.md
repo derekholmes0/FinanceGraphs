@@ -1,7 +1,11 @@
 # Changelog
 
-## FinanceGraphs 0.9.12
+## FinanceGraphs 0.9.2
 
+### New Functionality
+
+- New graph type
+  [`fg_seasonalstudy()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_seasonalstudy.md)
 - [`fgts_dygraph()`](https://derekholmes0.github.io/FinanceGraphs/reference/fgts_dygraph.md)
   ignores `splitcols` argument if only one series is plotted.
 - Cache created with .onLoad error
