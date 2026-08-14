@@ -7,16 +7,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/derekholmes0/FinanceGraphs/blob/v0.9.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/derekholmes0/FinanceGraphs/blob/v0.9.2/DESCRIPTION)
 
 Holmes D (2026). *FinanceGraphs: Flexible Graphs for Analysis of
-Financial Data and Time Series*. R package version 0.9.0,
+Financial Data and Time Series*. R package version 0.9.2,
 <https://github.com/derekholmes0/FinanceGraphs>.
 
     @Manual{,
       title = {FinanceGraphs: Flexible Graphs for Analysis of Financial Data and Time Series},
       author = {Derek Holmes},
       year = {2026},
-      note = {R package version 0.9.0},
+      note = {R package version 0.9.2},
       url = {https://github.com/derekholmes0/FinanceGraphs},
     }

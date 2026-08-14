@@ -31,7 +31,7 @@ The `date` column can be called anything or be anywhere in the input
 data.frame, but there must be at least one coercible column with dates
 and one numeric column. Each column after the date column is treated as
 a separate series to be graphed, but if the column name (series name)
-ends in any of ‘`.lo`, `.hi`, `.f` (for forecast),’`.flo`, `.fhi` then
+ends in any of ’`.lo`, `.hi`, `.f` (for forecast), `.flo`, `.fhi` then
 those columns are treated specially as lower/upper bands or forecast
 series associated with the prefix of the name.
 
@@ -91,8 +91,10 @@ methods](reference/figures/README-simple_example2-1.png)
 - Series can be grouped together into bands by adding new columns in the
   data with names ending in ‘`.lo`’ and ‘`.hi`’ for lower and upper
   bounds. Those additional series can represent many things, such as
-  statistical extremes, rolling correlations to other variables (see
-  vignette), or (as a special case) forecast confidence intervals.
+  statistical extremes, rolling correlations to other variables (as in
+  this
+  [vignette](https://derekholmes0.github.io/FinanceGraphs/articles/Time-Series-dygraph.html))
+  or (as a special case) forecast confidence intervals.
 
 - Horizontal annotations can also be added using the `annotations`
   parameter. The most common example is a horizontal line at the last
@@ -115,8 +117,9 @@ Annotations to a particular date or date range can be added to the graph
 using the `events` and `event_ds` parameters.  
 The `events` parameter is a string with one or more (separated by
 semicolons) event specifications. The `event_ds` parameter is an
-optional data.frame with user defined events. (See Vignette for
-examples) Any events specified with either parameter are additive.
+optional data.frame with user defined events. See
+[Vignette](https://derekholmes0.github.io/FinanceGraphs/articles/Time-Series-dygraph.html)
+for examples. Any events specified with either parameter are additive.
 
 ### Events in the function call
 
@@ -140,9 +143,11 @@ styles](reference/figures/README-Events1-1.png) Several types of events
 are predefined in
 [`fgts_dygraph()`](https://derekholmes0.github.io/FinanceGraphs/reference/fgts_dygraph.md)
 including equity option expirations, IMM CDS roll dates, seasonal events
-(e.g. “same day in quarter as last observation”) and series extremes.
-See the vignette for more examples. Events can also be passed in as a
-`data.frame` using the `event_ds` parameter, as shown next.
+(e.g. “same day in quarter as last observation”) and series extremes.  
+See
+[Vignette](https://derekholmes0.github.io/FinanceGraphs/articles/Time-Series-dygraph.html)
+for details and examples. Events can also be passed in as a `data.frame`
+using the `event_ds` parameter, as shown next.
 
 ### Event helpers
 
@@ -192,9 +197,9 @@ to show the transition.
 ``` r
 
 head(example_fcst_set,2)
-#>          date    QQQ.f  QQQ.flo  QQQ.fhi   IBM.f  IBM.flo  IBM.fhi
-#> 1: 2026-03-21 582.8459 574.5719 591.1199 241.965 236.1769 247.7531
-#> 2: 2026-03-22 582.8459 571.5502 594.1416 241.965 233.8706 250.0593
+#>          date    QQQ.f  QQQ.flo  QQQ.fhi    IBM.f  IBM.flo  IBM.fhi
+#> 1: 2026-08-13 723.3784 713.5460 733.2107 235.9802 228.4980 243.4625
+#> 2: 2026-08-14 723.3784 709.9055 736.8512 235.9802 225.3977 246.5628
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 ```
 
@@ -286,7 +291,8 @@ to get from idea to presentable graph quickly. The approach used here is
 to specify broad categories of aesthetics with a formula, while the
 details are kept behind the hood using the aesthetic sets managed by
 [`fg_get_aes()`](https://derekholmes0.github.io/FinanceGraphs/reference/get_constants.md)
-as above. Fuller explanations and more examples are in the accompanying
+as above. Fuller explanations and more examples are in the
+[Customization](https://derekholmes0.github.io/FinanceGraphs/articles/FinanceGraphs-customization.html)
 vignette.
 
 This “one-line” approach can be used with both date-based and non-date
@@ -343,6 +349,36 @@ Many more examples that encapsulate a large part of the
 [ggplot2](https://ggplot2.tidyverse.org/) corpus are in the accompanying
 vignette.
 
+## Seasonality Studies
+
+Seasonality around events are manyh times financially relevant. For
+example, we may want to understand how returns react around earnings
+events, or how commodity prices evolve by during growing or heating
+seasons. The function
+[`fg_seasonalstudy()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_seasonalstudy.md)
+helps to understand those questions. Suppsed we want to see how an
+equity reacts around earnings announcements. We just run:
+
+``` r
+
+earnings_dates <- earnings_ibm[,.(reportedDate,divdt=format(reportedDate,"%Y%m%d"))]
+prices <- eqtypx |> narrowbydtstr("2024-01-01::")
+fg_seasonalstudy(prices,yvar="IBM",seasonaldateset = earnings_dates,normalize="index",
+                 projectfwd="mean",title="IBM earnings seasons")
+#> Warning: Removed 1 row containing missing values or values outside the scale range
+#> (`geom_label_repel()`).
+```
+
+![Seasonality of IBM around earnings
+dates](reference/figures/README-Seasonality-1.png)
+
+Like
+[`fg_scatplot()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_scatplot.md),
+the default behavior is to go to density plots if the number of
+individual lines grows too large, as would typically be the case for
+month or quarter seasonalities over any time period longer than 5 years
+or so. Tha behavior can be adjusted with the parameters of the function.
+
 ## Time-categorized box plots
 
 One way to visualize multiple time series comparatively with a boxplot
@@ -359,7 +395,8 @@ week, month (less the last week) and the last quarter.
 
 ``` r
 
-fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks=c(7,90),normalize="byvar",title="Normalized Equity prices by Date category")
+fg_tsboxplot(narrowbydtstr(eqtypx,"-2y::"),breaks=c(7,90),normalize="byvar",
+             title="Normalized Equity prices by Date category")
 ```
 
 ![Boxplot of relative equity
@@ -377,7 +414,8 @@ reorder the currencies by their relative weakness.
 
 ``` r
 
-fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",boxtype="nowhisker",facetform=". ~ REGION",title="Real Eff. Exch Rates")
+fg_tsboxplot(reerdta,breaks=c(0,0.2,0.5,1),doi="last",orderby="value",boxtype="nowhisker",
+             facetform=". ~ REGION",title="Real Eff. Exch Rates")
 ```
 
 ![Boxplot of Real Effective Exchange

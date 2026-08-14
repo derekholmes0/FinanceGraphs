@@ -188,6 +188,12 @@ dtrtn<- rbind(eqtyrtn[,.(date,r_eq=100*EEM,r_idx=100*QQQ,ticker="EEM")],
                     narrowbydtstr("-1y::")
 fg_scatplot(dtrtn,"r_eq ~ r_idx + color:ticker + xline:0 + yline:0","densitylm",
             tformula="y~0+x:(x>0)",title="piecewise linear")
+#> Warning: Removed 2 rows containing non-finite outside the scale range
+#> (`stat_density2d()`).
+#> Warning: Removed 2 rows containing non-finite outside the scale range
+#> (`stat_smooth()`).
+#> Warning: Removed 2 rows containing missing values or values outside the scale range
+#> (`geom_label()`).
 ```
 
 ![](Time-Series-scatterplot_files/figure-html/unnamed-chunk-8-1.png)

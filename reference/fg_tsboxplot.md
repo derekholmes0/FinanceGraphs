@@ -1,4 +1,4 @@
-# fg_tsboxplot: Boxplots of time series
+# Boxplots to summarize time series
 
 Plots static summaries of time series in boxplot form.
 
@@ -139,6 +139,10 @@ fg_tsboxplot(indt,title="",xlab="",ylab="",
 A
 [`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
 object
+
+## Details
+
+fg_tsboxplot: Boxplots of time series
 
 ## Examples
 
