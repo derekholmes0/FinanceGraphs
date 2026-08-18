@@ -142,16 +142,39 @@ If <code>rtn="list"</code> returns <code>c(startdt,enddt)</code>, if <code>rtn="
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">gendtstr</span><span class="op">(</span><span class="st">"-3m::"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-05-14::2026-08-14"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-05-18::2026-08-18"</span>
 <span class="r-in"><span><span class="fu">gendtstr</span><span class="op">(</span><span class="st">"-2y::-3m"</span>,today<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2025-03-15"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2023-03-15::2024-12-15"</span>
 <span class="r-in"><span><span class="fu">narrowbydtstr</span><span class="op">(</span><span class="va">eqtypx</span>,<span class="st">"-2m::-1m"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Key: &lt;date&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Empty data.table (0 rows and 5 cols): date,EEM,IBM,QQQ,TLT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           date   EEM      IBM     QQQ      TLT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;Date&gt; &lt;num&gt;    &lt;num&gt;   &lt;num&gt;    &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1: 2026-06-18 70.79 247.3258 739.807 86.08401</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2: 2026-06-22 71.21 250.4236 737.950 85.42907</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3: 2026-06-23 67.17 263.0530 713.650 85.53823</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4: 2026-06-24 67.25 261.0871 710.620 86.70917</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5: 2026-06-25 67.96 256.4305 716.380 86.67941</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6: 2026-06-26 67.19 269.6953 706.520 86.68933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7: 2026-06-29 67.43 276.0200 724.080 86.77863</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8: 2026-06-30 68.41 279.2071 736.400 85.75654</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9: 2026-07-01 66.48 284.2112 725.170 85.17688</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10: 2026-07-02 65.70 287.4579 712.600 85.16692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11: 2026-07-06 67.57 297.3867 722.820 85.10715</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12: 2026-07-07 65.72 303.9496 709.430 84.21078</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13: 2026-07-08 66.23 299.8987 711.440 84.02154</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14: 2026-07-09 66.78 293.1967 723.280 84.15101</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15: 2026-07-10 66.90 285.5119 725.510 84.13110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16: 2026-07-13 64.50 288.1629 711.740 83.63310</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17: 2026-07-14 65.67 215.5239 719.690 83.74266</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18: 2026-07-15 65.57 209.6957 717.740 83.90202</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19: 2026-07-16 64.19 217.4898 705.940 83.87213</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20: 2026-07-17 63.29 211.1553 695.330 84.18089</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           date   EEM      IBM     QQQ      TLT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;Date&gt; &lt;num&gt;    &lt;num&gt;   &lt;num&gt;    &lt;num&gt;</span>
 <span class="r-in"><span><span class="fu">extenddtstr</span><span class="op">(</span><span class="st">"-2m::-1m"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-06-14::2026-07-14"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-06-18::2026-07-18"</span>
 <span class="r-in"><span><span class="fu">extenddtstr</span><span class="op">(</span><span class="st">"-2m::-1m"</span>,begchg<span class="op">=</span><span class="op">-</span><span class="fl">10</span>,endchg<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-06-04::2026-07-19"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-06-08::2026-07-23"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
