@@ -66,7 +66,7 @@ plotting these prices can be done with just a few parameters.
 
 head(eqtypx,1)
 #>          date      EEM      IBM      QQQ      TLT
-#> 1: 2018-01-02 39.77656 101.9261 150.0572 97.94792
+#> 1: 2018-01-02 39.77655 101.9261 150.0572 97.94788
 fgts_dygraph(eqtypx, title="Stock Prices", ylab="Adjusted Close")
 ```
 
@@ -370,10 +370,10 @@ suppressPackageStartupMessages(require(data.table))
 ma_signal<-eqtypx[,.(date,sig=cut(frollmean(EEM,5)-frollmean(EEM,20),
                      c(-10,-0.5,0.5,10),labels=c("long","flat","short")),EEM)]
 tail(ma_signal,3)
-#>          date  sig   EEM
-#> 1: 2026-08-10 <NA> 65.17
-#> 2: 2026-08-11 <NA> 65.43
-#> 3: 2026-08-12 <NA> 66.46
+#>          date   sig   EEM
+#> 1: 2026-08-20 short 66.62
+#> 2: 2026-08-21 short 67.12
+#> 3: 2026-08-24 short 66.11
 ```
 
 ``` r
@@ -464,9 +464,9 @@ fcst_eqtypx <- tk_ts(eqtypx[,.(date,QQQ)]) |> ets() |> forecast::forecast(h=60) 
 #> Warning in .check_tzones(e1, e2): 'tzone' attributes are inconsistent
 head( fcst_in <- fg_sweep(fcst_eqtypx) ,3)
 #>          date    QQQ.f  QQQ.flo  QQQ.fhi
-#> 1: 2026-08-13 723.3653 709.5226 737.2080
-#> 2: 2026-08-14 723.5901 705.1394 742.0408
-#> 3: 2026-08-15 723.8149 701.6927 745.9370
+#> 1: 2026-08-25 707.3982 693.8751 720.9212
+#> 2: 2026-08-26 707.5985 689.6091 725.5878
+#> 3: 2026-08-27 707.7987 686.2465 729.3509
 ```
 
 ``` r

@@ -1,6 +1,19 @@
 # Changelog
 
+## FinanceGraphs 0.9.21
+
+### Bug fixes
+
+- [`fg_seasonalstudy()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_seasonalstudy.md)
+  ignores events datasets when a data.table with no rows passed.
+- Removed `ggtext` dependency
+- [`fg_RegimeChange()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_RegimeChange.md)
+  more robust against undeterminable confidence intervals, has better
+  coloring.
+
 ## FinanceGraphs 0.9.2
+
+CRAN release: 2026-08-21
 
 ### New Functionality
 
