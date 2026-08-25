@@ -120,7 +120,7 @@ fg_seasonalstudy <-function(indta,
     captionlab = "Older cycles adjusted to match beginning of latest cycle"
   }
   if(normalize=="index") {
-    indta = indta[,fg_value:=100*(fg_value/first(fg_value)-1), by=.(rollpd)]
+    indta = indta[,fg_value:=100*(fg_value/first(fg_value)), by=.(rollpd)]
     captionlab = "Expressed as index from beginning of each period"
   }
   ulast    = indta[,.SD[.N],by=.(rollpd)][,':='(rollsback=.N-.I+1)][,islastpd:=fifelse(rollsback==1,"LAST","--")]
