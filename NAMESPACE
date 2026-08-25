@@ -42,7 +42,6 @@ import(scales)
 import(usethis)
 importFrom(broom,tidy)
 importFrom(forcats,fct_reorder)
-importFrom(ggtext,element_markdown)
 importFrom(graphics,axis)
 importFrom(purrr,
   map2,

@@ -55,7 +55,6 @@
 #'         addline="last",boxtype="violin",title="Real Eff. Exch Rates (Violin)")
 #' @import data.table
 #' @importFrom forcats fct_reorder
-#' @importFrom ggtext element_markdown
 #' @export
 fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
                       breaks=c(7,30,90,360), doi="last", normalize="", orderby="",
@@ -66,7 +65,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
                       ycoord=NULL,trimpctile=0,
                       legend="insidetop",meltvar="variable",flip=FALSE,ptsize=3) {
     # Rename if necessary, premelt is if already in melted form, otherwise melt whatever we get
-  vmin=vmax=vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=R1=R2=vmn=dtrolled=xo=NULL
+  vmin=vmax=vminalldta=vmaxalldta=normid=xlabel=ii=qlo=qhi=R1=R2=vmn=dtrolled=xo=labcolor=NULL
 
   # Preprocessing: get into data.table format
   # Create dt and dt_colnames
@@ -109,9 +108,10 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
   if(length(s(hilightcats))>0) { # DOenst reorder properly, need to move to front
     hilightcolor <- fg_get_aesstring("boxplotcat")
     labelcol <- "xlabel"
-    dtm <- dtm[,let(xlabel=variable)]
-    dtm[data.table(variable=s(hilightcats)),xlabel:=paste0("<span style='color:",hilightcolor,"'>",xlabel,"</span>"),on=.(variable)]
-  }  # COuld combine the two and not get fancy
+    labelcolordf <- dtm[,.N,,by=.(variable)][,let(labcolor="black")]
+    labelcolordf <- labelcolordf[data.table(variable=s(hilightcats)),labcolor:=hilightcolor,on=.(variable)]
+    dtm <- dtm[,let(xlabel=variable)] # FOr future expansion if I actually change the text, like before
+   }  # COuld combine the two and not get fancy
 
     # orderby: last;  value,dt: alpha: DEfault order it ins
     orderbyargs <- c(s(tolower(orderby),sep=","),0,0)
@@ -202,7 +202,7 @@ fg_tsboxplot<-function(indt,title="",xlab="",ylab="",
                             color=fg_get_aesstring("boxplotlast"), linewidth=1.5)
     }
     if( labelcol=="xlabel") {
-      g1 <- g1 +  theme(axis.text.x = element_markdown(hjust = 1))
+      g1 <- g1 +  theme(axis.text.x = element_text(color=labelcolordf$labcolor, size=rel(1.5)))
     }
     if(flip==TRUE) {
       g1 <- g1+coord_flip(ylim = ycoord)

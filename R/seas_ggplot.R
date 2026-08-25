@@ -72,7 +72,7 @@ fg_seasonalstudy <-function(indta,
   captionlab <- ""
   seasonal_map <- data.table(inttype=s("yr;qtr;wk;mo;immroll;optmo;optqtr"),dtmapvar=s("yr;yrqtr;yrwk;yrmo;rollpd;yrmo;yrqtr"),
                              dtmaptype=c(rep("direct",5),rep("opt",2)))
-  if(is.data.frame(seasonaldateset)) {
+  if(is.data.frame(seasonaldateset) && nrow(seasonaldateset)>0) {
     seasonaldateset <- as.data.table(seasonaldateset)
     idname <- find_col_bytype(seasonaldateset,is.character) %||% "ctr"
     if(is.null( dtname <- find_col_bytype(seasonaldateset,lubridate::is.instant) )) {

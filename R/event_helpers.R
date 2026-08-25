@@ -8,10 +8,11 @@
 #' @param usereturns (default TRUE) LOgical to take log returns before changepoint calculations.
 #' @param ... Parameters passed to [RegimeChange::detect_regimes()]
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
+#' @details Change points with no avavilable confidence intervals will be shown, but not colored.
 #' @examples
 #' if (requireNamespace("RegimeChange", quietly = TRUE)) {
 #' dta <- tail(eqtypx[,.(date,QQQ,TLT)],260)
-#' eventdt = fg_RegimeChange(dta,bootstrap_reps=50)
+#' eventdt = fg_RegimeChange(dta,bootstrap_reps=30)
 #' fgts_dygraph(dta,event_ds=eventdt,title="With Breakouts")
 #' }
 #' @import data.table
@@ -31,11 +32,11 @@ fg_RegimeChange<-function(indta,usereturns=TRUE,series=NULL,...) {
     confimelt <- melt(confi,id.vars=c("text","irow"))[,let(value=as.integer(round(value,1)))]
     confimelt <- dts[confimelt,on=.(value)][order(irow,variable)]
     thiscolor <- fg_get_aesstring("lines")[[icol]]
-    eset <- confimelt[,.(text,DT_ENTRY=.SD[variable=="lower",]$DT_ENTRY,END_DT_ENTRY=.SD[variable=="upper",]$DT_ENTRY, color=alpha(thiscolor,0.2)), by=.(irow)]
+    eset <- confimelt[,.(text,DT_ENTRY=.SD[variable=="lower",]$DT_ENTRY,END_DT_ENTRY=.SD[variable=="upper",]$DT_ENTRY, color=alpha(thiscolor,0.1)), by=.(irow)]
     eset <- eset[,.SD[1],by=.(irow)][,irow:=NULL]
     eset <- rbindlist(list( confimelt[variable=="estimate"][,.(text=paste(text,format(DT_ENTRY,"%m-%d")),DT_ENTRY,END_DT_ENTRY=DT_ENTRY,
                                                                color=thiscolor,loc="bottom")], eset),use.names=TRUE,fill=TRUE)
-    return(eset[])
+    return(eset[!is.na(DT_ENTRY),][])
   }
   return(onereg(icol))
 }
