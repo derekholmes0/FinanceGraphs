@@ -1,9 +1,7 @@
 # FinanceGraphs 0.9.21
 
-## Bug fixes
-
-* `fg_seasonalstudy()` ignores events datasets when a data.table with no rows passed.
 * Removed `ggtext` dependency
+* `fg_seasonalstudy()` ignores events datasets when a data.table with no rows passed.
 * `fg_RegimeChange()` more robust against undeterminable confidence intervals, has better coloring.
 
 # FinanceGraphs 0.9.2
