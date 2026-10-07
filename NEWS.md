@@ -1,8 +1,9 @@
-# FinanceGraphs 0.9.21
+# FinanceGraphs 0.9.22
 
 * Removed `ggtext` dependency
 * `fg_seasonalstudy()` ignores events datasets when a data.table with no rows passed.
 * `fg_RegimeChange()` more robust against undeterminable confidence intervals, has better coloring.
+* Updated internal date maps to fix option expiration error in 2029.
 
 # FinanceGraphs 0.9.2
 

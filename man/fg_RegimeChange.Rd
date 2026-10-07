@@ -21,10 +21,13 @@ fg_RegimeChange(indta, usereturns = TRUE, series = NULL, ...)
 \description{
 Wrapper around the function \code{\link[RegimeChange:detect_regimes]{RegimeChange::detect_regimes()}} to create events for \code{\link[=fgts_dygraph]{fgts_dygraph()}}
 }
+\details{
+Change points with no avavilable confidence intervals will be shown, but not colored.
+}
 \examples{
 if (requireNamespace("RegimeChange", quietly = TRUE)) {
 dta <- tail(eqtypx[,.(date,QQQ,TLT)],260)
-eventdt = fg_RegimeChange(dta,bootstrap_reps=50)
+eventdt = fg_RegimeChange(dta,bootstrap_reps=30)
 fgts_dygraph(dta,event_ds=eventdt,title="With Breakouts")
 }
 }

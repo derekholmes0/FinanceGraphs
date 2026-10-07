@@ -187,8 +187,8 @@ to show the transition.
 ``` r
 head(example_fcst_set,2)
 #>          date    QQQ.f  QQQ.flo  QQQ.fhi    IBM.f  IBM.flo  IBM.fhi
-#> 1: 2026-08-13 723.3784 713.5460 733.2107 235.9802 228.4980 243.4625
-#> 2: 2026-08-14 723.3784 709.9055 736.8512 235.9802 225.3977 246.5628
+#> 1: 2026-08-25 706.7582 696.9227 716.5938 231.0405 223.7059 238.3750
+#> 2: 2026-08-26 706.7582 693.2780 720.2384 231.0405 220.6668 241.4141
 fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=example_fcst_set)
 ```
 

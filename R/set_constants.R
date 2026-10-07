@@ -228,12 +228,13 @@ fg_create_defaults <- function() {
 }
 
 # Make datemap, very helpuful for narrowing dates.
+# datemap 261007
 #
 #' @import data.table
 #' @import qlcal
-make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
+make_dtmap <- function(yrs_ahead=10,begDate=as.Date("1970-01-01")) {
   # All Dates
-  `.`<-DT_ENTRY<-isbday<-rolldt<-yr<-yrmo<-yrwk<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-NULL
+  `.`<-DT_ENTRY<-isbday<-rolldt<-yr<-yrmo<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-yrwk<-NULL
   ishol_nyse<-ishol_bond<-NULL
   dtmap <- data.table::data.table(DT_ENTRY=seq(from =begDate, to = Sys.Date()+yrs_ahead*365, by = "day")) |> .addseasonaldates()
   allhols <- rbindlist(list(
@@ -250,7 +251,8 @@ make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
   data.table::setnafill(dtmap,"locf",cols=c('rolldt'))
   data.table::setkeyv(dtmap,c("DT_ENTRY"))
   # Business days and end periods
-  dtmap <- dtmap[,'isbday':=data.table::between(data.table::wday(DT_ENTRY),2,6) & !(ishol_nyse | ishol_bond)] # weekdays
+  # Just NYSE holidays; not bond holidays
+  dtmap <- dtmap[,'isbday':=data.table::between(data.table::wday(DT_ENTRY),2,6) & !(ishol_nyse)] # weekdays
   dtmapc <- data.table::copy(dtmap)
   dtmapc <- dtmapc[isbday==TRUE,]
   dtmapc <- dtmapc[,'isweek':=(DT_ENTRY==max(DT_ENTRY)),by="yrwk"]
@@ -264,15 +266,21 @@ make_dtmap <- function(yrs_ahead=5,begDate=as.Date("1970-01-01")) {
   data.table::setnafill(dtmap,"locf",cols=c("daysfromroll"))
   dtmap <- dtmap |> tidyr::fill('rollpd') # tidyr bc of character
   # Option Expirations (Equities)
-  moexp <- dtmap[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrwk)]
-  moexp <-  moexp[,':='('frino'=.I-min(.I)),by=.(yrmo)][frino==2,][,.(DT_ENTRY,optexp="mo")]
-  qexp <- dtmap[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrqtr)][,.(DT_ENTRY,xoptexp="qtr")]
-  dtmap <- moexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=data.table::fcoalesce(optexp,""))]
-  dtmap <- qexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=paste0(optexp,data.table::fcoalesce(xoptexp,"")))][,':='(xoptexp=NULL)]
+
+  moexp <- copy(dtmap)[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrwk)]
+  moexp <-  moexp[,':='('frino'=.I-min(.I)),by=.(yrmo)][frino==2,][,.(DT_ENTRY,prio=2,optexp="mo")]
+  qexp <- copy(dtmap)[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrqtr)][,.(DT_ENTRY,prio=1,optexp="qtr")]
+  wkexp <- copy(dtmap)[ishol_nyse==FALSE & isbday==TRUE,][,.SD[.N],by=.(yrwk)][,.(DT_ENTRY,prio=3,optexp="wk")]
+
+  optexp <-rbindlist(list(wkexp,moexp,qexp))[order(DT_ENTRY,prio)][,.SD[1],by=.(DT_ENTRY)][,prio:=NULL]
+  dtmap <- optexp[dtmap,on=.(DT_ENTRY)][,':='(optexp=data.table::fcoalesce(optexp,fifelse(isbday==TRUE,"dly","")))]
+  # Fill in the rest
   dtmap <- dtmap[,':='('isweek'=data.table::fcoalesce(isweek,FALSE),'ismo'=data.table::fcoalesce(ismo,FALSE),
                        'isqtr'=data.table::fcoalesce(isqtr,FALSE),'isyr'=data.table::fcoalesce(isyr,FALSE))][]
   return(dtmap)
 }
+
+
 
 fg_setdbg <- function() {
   assign("cassign",TRUE,envir=the_fg)
