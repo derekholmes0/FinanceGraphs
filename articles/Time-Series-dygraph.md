@@ -616,8 +616,8 @@ fg_update_dates_of_interest(newevents[!color=="grey"]) # Only add real moves
 #> NULL
 tail(newevents,2)
 #>    category eventid   DT_ENTRY color
-#> 1:    COPOM    15.0 2025-12-10  grey
-#> 2:    COPOM    15.0 2026-01-28  grey
+#> 1:    COPOM    14.0 2026-08-05  blue
+#> 2:    COPOM    13.8 2026-09-16  blue
 ```
 
 and use it easily with just a text argument to `events`.
