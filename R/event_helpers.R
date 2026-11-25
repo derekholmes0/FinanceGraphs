@@ -194,7 +194,6 @@ fg_ratingsEvents<-function(credit,ratings_db,agency="S.P") { # CERDIT,AGENCY,RAT
 }
 
 #' Event Helpers: fg_cut_to_events
-#'
 #' @name fg_cut_to_events
 #' @title Cut a univariate time series into colored event bars.
 #' @param indta Time series `data.table` with a date as the first column and a value series as the second column.

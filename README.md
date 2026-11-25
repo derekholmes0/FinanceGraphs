@@ -169,6 +169,7 @@ Current event helpers are:
 
 | Function | Description |
 |:---|:---|
+| `fg_drawdowns_to_events()` | Add colored ranges for drawdowns or extreme returns over rolling windows |
 | `fg_findTurningPoints()` | Statistically identify turning points in a series |
 | `fg_ratingsEvents()` | Add colored ranges based on analyst credit ratings |
 | `fg_cut_to_events()` | “Cut” a univariate series into colored bands, with two different colors for positive and negative values |
@@ -196,7 +197,7 @@ fgts_dygraph(smalldta,title="With Forecasts", dtstartfrac=0.7,forecast_ds=exampl
 
 Like events, forecasts can be generated from many packages with
 different output formats. There is also a “forecast helper” to get their
-outputs into the appropriate `foreast_ds` forms
+outputs into the appropriate `forcast_ds` forms
 
 | Function | Description |
 |:---|:---|
@@ -238,8 +239,8 @@ fg_update_dates_of_interest(newdoi)
 #> NULL
 tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 #>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
-#> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
-#> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
+#> 1 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
+#> 2 fedmoves   F:+25     rt:7 2026-09-16   2026-09-16  <NA>          <NA> <NA>
 fg_reset_to_default_state("all")
 #> Removing dates file and reverting to defaults of package
 #> Removing Aesthetics file and reverting to defaults of package
@@ -304,7 +305,7 @@ fg_scatplot(dttest,"px_y ~ px_x + color:ccat + doi:recent + point:label","lmone"
 One important feature of the static plots in this package to note is
 that they include options for switching the colors of large numbers of
 groups or points from discrete values to continuous values from the
-[RColorBrewer](https://colorbrewer2.org) package.
+[RColorBrewer](https://colorbrewer2.org/) package.
 
 `fg_scatplot()` does not require dates in the input data, and can be
 useful for communicating comparative analyses as well. The `mtcars`
