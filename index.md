@@ -179,6 +179,7 @@ are:
 
 | Function | Description |
 |:---|:---|
+| [`fg_drawdowns_to_events()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_drawdowns_to_events.md) | Add colored ranges for drawdowns or extreme returns over rolling windows |
 | [`fg_findTurningPoints()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_findTurningPoints.md) | Statistically identify turning points in a series |
 | [`fg_ratingsEvents()`](https://derekholmes0.github.io/FinanceGraphs/reference/Event_Helpers.md) | Add colored ranges based on analyst credit ratings |
 | [`fg_cut_to_events()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_cut_to_events.md) | “Cut” a univariate series into colored bands, with two different colors for positive and negative values |
@@ -208,7 +209,7 @@ data](reference/figures/README-Forecasts1-1.png)
 
 Like events, forecasts can be generated from many packages with
 different output formats. There is also a “forecast helper” to get their
-outputs into the appropriate `foreast_ds` forms
+outputs into the appropriate `forcast_ds` forms
 
 | Function | Description |
 |:---|:---|
@@ -256,8 +257,8 @@ fg_update_dates_of_interest(newdoi)
 #> NULL
 tail(fg_get_dates_of_interest("fedmoves"),2)  |> data.frame()
 #>   category eventid eventid2   DT_ENTRY END_DT_ENTRY color strokePattern  loc
-#> 1 fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10  <NA>          <NA> <NA>
-#> 2 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
+#> 1 fedmoves   F:-50     <NA> 2026-06-16   2026-06-16  <NA>          <NA> <NA>
+#> 2 fedmoves   F:+25     rt:7 2026-09-16   2026-09-16  <NA>          <NA> <NA>
 fg_reset_to_default_state("all")
 #> Removing dates file and reverting to defaults of package
 #> Removing Aesthetics file and reverting to defaults of package
@@ -329,7 +330,7 @@ highlighting.](reference/figures/README-Scatter1-1.png) One important
 feature of the static plots in this package to note is that they include
 options for switching the colors of large numbers of groups or points
 from discrete values to continuous values from the
-[RColorBrewer](https://colorbrewer2.org) package.
+[RColorBrewer](https://colorbrewer2.org/) package.
 
 [`fg_scatplot()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_scatplot.md)
 does not require dates in the input data, and can be useful for
