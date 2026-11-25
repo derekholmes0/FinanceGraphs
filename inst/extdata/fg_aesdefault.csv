@@ -143,3 +143,6 @@ seas_projfwd,,color,red,,fg_seasonalstudy,Projection line
 seas_label_bg,,color,lightgreen,,fg_seasonalstudy,Label Background
 seas_label_fg,,color,black,,fg_seasonalstudy,Label color
 seas_projlt,,linestyle,3131,,fg_seasonalstudy,Linestyle of projections
+draws,nonol_dd,color,#ffcdcd,,fgts_dygraph,Drawdown background color: Bad
+draws,table,color,#c0dccc,,fgts_dygraph,Drawdown background color: Bad
+draws,nonol_du,color,#c0dccc,,fgts_dygraph,Drawdown background color: Good

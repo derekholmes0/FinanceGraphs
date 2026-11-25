@@ -272,6 +272,38 @@ fg_signal_to_events<-function(signal_df,colormap) {
   return(tmpruns)
 }
 
+#' Event Helpers: fg_signal_to_events
+#'
+#' @name fg_drawdowns_to_events
+#' @title Adds drawdown shading to time series graphs
+#' @param prices A two-column `data.frame` with first being a date and second being a price time series
+#' @param drawdown_type  (default: "nonol_dd,5,10")  Type of drawdown to return. Choices are:
+#' |Parameter|Desccription|
+#' |:-------:|:----------------------|
+#' |`drawdown`|Actual drawdowns until new highs are reached|
+#' |`nonol_dd,<window>,<ntoreturn>`|Nonoverlapping `window` drawdowns (up to `ntoreturn` returned) |
+#' |`nonol_du,<window>,<ntoreturn>`|Nonoverlapping `window` draw-ups (up to `ntoreturn` returned) |
+#' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
+#' @examples
+#' # EQuity Prices wih 20 day drawdowns and drawups
+#' epx <- eqtypx[,.(date,QQQ)]
+#' draws <- data.table::rbindlist(list(
+#'    fg_drawdowns_to_events(epx,drawdown_type='nonol_du,20,10'),
+#'    fg_drawdowns_to_events(epx,drawdown_type='nonol_dd,20,10')
+#'    ))
+#' fgts_dygraph(eqtypx[,.(date,QQQ,IBM)],event_ds=draws,title="With 20 day QQQ drawups and downs")
+#' @import data.table
+#' @export
+fg_drawdowns_to_events<-function(prices,drawdown_type="nonol_dd,5,10") {
+  rtnwindow=NULL
+  ddt_list <- s(drawdown_type,sep=",")
+  ddt_list[1] <- fifelse(ddt_list[1]=="drawdown","table",ddt_list[1])
+  ddt <- fg_ts_to_drawdowns(prices,stat=fcoalesce(ddt_list[1],"table"),
+                            nwindow=fcoalesce(as.numeric(ddt_list[2]),5),ntoget=fcoalesce(as.numeric(ddt_list[3]),10))
+  ddt_color <- fg_get_aes("draws")[variable==ddt_list[1],]$value
+  return(ddt[,.(category=ddt_list[1],text=format(rtnwindow,digits=2),DT_ENTRY,END_DT_ENTRY,color=ddt_color,location="bottom")])
+}
+
 #' Event Helpers: fg_tq_divs
 #'
 #' @name fg_tq_divs
@@ -319,12 +351,14 @@ fg_tq_divs<-function(tickers,divs_ds=NULL,ticker_in_label=TRUE) {
 #' @param ticker_in_label (Default: TRUE) Make label ticker and the earnings
 #' @returns `data.table` suitable for passing into [fgts_dygraph()] via the `event_ds` parameter
 #' @examples
+#' \dontrun{
 #' if (requireNamespace("alphavantagepf", quietly = TRUE)) {
 #' earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
 #'         alphavantagepf::av_extract_df("quarterlyEarnings") |>
 #'         fg_av_earnings()
 #' toplot = dplyr::select(eqtypx,date,IBM)
 #' fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=earnings)
+#' }
 #' }
 #' @import data.table
 #' @rdname Event_Helpers

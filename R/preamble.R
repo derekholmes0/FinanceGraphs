@@ -23,7 +23,11 @@ if(file.exists(the_fg$doifn)) {
 }
 if(file.exists(the_fg$aesfn)) {
   load(the_fg$aesfn)
-  the_fg$aesset <- newaes
+  aeskeys <- c("category","variable","type")
+  data.table::setkeyv(the_fg$aes_default,aeskeys)
+  data.table::setkeyv(newaes,aeskeys)
+  the_fg$aesset<- data.table::rbindlist(list(the_fg$aes_default[!newaes],newaes),use.names=TRUE,fill=TRUE)
+  #the_fg$aesset <- DTUpsert(the_fg$aes_default,newaes,c("category","variable","type"))
 }
 if(file.exists(the_fg$themefn)) {
   load(the_fg$themefn)

@@ -1,10 +1,9 @@
-#' Seasonality Graphs
+#' Flexible Seasonality Graphs
 #' @name fg_seasonalstudy
-#' @title Flexible Seasonality Graphs
 #' @description Flexible and general seasonality graphs.
 #' @param indta A data.frame with at least one date column and a numeric column with the name given by `yvar`
 #' @param seasonaltype (default: `"yr"`) A string denoting the periodicity of the analysis, must be in one of
-#' `c("yr","qtr","mo","wk",IMMroll","optmo","optqtr")`.  Not used if `seasonaldataset` is specified instead
+#' `c("yr","qtr","mo","wk","IMMroll","optmo","optqtr")`.  Not used if `seasonaldateset` is specified instead
 #' @param seasonaldateset (default:NULL) An optional dataset with two columns: A Date column defining each period, and possibly a character
 #' variable with a period identifier.
 #' @param day_offset (default: 0) Number of days (determined by bdaysonly) to offset each period.  Applies only to `c("yr","qtr","mo","wk")`
@@ -22,7 +21,7 @@
 #' |`relative`|Older seasonal periods adjusted to match beginning of latest  period|
 #' |`index`|Each seasonal period is expressed as index from beginning of each period|
 #' @param projectfwd (default "")  Project forward based on same number of days in seaonal period.  Default is no projection.
-#' |`normalize`|Description|
+#' |Value|Description|
 #' |:-------:|:---------------------|
 #' |`mean`|Use mean (by days in seasonal period) of each cumulative percentage change from the start of the period|
 #' |`weighted`|Weight previous period cumulative percantge change with an expoential decay using `projfwd_wt` ** (Periods back)|

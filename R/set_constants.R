@@ -186,8 +186,6 @@ fg_sync_group <- function(gpname="") {
 }
 
 
-
-
 #' @import data.table
 #' @import usethis
 fg_create_defaults <- function() {
@@ -234,8 +232,8 @@ fg_create_defaults <- function() {
 #' @import qlcal
 make_dtmap <- function(yrs_ahead=10,begDate=as.Date("1970-01-01")) {
   # All Dates
-  `.`<-DT_ENTRY<-isbday<-rolldt<-yr<-yrmo<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-isqtr<-isyr<-yrwk<-NULL
-  ishol_nyse<-ishol_bond<-NULL
+  `.`<-DT_ENTRY<-isbday<-rolldt<-yr<-yrmo<-frino<-yrqtr<-optexp<-xoptexp<-isweek<-ismo<-NULL
+  ishol_nyse<-ishol_bond<-isqtr<-isyr<-yrwk<-prio<-NULL
   dtmap <- data.table::data.table(DT_ENTRY=seq(from =begDate, to = Sys.Date()+yrs_ahead*365, by = "day")) |> .addseasonaldates()
   allhols <- rbindlist(list(
     data.table(DT_ENTRY=qlcal::getHolidays(begDate, Sys.Date()+yrs_ahead*365,xp=qlcal::getCalendar("UnitedStates/NYSE")),calnm="ishol_nyse",ishol=TRUE),

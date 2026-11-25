@@ -29,7 +29,7 @@ fg_seasonalstudy(
 \item{indta}{A data.frame with at least one date column and a numeric column with the name given by \code{yvar}}
 
 \item{seasonaltype}{(default: \code{"yr"}) A string denoting the periodicity of the analysis, must be in one of
-\verb{c("yr","qtr","mo","wk",IMMroll","optmo","optqtr")}.  Not used if \code{seasonaldataset} is specified instead}
+\code{c("yr","qtr","mo","wk","IMMroll","optmo","optqtr")}.  Not used if \code{seasonaldateset} is specified instead}
 
 \item{seasonaldateset}{(default:NULL) An optional dataset with two columns: A Date column defining each period, and possibly a character
 variable with a period identifier.}
@@ -53,7 +53,7 @@ variable with a period identifier.}
 }}
 
 \item{projectfwd}{(default "")  Project forward based on same number of days in seaonal period.  Default is no projection.\tabular{cl}{
-   \code{normalize} \tab Description \cr
+   Value \tab Description \cr
    \code{mean} \tab Use mean (by days in seasonal period) of each cumulative percentage change from the start of the period \cr
    \code{weighted} \tab Weight previous period cumulative percantge change with an expoential decay using \code{projfwd_wt} ** (Periods back) \cr
 }}
@@ -85,9 +85,6 @@ a \code{\link[ggplot2:ggplot]{ggplot()}} object displaying seasonality
 }
 \description{
 Flexible and general seasonality graphs.
-}
-\details{
-Seasonality Graphs
 }
 \examples{
 require(data.table)

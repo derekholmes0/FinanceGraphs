@@ -66,11 +66,13 @@ fgts_dygraph(copdta,title="COP with Ratings",dtstartfrac=0.3,
 if (requireNamespace("tidyquant", quietly = TRUE)) {
   fgts_dygraph(eqtypx,title="With divs",dtstartfrac=0.8,event_ds=fg_tq_divs(c("IBM","QQQ")))
 }
+\dontrun{
 if (requireNamespace("alphavantagepf", quietly = TRUE)) {
 earnings = alphavantagepf::av_get_pf("IBM","EARNINGS") |>
         alphavantagepf::av_extract_df("quarterlyEarnings") |>
         fg_av_earnings()
 toplot = dplyr::select(eqtypx,date,IBM)
 fgts_dygraph(toplot,title="With earnings",dtstartfrac=0.8,event_ds=earnings)
+}
 }
 }
