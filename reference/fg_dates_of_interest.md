@@ -88,8 +88,8 @@ require(data.table)
 tail(fg_get_dates_of_interest("fedmoves"),2)
 #>    category eventid eventid2   DT_ENTRY END_DT_ENTRY  color strokePattern
 #>      <char>  <char>   <char>     <Date>       <Date> <char>        <char>
-#> 1: fedmoves   F:-25     rt:4 2025-10-29   2025-10-29   <NA>          <NA>
-#> 2: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   <NA>          <NA>
+#> 1: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   <NA>          <NA>
+#> 2: fedmoves   F:+25     rt:7 2026-09-16   2026-09-16   <NA>          <NA>
 #>       loc
 #>    <char>
 #> 1:   <NA>
@@ -111,11 +111,11 @@ fg_get_dates_of_interest("fedmoves",totoday=as.Date("2026-12-31"))
 #>   4: fedmoves   F:-75 rt:10.75 1980-05-22   1980-05-22   <NA>          <NA>
 #>   5: fedmoves  F:-125   rt:9.5 1980-06-05   1980-06-05   <NA>          <NA>
 #>  ---                                                                       
-#> 184: fedmoves   F:-25   rt:4.5 2024-12-18   2024-12-18   <NA>          <NA>
 #> 185: fedmoves   F:-25  rt:4.25 2025-09-17   2025-09-17   <NA>          <NA>
 #> 186: fedmoves   F:-25     rt:4 2025-10-29   2025-10-29   <NA>          <NA>
 #> 187: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   <NA>          <NA>
-#> 188: fedmoves   F:-50     <NA> 2026-06-16   2026-12-31   <NA>          <NA>
+#> 188: fedmoves   F:-50     <NA> 2026-06-16   2026-06-16   <NA>          <NA>
+#> 189: fedmoves   F:+25     rt:7 2026-09-16   2026-12-31   <NA>          <NA>
 #>         loc
 #>      <char>
 #>   1:   <NA>
@@ -124,11 +124,11 @@ fg_get_dates_of_interest("fedmoves",totoday=as.Date("2026-12-31"))
 #>   4:   <NA>
 #>   5:   <NA>
 #>  ---       
-#> 184:   <NA>
 #> 185:   <NA>
 #> 186:   <NA>
 #> 187:   <NA>
 #> 188:   <NA>
+#> 189:   <NA>
 fg_reset_to_default_state("doi")
 #> Removing dates file and reverting to defaults of package
 #> fg_reset_to_default_state(doi) completed

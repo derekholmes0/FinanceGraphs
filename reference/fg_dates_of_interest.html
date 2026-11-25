@@ -9,7 +9,7 @@ fg_update_dates_of_interest() updates a set of time events for future use in tim
 
     <a class="navbar-brand me-2" href="../index.html">FinanceGraphs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.23</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,8 +113,8 @@ New data passed into <code>fg_update_dates_of_interest()</code> or <code><a href
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="fu">fg_get_dates_of_interest</span><span class="op">(</span><span class="st">"fedmoves"</span><span class="op">)</span>,<span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    category eventid eventid2   DT_ENTRY END_DT_ENTRY  color strokePattern</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;  &lt;char&gt;   &lt;char&gt;     &lt;Date&gt;       &lt;Date&gt; &lt;char&gt;        &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: fedmoves   F:-25     rt:4 2025-10-29   2025-10-29   &lt;NA&gt;          &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   &lt;NA&gt;          &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   &lt;NA&gt;          &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: fedmoves   F:+25     rt:7 2026-09-16   2026-09-16   &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       loc</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:   &lt;NA&gt;</span>
@@ -136,11 +136,11 @@ New data passed into <code>fg_update_dates_of_interest()</code> or <code><a href
 <span class="r-out co"><span class="r-pr">#&gt;</span>   4: fedmoves   F:-75 rt:10.75 1980-05-22   1980-05-22   &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   5: fedmoves  F:-125   rt:9.5 1980-06-05   1980-06-05   &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ---                                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 184: fedmoves   F:-25   rt:4.5 2024-12-18   2024-12-18   &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 185: fedmoves   F:-25  rt:4.25 2025-09-17   2025-09-17   &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 186: fedmoves   F:-25     rt:4 2025-10-29   2025-10-29   &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 187: fedmoves   F:-25  rt:3.75 2025-12-10   2025-12-10   &lt;NA&gt;          &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 188: fedmoves   F:-50     &lt;NA&gt; 2026-06-16   2026-12-31   &lt;NA&gt;          &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 188: fedmoves   F:-50     &lt;NA&gt; 2026-06-16   2026-06-16   &lt;NA&gt;          &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 189: fedmoves   F:+25     rt:7 2026-09-16   2026-12-31   &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         loc</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   1:   &lt;NA&gt;</span>
@@ -149,11 +149,11 @@ New data passed into <code>fg_update_dates_of_interest()</code> or <code><a href
 <span class="r-out co"><span class="r-pr">#&gt;</span>   4:   &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   5:   &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  ---       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 184:   &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 185:   &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 186:   &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 187:   &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 188:   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 189:   &lt;NA&gt;</span>
 <span class="r-in"><span><span class="fu"><a href="set_constants.html">fg_reset_to_default_state</a></span><span class="op">(</span><span class="st">"doi"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Removing dates file and reverting to defaults of package</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> fg_reset_to_default_state(doi) completed</span>

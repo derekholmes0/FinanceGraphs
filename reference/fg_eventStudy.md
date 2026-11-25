@@ -106,6 +106,7 @@ Event Studies
 ``` r
 dtset <- fg_get_dates_of_interest("fedmoves",startdt="2024-01-01")[,.(DT_ENTRY,text=eventid2)]
 fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="stats")
+#> No data for event : rt:7 skipping
 #>      idelta variable eventid    s50    s20    s80     N
 #>       <int>   <char>  <fctr>  <num>  <num>  <num> <int>
 #>   1:    -10   CMS_10    <NA> -0.065 -0.120  0.070     6
@@ -114,19 +115,24 @@ fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="stats")
 #>   4:     -7   CMS_10    <NA> -0.035 -0.080 -0.010     6
 #>   5:     -6   CMS_10    <NA> -0.045 -0.100 -0.020     6
 #>  ---                                                   
-#> 279:     16     <NA>    rt:5  0.370  0.358  0.382     3
-#> 280:     17     <NA>    rt:5  0.360  0.348  0.372     3
-#> 281:     18     <NA>    rt:5  0.330  0.306  0.336     3
-#> 282:     19     <NA>    rt:5  0.320  0.290  0.320     3
-#> 283:     20     <NA>    rt:5  0.360  0.354  0.378     3
+#> 275:     15     <NA>    rt:5  0.360  0.330  0.372     3
+#> 276:     16     <NA>    rt:5  0.370  0.358  0.382     3
+#> 277:     17     <NA>    rt:5  0.360  0.348  0.372     3
+#> 278:     18     <NA>    rt:5  0.330  0.306  0.336     3
+#> 279:     19     <NA>    rt:5  0.320  0.290  0.320     3
 fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="pathbyevent")
+#> No data for event : rt:7 skipping
 
 fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="medbyvar")
+#> No data for event : rt:7 skipping
 
 fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="lmbyvar",n_color_switch=0)
+#> No data for event : rt:7 skipping
 
 fg_eventStudy(yc_CMSUST,dtset,nbd_back=3,nbd_fwd=10,title="Fed Cuts",output="boxbyvar")
+#> No data for event : rt:7 skipping
 
 fg_eventStudy(yc_CMSUST,dtset,title="Fed Cuts",output="scatter")
+#> No data for event : rt:7 skipping
 
 ```

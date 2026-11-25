@@ -37,8 +37,9 @@ fg_seasonalstudy(
 - seasonaltype:
 
   (default: `"yr"`) A string denoting the periodicity of the analysis,
-  must be in one of `c("yr","qtr","mo","wk",IMMroll","optmo","optqtr")`.
-  Not used if `seasonaldataset` is specified instead
+  must be in one of
+  `c("yr","qtr","mo","wk","IMMroll","optmo","optqtr")`. Not used if
+  `seasonaldateset` is specified instead
 
 - seasonaldateset:
 
@@ -85,7 +86,7 @@ fg_seasonalstudy(
 
   |  |  |
   |----|----|
-  | `normalize` | Description |
+  | Value | Description |
   | `mean` | Use mean (by days in seasonal period) of each cumulative percentage change from the start of the period |
   | `weighted` | Weight previous period cumulative percantge change with an expoential decay using `projfwd_wt` \*\* (Periods back) |
 
@@ -139,10 +140,6 @@ fg_seasonalstudy(
 
 a [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
 object displaying seasonality
-
-## Details
-
-Seasonality Graphs
 
 ## Examples
 

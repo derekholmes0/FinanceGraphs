@@ -1,6 +1,6 @@
 # Changelog
 
-## FinanceGraphs 0.9.23
+## FinanceGraphs 0.9.24
 
 - Removed `ggtext` dependency
 - [`fg_seasonalstudy()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_seasonalstudy.md)
@@ -9,7 +9,12 @@
   more robust against undeterminable confidence intervals, has better
   coloring.
 - Updated internal date maps to fix option expiration error in 2029.
-- 
+- Added new helper functions
+  [`fg_ts_to_drawdowns()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_ts_to_drawdowns.md)
+  and
+  [`fg_drawdowns_to_events()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_drawdowns_to_events.md)
+- Fixed Initial load of aesthetics so existing aesthetics are merged
+  into defaults rather than replacing them.
 
 ## FinanceGraphs 0.9.2
 

@@ -507,6 +507,9 @@ Cuts](reference/figures/README-EventStudies2-1.png)
   [`fg_update_dates_of_interest()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_dates_of_interest.md)
   : Maintain Aethestics and Dates of Interest
 
+- [`fg_drawdowns_to_events()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_drawdowns_to_events.md)
+  : Adds drawdown shading to time series graphs
+
 - [`fg_eventStudy()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_eventStudy.md)
   : Event Studies graphs
 
@@ -532,6 +535,9 @@ Cuts](reference/figures/README-EventStudies2-1.png)
 - [`fg_sync_group()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_sync_group.md)
   : Add a synchronizing identifier for dygraphs used in Shiny or
   Markdown contexts
+
+- [`fg_ts_to_drawdowns()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_ts_to_drawdowns.md)
+  : fg_ts_to_drawdowns
 
 - [`fg_tsboxplot()`](https://derekholmes0.github.io/FinanceGraphs/reference/fg_tsboxplot.md)
   : Boxplots to summarize time series

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FinanceGraphs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.23</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,7 +77,7 @@
 
 <dt id="arg-seasonaltype">seasonaltype<a class="anchor" aria-label="anchor" href="#arg-seasonaltype"></a></dt>
 <dd><p>(default: <code>"yr"</code>) A string denoting the periodicity of the analysis, must be in one of
-<code>c("yr","qtr","mo","wk",IMMroll","optmo","optqtr")</code>.  Not used if <code>seasonaldataset</code> is specified instead</p></dd>
+<code>c("yr","qtr","mo","wk","IMMroll","optmo","optqtr")</code>.  Not used if <code>seasonaldateset</code> is specified instead</p></dd>
 
 
 <dt id="arg-seasonaldateset">seasonaldateset<a class="anchor" aria-label="anchor" href="#arg-seasonaldateset"></a></dt>
@@ -102,7 +102,7 @@ variable with a period identifier.</p></dd>
 
 
 <dt id="arg-projectfwd">projectfwd<a class="anchor" aria-label="anchor" href="#arg-projectfwd"></a></dt>
-<dd><p>(default "")  Project forward based on same number of days in seaonal period.  Default is no projection.</p><table class="table table"><tr><td><code>normalize</code></td><td>Description</td></tr><tr><td><code>mean</code></td><td>Use mean (by days in seasonal period) of each cumulative percentage change from the start of the period</td></tr><tr><td><code>weighted</code></td><td>Weight previous period cumulative percantge change with an expoential decay using <code>projfwd_wt</code> ** (Periods back)</td></tr></table></dd>
+<dd><p>(default "")  Project forward based on same number of days in seaonal period.  Default is no projection.</p><table class="table table"><tr><td>Value</td><td>Description</td></tr><tr><td><code>mean</code></td><td>Use mean (by days in seasonal period) of each cumulative percentage change from the start of the period</td></tr><tr><td><code>weighted</code></td><td>Weight previous period cumulative percantge change with an expoential decay using <code>projfwd_wt</code> ** (Periods back)</td></tr></table></dd>
 
 
 <dt id="arg-projfwd-wt">projfwd_wt<a class="anchor" aria-label="anchor" href="#arg-projfwd-wt"></a></dt>
@@ -150,10 +150,6 @@ this would redact the 366th day of the year.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot()</a></code> object displaying seasonality</p>
-    </div>
-    <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Seasonality Graphs</p>
     </div>
 
     <div class="section level2">
